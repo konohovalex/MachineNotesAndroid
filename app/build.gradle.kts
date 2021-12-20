@@ -1,7 +1,7 @@
-import com.owlmanners.machinenotes.gradle.Dependencies
-import com.owlmanners.machinenotes.gradle.Modules
-import com.owlmanners.machinenotes.gradle.utils.implementation
-import com.owlmanners.machinenotes.gradle.utils.kapt
+import ru.konohovalex.gradle.Dependencies
+import ru.konohovalex.gradle.Modules
+import ru.konohovalex.gradle.utils.implementation
+import ru.konohovalex.gradle.utils.kapt
 
 plugins {
     id("android-app-module-plugin")
@@ -20,13 +20,13 @@ dependencies {
 
             addAll(
                 listOf(
-                    project(Modules.core),
-                    project(Modules.design),
-                    project(Modules.Features.notes),
-                    project(Modules.Features.preferences),
-                    project(Modules.Features.profile),
-                    project(Modules.Features.imageRecognition),
-                    project(Modules.Features.speechRecognition),
+                    project(Modules.Core.data),
+                    project(Modules.Core.design),
+                    project(Modules.Features.Api.notes),
+                    project(Modules.Features.Api.preferences),
+                    project(Modules.Features.Api.profile),
+                    project(Modules.Features.Api.imageRecognition),
+                    project(Modules.Features.Api.speechRecognition),
                 )
             )
         }

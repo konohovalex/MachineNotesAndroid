@@ -2,13 +2,20 @@ rootProject.name = "MachineNotes"
 include(
     ":app",
 
-    ":core",
+    ":core:data",
+    ":core:design",
 
-    ":design",
+    ":feature:api:imagerecognition",
+    ":feature:api:navigation",
+    ":feature:api:notes",
+    ":feature:api:preferences",
+    ":feature:api:profile",
+    ":feature:api:speechrecognition",
 
-    ":feature:notes",
-    ":feature:preferences",
-    ":feature:profile",
-    ":feature:speechrecognition",
-    ":feature:imagerecognition",
+    ":feature:impl:imagerecognition",
+    ":feature:impl:navigation",
+    ":feature:impl:notes",
+    ":feature:impl:preferences",
+    ":feature:impl:profile",
+    ":feature:impl:speechrecognition",
 )

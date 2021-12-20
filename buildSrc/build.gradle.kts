@@ -7,28 +7,28 @@ gradlePlugin {
         "kotlin-module-plugin".let {
             register(it) {
                 id = it
-                implementationClass = "com.owlmanners.machinenotes.gradle.plugins.KotlinModulePlugin"
+                implementationClass = "ru.konohovalex.gradle.plugins.KotlinModulePlugin"
             }
         }
 
         "android-library-module-plugin".let {
             register(it) {
                 id = it
-                implementationClass = "com.owlmanners.machinenotes.gradle.plugins.android.AndroidLibraryModulePlugin"
+                implementationClass = "ru.konohovalex.gradle.plugins.android.AndroidLibraryModulePlugin"
             }
         }
 
         "feature-module-plugin".let {
             register(it) {
                 id = it
-                implementationClass = "com.owlmanners.machinenotes.gradle.plugins.android.FeatureModulePlugin"
+                implementationClass = "ru.konohovalex.gradle.plugins.android.FeatureModulePlugin"
             }
         }
 
         "android-app-module-plugin".let {
             register(it) {
                 id = it
-                implementationClass = "com.owlmanners.machinenotes.gradle.plugins.android.AndroidAppModulePlugin"
+                implementationClass = "ru.konohovalex.gradle.plugins.android.AndroidAppModulePlugin"
             }
         }
     }
