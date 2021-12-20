@@ -5,7 +5,7 @@ buildscript {
     }
     dependencies {
         classpath(com.owlmanners.machinenotes.gradle.Dependencies.gradle)
-        classpath(com.owlmanners.machinenotes.gradle.Dependencies.kotlinGradlePlugin)
+        classpath(com.owlmanners.machinenotes.gradle.Dependencies.Kotlin.kotlinGradlePlugin)
         classpath(com.owlmanners.machinenotes.gradle.Dependencies.Hilt.androidGradlePlugin)
     }
 }

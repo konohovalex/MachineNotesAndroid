@@ -1,9 +1,10 @@
 import com.owlmanners.machinenotes.gradle.AppConfig
 import com.owlmanners.machinenotes.gradle.Dependencies
 import com.owlmanners.machinenotes.gradle.Modules
+import com.owlmanners.machinenotes.gradle.SdkConfig
 import com.owlmanners.machinenotes.gradle.utils.androidTestImplementation
-import com.owlmanners.machinenotes.gradle.utils.kapt
 import com.owlmanners.machinenotes.gradle.utils.implementation
+import com.owlmanners.machinenotes.gradle.utils.kapt
 import com.owlmanners.machinenotes.gradle.utils.testImplementation
 
 plugins {
@@ -22,14 +23,14 @@ hilt {
 }
 
 android {
-    compileSdk = AppConfig.compileSdk
+    compileSdk = SdkConfig.compileSdk
 
     defaultConfig {
-        applicationId = AppConfig.packageName
-        minSdk = AppConfig.minSdk
-        targetSdk = AppConfig.targetSdk
-        versionCode = AppConfig.versionCode
-        versionName = AppConfig.versionName
+        applicationId = AppConfig.applicationId
+        minSdk = SdkConfig.minSdk
+        targetSdk = SdkConfig.targetSdk
+        versionCode = SdkConfig.versionCode
+        versionName = SdkConfig.versionName
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -50,7 +51,7 @@ android {
     buildFeatures {
         composeOptions {
             compose = true
-            kotlinCompilerExtensionVersion = AppConfig.kotlinCompilerExtensionVersion
+            kotlinCompilerExtensionVersion = Dependencies.Android.Compose.version
         }
     }
 
@@ -66,15 +67,14 @@ android {
 dependencies {
     implementation(
         mutableListOf<String>().apply {
-            add(Dependencies.coreKtx)
-            add(Dependencies.appCompat)
-            add(Dependencies.material)
+            add(Dependencies.Android.coreKtx)
+            add(Dependencies.Android.appCompat)
+            add(Dependencies.Android.material)
+            addAll(Dependencies.Android.Compose.getAllRuntimeDependencies())
 
-            addAll(Dependencies.Compose.getAll())
+            addAll(Dependencies.Hilt.getAllRuntimeDependencies())
 
-            addAll(Dependencies.Hilt.getAll())
-
-            addAll(Dependencies.Room.getAll())
+            addAll(Dependencies.Room.getAllRuntimeDependencies())
         }
     )
 

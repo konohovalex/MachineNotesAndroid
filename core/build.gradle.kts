@@ -1,4 +1,4 @@
-import com.owlmanners.machinenotes.gradle.AppConfig
+import com.owlmanners.machinenotes.gradle.SdkConfig
 import com.owlmanners.machinenotes.gradle.Dependencies
 import com.owlmanners.machinenotes.gradle.utils.androidTestImplementation
 import com.owlmanners.machinenotes.gradle.utils.testImplementation
@@ -9,11 +9,11 @@ plugins {
 }
 
 android {
-    compileSdk = AppConfig.compileSdk
+    compileSdk = SdkConfig.compileSdk
 
     defaultConfig {
-        minSdk = AppConfig.minSdk
-        targetSdk = AppConfig.targetSdk
+        minSdk = SdkConfig.minSdk
+        targetSdk = SdkConfig.targetSdk
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles("consumer-rules.pro")
@@ -35,7 +35,7 @@ android {
     buildFeatures {
         composeOptions {
             compose = true
-            kotlinCompilerExtensionVersion = AppConfig.kotlinCompilerExtensionVersion
+            kotlinCompilerExtensionVersion = Dependencies.Android.Compose.version
         }
     }
 
