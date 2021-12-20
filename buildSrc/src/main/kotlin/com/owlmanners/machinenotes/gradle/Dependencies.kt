@@ -4,16 +4,16 @@ object Dependencies {
     const val gradle = "com.android.tools.build:gradle:7.0.4"
 
     object Kotlin {
-        private const val version = "1.6.0"
+        private const val version = "1.5.31"
 
         const val stdLib = "org.jetbrains.kotlin:kotlin-stdlib:$version"
 
         const val kotlinGradlePlugin = "org.jetbrains.kotlin:kotlin-gradle-plugin:$version"
 
         object Coroutines {
-            private const val coroutinesVersion = "1.5.2"
+            private const val version = "1.5.2"
 
-            const val core = "org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutinesVersion"
+            const val core = "org.jetbrains.kotlinx:kotlinx-coroutines-core:$version"
             const val android = "org.jetbrains.kotlinx:kotlinx-coroutines-android:$version"
 
             const val test = "org.jetbrains.kotlinx:kotlinx-coroutines-test:$version"
@@ -26,7 +26,7 @@ object Dependencies {
         const val material = "com.google.android.material:material:1.4.0"
 
         object Compose {
-            const val version = "1.1.0-rc01"
+            const val version = "1.0.5"
 
             const val ui = "androidx.compose.ui:ui:$version"
             const val material = "androidx.compose.material:material:$version"

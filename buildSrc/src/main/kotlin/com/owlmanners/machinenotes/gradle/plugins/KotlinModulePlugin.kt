@@ -22,10 +22,10 @@ open class KotlinModulePlugin : ModulePlugin() {
     override fun configureDependencies(dependencyHandler: DependencyHandler) {
         with(dependencyHandler) {
             implementation(
-                mutableListOf<String>().apply {
-                    add(Dependencies.Kotlin.stdLib)
-                    add(Dependencies.Kotlin.Coroutines.core)
-                }
+                listOf(
+                    Dependencies.Kotlin.stdLib,
+                    Dependencies.Kotlin.Coroutines.core,
+                )
             )
 
             testImplementation(

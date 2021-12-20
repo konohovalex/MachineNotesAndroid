@@ -21,7 +21,7 @@ abstract class AndroidModulePlugin : KotlinModulePlugin() {
 
         configureAndroid(target.extensions.getByType(BaseExtension::class.java))
 
-        target.tasks.withType<KotlinCompile>() {
+        target.tasks.withType<KotlinCompile>().configureEach {
             kotlinOptions {
                 jvmTarget = JavaVersion.VERSION_1_8.toString()
             }
@@ -29,11 +29,10 @@ abstract class AndroidModulePlugin : KotlinModulePlugin() {
     }
 
     override fun configurePlugins(pluginContainer: PluginContainer) {
-        super.configurePlugins(pluginContainer)
-
         pluginContainer.apply(
             listOf(
                 Plugins.kotlinAndroid,
+                Plugins.kapt,
                 Plugins.ktx,
             )
         )
@@ -68,9 +67,6 @@ abstract class AndroidModulePlugin : KotlinModulePlugin() {
             defaultConfig {
                 minSdk = SdkConfig.minSdk
                 targetSdk = SdkConfig.targetSdk
-
-                versionCode = SdkConfig.versionCode
-                versionName = SdkConfig.versionName
 
                 testInstrumentationRunner = Dependencies.Testing.jUnitTestRunnerAndroid
             }
