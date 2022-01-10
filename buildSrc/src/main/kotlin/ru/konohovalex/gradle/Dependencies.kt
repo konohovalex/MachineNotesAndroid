@@ -35,6 +35,10 @@ object Dependencies {
             const val activity = "androidx.activity:activity-compose:1.4.0"
             const val navigation = "androidx.navigation:navigation-compose:2.4.0-rc01"
             const val viewModel = "androidx.lifecycle:lifecycle-viewmodel-compose:2.4.0"
+            const val livedata = "androidx.compose.runtime:runtime-livedata:$version"
+            // tbd
+            // Grab necessary from here:
+            // https://mvnrepository.com/artifact/com.google.accompanist
 
             fun getAllRuntimeDependencies() = listOf(
                 ui,
@@ -44,31 +48,36 @@ object Dependencies {
                 activity,
                 navigation,
                 viewModel,
+                livedata,
             )
         }
+    }
+
+    object Dagger {
+        private const val version = "2.40.1"
+
+        const val core = "com.google.dagger:dagger:$version"
+
+        const val compiler = "com.google.dagger:dagger-compiler:$version"
     }
 
     object Hilt {
         private const val version = "2.40.1"
 
-        private const val core = "com.google.dagger:hilt-android:$version"
-        private const val navigationCompose = "androidx.hilt:hilt-navigation-compose:1.0.0-rc01"
+        const val core = "com.google.dagger:hilt-android:$version"
+        const val navigationCompose = "androidx.hilt:hilt-navigation-compose:1.0.0-rc01"
 
-        const val androidGradlePlugin = "com.google.dagger:hilt-android-gradle-plugin:$version"
         const val compiler = "com.google.dagger:hilt-compiler:$version"
 
-        fun getAllRuntimeDependencies() = listOf(
-            core,
-            navigationCompose,
-        )
+        const val androidGradlePlugin = "com.google.dagger:hilt-android-gradle-plugin:$version"
     }
 
     object Room {
         private const val version = "2.4.0"
 
-        private const val ktx = "androidx.room:room-ktx:$version"
-        private const val runtime = "androidx.room:room-runtime:$version"
-        private const val paging = "androidx.room:room-paging:$version"
+        const val runtime = "androidx.room:room-runtime:$version"
+        const val ktx = "androidx.room:room-ktx:$version"
+        const val paging = "androidx.room:room-paging:$version"
 
         const val compiler = "androidx.room:room-compiler:$version"
 
@@ -76,6 +85,30 @@ object Dependencies {
             ktx,
             runtime,
             paging,
+        )
+    }
+
+    object OkHttp {
+        private const val version = "4.9.3"
+
+        const val core = "com.squareup.okhttp3:$version"
+        const val loggingInterceptor = "com.squareup.okhttp3:logging-interceptor:$version"
+
+        fun getAllRuntimeDependencies() = listOf(
+            core,
+            loggingInterceptor,
+        )
+    }
+
+    object Retrofit {
+        private const val version = "2.9.0"
+
+        const val core = "com.squareup.retrofit2:retrofit:$version"
+        const val gsonConverter = "com.squareup.retrofit2:converter-gson:$version"
+
+        fun getAllRuntimeDependencies() = listOf(
+            core,
+            gsonConverter,
         )
     }
 

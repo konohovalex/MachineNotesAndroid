@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="untitled">Untitled</string>
+    <string name="no_additional_text">No additional text</string>
+    <string name="image">Image</string>
+    <string name="audio">Audio</string>
+</resources>

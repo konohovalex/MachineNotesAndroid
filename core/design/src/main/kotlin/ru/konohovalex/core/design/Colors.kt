@@ -2,6 +2,8 @@ package ru.konohovalex.core.design
 
 import androidx.compose.ui.graphics.Color
 
+// tbd move to app module
+
 val gray100 = Color(0xFFF5F5F5)
 val gray200 = Color(0xFFEEEEEE)
 val gray300 = Color(0xFFE0E0E0)

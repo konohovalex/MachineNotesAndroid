@@ -2,26 +2,41 @@ package ru.konohovalex.gradle.utils
 
 import org.gradle.api.artifacts.dsl.DependencyHandler
 
-fun DependencyHandler.kapt(dependencies: List<String>) {
+private fun DependencyHandler.addConfiguration(
+    configurationName: String,
+    vararg dependencies: Any,
+) {
     dependencies.forEach { dependency ->
-        add("kapt", dependency)
+        (dependency as? List<Any>)?.forEach {
+            add(configurationName, it)
+        } ?: add(configurationName, dependency)
     }
 }
 
-fun DependencyHandler.implementation(dependencies: List<Any>) {
-    dependencies.forEach { dependency ->
-        add("implementation", dependency)
-    }
+fun DependencyHandler.kapt(vararg dependencies: Any) {
+    addConfiguration(
+        configurationName = "kapt",
+        dependencies = dependencies,
+    )
 }
 
-fun DependencyHandler.androidTestImplementation(dependencies: List<String>) {
-    dependencies.forEach { dependency ->
-        add("androidTestImplementation", dependency)
-    }
+fun DependencyHandler.implementation(vararg dependencies: Any) {
+    addConfiguration(
+        configurationName = "implementation",
+        dependencies = dependencies,
+    )
 }
 
-fun DependencyHandler.testImplementation(dependencies: List<String>) {
-    dependencies.forEach { dependency ->
-        add("testImplementation", dependency)
-    }
+fun DependencyHandler.androidTestImplementation(vararg dependencies: Any) {
+    addConfiguration(
+        configurationName = "androidTestImplementation",
+        dependencies = dependencies,
+    )
+}
+
+fun DependencyHandler.testImplementation(vararg dependencies: Any) {
+    addConfiguration(
+        configurationName = "testImplementation",
+        dependencies = dependencies,
+    )
 }

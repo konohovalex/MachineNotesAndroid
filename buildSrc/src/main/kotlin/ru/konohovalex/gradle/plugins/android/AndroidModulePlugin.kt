@@ -5,8 +5,6 @@ import org.gradle.api.JavaVersion
 import org.gradle.api.Project
 import org.gradle.api.artifacts.dsl.DependencyHandler
 import org.gradle.api.plugins.PluginContainer
-import org.gradle.kotlin.dsl.withType
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import ru.konohovalex.gradle.Dependencies
 import ru.konohovalex.gradle.SdkConfig
 import ru.konohovalex.gradle.plugins.KotlinModulePlugin
@@ -20,21 +18,13 @@ abstract class AndroidModulePlugin : KotlinModulePlugin() {
         super.apply(target)
 
         configureAndroid(target.extensions.getByType(BaseExtension::class.java))
-
-        target.tasks.withType<KotlinCompile>().configureEach {
-            kotlinOptions {
-                jvmTarget = JavaVersion.VERSION_1_8.toString()
-            }
-        }
     }
 
     override fun configurePlugins(pluginContainer: PluginContainer) {
         pluginContainer.apply(
-            listOf(
-                Plugins.kotlinAndroid,
-                Plugins.kapt,
-                Plugins.ktx,
-            )
+            Plugins.kotlinAndroid,
+            Plugins.kapt,
+            Plugins.ktx,
         )
     }
 
@@ -43,18 +33,14 @@ abstract class AndroidModulePlugin : KotlinModulePlugin() {
 
         with(dependencyHandler) {
             implementation(
-                listOf(
-                    Dependencies.Android.coreKtx,
+                Dependencies.Android.coreKtx,
 
-                    Dependencies.Kotlin.Coroutines.android,
-                )
+                Dependencies.Kotlin.Coroutines.android,
             )
 
             androidTestImplementation(
-                listOf(
-                    Dependencies.Testing.jUnitAndroidExt,
-                    Dependencies.Testing.espresso,
-                )
+                Dependencies.Testing.jUnitAndroidExt,
+                Dependencies.Testing.espresso,
             )
         }
     }

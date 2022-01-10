@@ -2,6 +2,7 @@ package ru.konohovalex.core.design
 
 import androidx.compose.ui.graphics.Color
 
+// tbd remove defaults and create concrete Palette in app module
 data class Palette(
     val backgroundColor: Color,
     val accentColor: Color,

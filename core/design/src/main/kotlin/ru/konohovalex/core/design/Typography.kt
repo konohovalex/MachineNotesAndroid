@@ -1,58 +1,49 @@
 package ru.konohovalex.core.design
 
-import androidx.compose.material.Typography
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 
-val typography = Typography(
-    // header
-    h1 = TextStyle(
+// tbd remove defaults and create concrete TextStyle in app module
+data class TextStyles(
+    val header: TextStyle = TextStyle(
         fontSize = 40.sp,
         fontWeight = FontWeight.Bold,
     ),
-    // title
-    h2 = TextStyle(
+    val title: TextStyle = TextStyle(
         fontSize = 32.sp,
         fontWeight = FontWeight.Bold,
     ),
-    // subtitle
-    subtitle1 = TextStyle(
+    val subtitle: TextStyle = TextStyle(
         fontSize = 24.sp,
         fontWeight = FontWeight.Normal,
     ),
-    // info
-    subtitle2 = TextStyle(
+    val info: TextStyle = TextStyle(
         fontSize = 20.sp,
         fontWeight = FontWeight.Bold,
     ),
-    button = TextStyle(
+    val button: TextStyle = TextStyle(
         fontSize = 32.sp,
         fontWeight = FontWeight.Bold,
     ),
-    // editable label
-    h3 = TextStyle(
+    val editableLabel: TextStyle = TextStyle(
         fontSize = 24.sp,
         fontWeight = FontWeight.Normal,
     ),
-    // editable input
-    body1 = TextStyle(
+    val editableInput: TextStyle = TextStyle(
         fontSize = 24.sp,
         fontWeight = FontWeight.Normal,
     ),
-    // editable assistive
-    overline = TextStyle(
+    val editableAssistive: TextStyle = TextStyle(
         fontSize = 16.sp,
         fontWeight = FontWeight.Normal,
     ),
-    // clickable text large
-    h4 = TextStyle(
-        fontSize = 32.sp,
+    val clickableTextSmall: TextStyle = TextStyle(
+        fontSize = 24.sp,
         fontWeight = FontWeight.Bold,
     ),
-    // clickable text small
-    h5 = TextStyle(
-        fontSize = 24.sp,
+    val clickableTextLarge: TextStyle = TextStyle(
+        fontSize = 32.sp,
         fontWeight = FontWeight.Bold,
     ),
 )

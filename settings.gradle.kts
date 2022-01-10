@@ -4,18 +4,14 @@ include(
 
     ":core:data",
     ":core:design",
+    ":core:ui",
+    ":core:utils",
 
-    ":feature:api:imagerecognition",
-    ":feature:api:navigation",
-    ":feature:api:notes",
-    ":feature:api:preferences",
-    ":feature:api:profile",
-    ":feature:api:speechrecognition",
+    ":feature:notes:data",
+    ":feature:notes:domain",
+    ":feature:notes:presentation",
 
-    ":feature:impl:imagerecognition",
-    ":feature:impl:navigation",
-    ":feature:impl:notes",
-    ":feature:impl:preferences",
-    ":feature:impl:profile",
-    ":feature:impl:speechrecognition",
+    ":feature:preferences:data",
+
+    ":feature:profile:data",
 )

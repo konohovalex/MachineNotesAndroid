@@ -18,10 +18,24 @@ gradlePlugin {
             }
         }
 
-        "feature-module-plugin".let {
+        "android-hilted-library-module-plugin".let {
             register(it) {
                 id = it
-                implementationClass = "ru.konohovalex.gradle.plugins.android.FeatureModulePlugin"
+                implementationClass = "ru.konohovalex.gradle.plugins.android.AndroidHiltedLibraryModulePlugin"
+            }
+        }
+
+        "android-compose-library-module-plugin".let {
+            register(it) {
+                id = it
+                implementationClass = "ru.konohovalex.gradle.plugins.android.AndroidComposeLibraryModulePlugin"
+            }
+        }
+
+        "android-hilted-compose-library-module-plugin".let {
+            register(it) {
+                id = it
+                implementationClass = "ru.konohovalex.gradle.plugins.android.AndroidHiltedComposeLibraryModulePlugin"
             }
         }
 
