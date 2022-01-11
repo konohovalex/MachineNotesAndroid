@@ -18,23 +18,26 @@ fun ThemedText(
 ) = Text(
     color = with(Theme.palette) {
         when (themedTextType) {
+            ThemedTextType.HEADLINE -> titleColor
             ThemedTextType.TITLE -> titleColor
-            ThemedTextType.SUBTITLE -> subtitleColor
-            ThemedTextType.INFO -> infoTextColor
+            ThemedTextType.BODY -> bodyColor
+            ThemedTextType.LABEL -> labelColor
         }
     },
     fontSize = with(Theme.textStyles) {
         when (themedTextType) {
+            ThemedTextType.HEADLINE -> headline
             ThemedTextType.TITLE -> title
-            ThemedTextType.SUBTITLE -> subtitle
-            ThemedTextType.INFO -> info
+            ThemedTextType.BODY -> body
+            ThemedTextType.LABEL -> label
         }
     }.fontSize,
     fontWeight = with(Theme.textStyles) {
         when (themedTextType) {
+            ThemedTextType.HEADLINE -> headline
             ThemedTextType.TITLE -> title
-            ThemedTextType.SUBTITLE -> subtitle
-            ThemedTextType.INFO -> info
+            ThemedTextType.BODY -> body
+            ThemedTextType.LABEL -> label
         }
     }.fontWeight,
     text = text,
@@ -45,7 +48,8 @@ fun ThemedText(
 )
 
 enum class ThemedTextType {
+    HEADLINE,
     TITLE,
-    SUBTITLE,
-    INFO,
+    BODY,
+    LABEL,
 }

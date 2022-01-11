@@ -17,8 +17,8 @@ internal fun NoteList(
     onItemClickListener: (String) -> Unit,
 ) {
     LazyColumn(
-        contentPadding = PaddingValues(16.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
+        contentPadding = PaddingValues(8.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         items(items = items) { item ->
             NoteListItem(
@@ -36,7 +36,7 @@ internal fun NoteList(
 private fun NotePreviewListPreview() {
     Theme(darkTheme = false) {
         NoteList(
-            items = createNotePreviewDummyModelList(5),
+            items = createNotePreviewDummyModelList(25),
             onItemClickListener = {}
         )
     }

@@ -11,8 +11,8 @@ data class Palette(
     val iconTintColor: Color,
     val errorColor: Color,
     val titleColor: Color,
-    val subtitleColor: Color,
-    val infoTextColor: Color,
+    val bodyColor: Color,
+    val labelColor: Color,
 )
 
 val lightPalette = Palette(
@@ -23,8 +23,8 @@ val lightPalette = Palette(
     iconTintColor = gray900,
     errorColor = red700,
     titleColor = gray900,
-    subtitleColor = gray700,
-    infoTextColor = gray600,
+    bodyColor = gray700,
+    labelColor = gray600,
 )
 
 val darkPalette = Palette(
@@ -35,6 +35,6 @@ val darkPalette = Palette(
     iconTintColor = gray100,
     errorColor = red700,
     titleColor = gray100,
-    subtitleColor = gray300,
-    infoTextColor = gray400,
+    bodyColor = gray300,
+    labelColor = gray400,
 )

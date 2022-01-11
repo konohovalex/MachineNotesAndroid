@@ -6,44 +6,37 @@ import androidx.compose.ui.unit.sp
 
 // tbd remove defaults and create concrete TextStyle in app module
 data class TextStyles(
-    val header: TextStyle = TextStyle(
-        fontSize = 40.sp,
-        fontWeight = FontWeight.Bold,
+    val display: TextStyle = TextStyle(
+        fontSize = 36.sp,
+        lineHeight = 44.sp,
+        fontWeight = FontWeight.Normal,
+    ),
+    val headline: TextStyle = TextStyle(
+        fontSize = 32.sp,
+        lineHeight = 40.sp,
+        fontWeight = FontWeight.Normal,
     ),
     val title: TextStyle = TextStyle(
-        fontSize = 32.sp,
-        fontWeight = FontWeight.Bold,
+        fontSize = 22.sp,
+        lineHeight = 28.sp,
+        fontWeight = FontWeight.Medium,
     ),
-    val subtitle: TextStyle = TextStyle(
-        fontSize = 24.sp,
+    val body: TextStyle = TextStyle(
+        fontSize = 16.sp,
+        lineHeight = 24.sp,
+        letterSpacing = 0.5.sp,
         fontWeight = FontWeight.Normal,
     ),
-    val info: TextStyle = TextStyle(
-        fontSize = 20.sp,
-        fontWeight = FontWeight.Bold,
+    val label: TextStyle = TextStyle(
+        fontSize = 12.sp,
+        lineHeight = 16.sp,
+        letterSpacing = 0.5.sp,
+        fontWeight = FontWeight.Medium,
     ),
     val button: TextStyle = TextStyle(
-        fontSize = 32.sp,
-        fontWeight = FontWeight.Bold,
-    ),
-    val editableLabel: TextStyle = TextStyle(
-        fontSize = 24.sp,
-        fontWeight = FontWeight.Normal,
-    ),
-    val editableInput: TextStyle = TextStyle(
-        fontSize = 24.sp,
-        fontWeight = FontWeight.Normal,
-    ),
-    val editableAssistive: TextStyle = TextStyle(
-        fontSize = 16.sp,
-        fontWeight = FontWeight.Normal,
-    ),
-    val clickableTextSmall: TextStyle = TextStyle(
-        fontSize = 24.sp,
-        fontWeight = FontWeight.Bold,
-    ),
-    val clickableTextLarge: TextStyle = TextStyle(
-        fontSize = 32.sp,
-        fontWeight = FontWeight.Bold,
+        fontSize = 14.sp,
+        lineHeight = 20.sp,
+        letterSpacing = 0.1.sp,
+        fontWeight = FontWeight.Medium,
     ),
 )

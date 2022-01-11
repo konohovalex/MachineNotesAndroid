@@ -55,11 +55,8 @@ private fun ContentColumn(
     content: @Composable ColumnScope.() -> Unit,
 ) = Column(
     modifier = Modifier
-        .padding(
-            vertical = 24.dp,
-            horizontal = 32.dp,
-        ),
-    verticalArrangement = Arrangement.spacedBy(16.dp),
+        .padding(8.dp),
+    verticalArrangement = Arrangement.spacedBy(4.dp),
     content = content,
 )
 
@@ -80,7 +77,7 @@ private fun SubtitleAndInfoRow(
 ) = Row(
     modifier = Modifier
         .fillMaxWidth(),
-    horizontalArrangement = Arrangement.spacedBy(32.dp),
+    horizontalArrangement = Arrangement.spacedBy(8.dp),
     verticalAlignment = Alignment.CenterVertically,
 ) {
     SubtitleText(
@@ -100,7 +97,7 @@ private fun SubtitleText(
     text: String,
     modifier: Modifier,
 ) = ThemedText(
-    themedTextType = ThemedTextType.SUBTITLE,
+    themedTextType = ThemedTextType.BODY,
     text = text,
     modifier = modifier,
     maxLines = 1,
@@ -112,7 +109,7 @@ private fun InfoText(
     text: String,
     modifier: Modifier,
 ) = ThemedText(
-    themedTextType = ThemedTextType.INFO,
+    themedTextType = ThemedTextType.LABEL,
     text = text,
     modifier = modifier,
     textAlign = TextAlign.End,
