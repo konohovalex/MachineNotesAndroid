@@ -10,6 +10,7 @@ dependencies {
     implementation(
         project(Modules.Core.data),
         project(Modules.Core.design),
+        project(Modules.Core.ui),
         project(Modules.Core.utils),
 
         project(Modules.Feature.Notes.presentation),

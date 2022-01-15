@@ -13,7 +13,10 @@ interface NotesRepository {
 
     suspend fun deleteNote(noteId: String)
 
-    suspend fun getNotes(paginationData: PaginationData): List<Note>
+    suspend fun getNotes(
+        filter: String?,
+        paginationData: PaginationData,
+    ): List<Note>
 
     suspend fun synchronizeNotes(notes: List<Note>): List<Note>
 

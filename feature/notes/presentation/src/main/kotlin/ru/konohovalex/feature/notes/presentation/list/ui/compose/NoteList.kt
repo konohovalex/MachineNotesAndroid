@@ -1,4 +1,4 @@
-package ru.konohovalex.feature.notes.presentation.list.compose
+package ru.konohovalex.feature.notes.presentation.list.ui.compose
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
@@ -7,23 +7,23 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
 import ru.konohovalex.core.design.Theme
 import ru.konohovalex.feature.notes.presentation.list.model.NotePreviewUiModel
+import ru.konohovalex.feature.notes.presentation.utils.createNotePreviewDummyModelList
 
 @Composable
 internal fun NoteList(
     items: List<NotePreviewUiModel>,
-    onItemClickListener: (String) -> Unit,
+    onNoteClick: (noteId: String) -> Unit,
 ) {
     LazyColumn(
-        contentPadding = PaddingValues(8.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp)
+        contentPadding = PaddingValues(Theme.paddings.contentDefault),
+        verticalArrangement = Arrangement.spacedBy(Theme.paddings.contentDefault)
     ) {
         items(items = items) { item ->
             NoteListItem(
                 notePreviewUiModel = item,
-                onClickListener = onItemClickListener,
+                onClickListener = onNoteClick,
             )
         }
     }
@@ -36,8 +36,8 @@ internal fun NoteList(
 private fun NotePreviewListPreview() {
     Theme(darkTheme = false) {
         NoteList(
-            items = createNotePreviewDummyModelList(25),
-            onItemClickListener = {}
+            items = createNotePreviewDummyModelList(10),
+            onNoteClick = {}
         )
     }
 }

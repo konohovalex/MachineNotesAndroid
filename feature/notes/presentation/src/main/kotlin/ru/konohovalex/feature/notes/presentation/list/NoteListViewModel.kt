@@ -5,9 +5,10 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.flow.subscribe
 import kotlinx.coroutines.launch
 import ru.konohovalex.core.data.model.OperationStatus
 import ru.konohovalex.core.data.model.PaginationData
@@ -27,47 +28,87 @@ internal class NoteListViewModel
     private val _state = MutableLiveData<NoteListState>(NoteListState.Loading)
     val state: LiveData<NoteListState> = _state
 
-    private val _notes = mutableListOf<NotePreviewUiModel>()
+//    private val _notes = mutableListOf<NotePreviewUiModel>()
+    private var _notes = listOf<NotePreviewUiModel>()
 
+    private var _filter: String? = null
     private var _paginationData = PaginationData(
         pageSize = 25,
         pageNumber = 0,
     )
 
+    private var getNotesJob: Job? = null
+    private var filterJob: Job? = null
+
     init {
         getNextNotes()
     }
 
-    fun getNextNotes() = getNotesUseCase.invoke(_paginationData)
-        .onEach {
-            when (it) {
-                is OperationStatus.Pending, is OperationStatus.Processing -> handleLoadingState(it.inputData)
-                is OperationStatus.Completed -> handleDataLoaded(
-                    it.inputData,
-                    it.outputData,
-                )
-                is OperationStatus.Error -> handleError(
-                    it.inputData,
-                    it.throwable,
-                )
+    fun getNextNotes() {
+        getNotesJob?.cancel()
+        getNotesJob = getNotesUseCase.invoke(_filter, _paginationData)
+            .onEach {
+                when (it) {
+                    is OperationStatus.Pending, is OperationStatus.Processing -> handleLoadingState(
+                        it.inputData.first,
+                        it.inputData.second,
+                    )
+                    is OperationStatus.Completed -> handleDataLoaded(
+                        it.inputData.first,
+                        it.inputData.second,
+                        it.outputData,
+                    )
+                    is OperationStatus.Error -> handleError(
+                        it.inputData.first,
+                        it.inputData.second,
+                        it.throwable,
+                    )
+                }
+            }
+            .launchIn(viewModelScope)
+    }
+
+    fun filterNotes(filter: String?) {
+        if (filter != _filter) {
+            _filter = filter
+            filterJob?.cancel()
+            filterJob = viewModelScope.launch {
+                delay(1000)
+                getNextNotes()
             }
         }
-        .launchIn(viewModelScope)
+    }
 
     fun refresh() {
     }
 
-    private fun handleLoadingState(inputData: PaginationData) {
+    private fun handleLoadingState(
+        filter: String?,
+        paginationData: PaginationData,
+    ) {
+        _filter = filter
+        _paginationData = paginationData
         _state.value = NoteListState.Loading
     }
 
-    private fun handleDataLoaded(paginationData: PaginationData, notes: List<NoteDomainModel>) {
+    private fun handleDataLoaded(
+        filter: String?,
+        paginationData: PaginationData,
+        notes: List<NoteDomainModel>,
+    ) {
+        _filter = filter
         _paginationData = paginationData
-        _notes.addAll(notes.map(noteDomainModelToNotePreviewUiModelMapper))
+//        _notes.addAll(notes.map(noteDomainModelToNotePreviewUiModelMapper))
+        _notes = notes.map(noteDomainModelToNotePreviewUiModelMapper)
         _state.value = NoteListState.Data(_notes)
     }
 
-    private fun handleError(paginationData: PaginationData, throwable: Throwable) {
+    private fun handleError(
+        filter: String?,
+        paginationData: PaginationData,
+        throwable: Throwable,
+    ) {
+        _filter = filter
         _paginationData = paginationData
         _state.value = NoteListState.Error(throwable)
     }

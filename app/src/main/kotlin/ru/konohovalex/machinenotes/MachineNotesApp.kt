@@ -8,7 +8,7 @@ import ru.konohovalex.core.utils.changeLocale
 import java.util.Locale
 
 @HiltAndroidApp
-class MachineNotesApp : Application() {
+internal class MachineNotesApp : Application() {
     // tbd place SharedPreferences of language in Preferences feature and make dynamic changes with Compose
     override fun attachBaseContext(base: Context?) {
         super.attachBaseContext(base?.changeLocale(Locale(LanguageCodes.ENGLISH)))

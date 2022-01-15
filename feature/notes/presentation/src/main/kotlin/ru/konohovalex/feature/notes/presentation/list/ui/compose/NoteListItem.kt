@@ -1,7 +1,8 @@
-package ru.konohovalex.feature.notes.presentation.list.compose
+package ru.konohovalex.feature.notes.presentation.list.ui.compose
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
@@ -11,7 +12,6 @@ import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
@@ -20,31 +20,36 @@ import ru.konohovalex.core.design.Theme
 import ru.konohovalex.core.ui.compose.ThemedCard
 import ru.konohovalex.core.ui.compose.ThemedText
 import ru.konohovalex.core.ui.compose.ThemedTextType
+import ru.konohovalex.core.ui.compose.model.TextWrapper
 import ru.konohovalex.feature.notes.presentation.list.model.NotePreviewUiModel
-import ru.konohovalex.feature.notes.presentation.list.model.TextWrapper
+import ru.konohovalex.feature.notes.presentation.utils.createNotePreviewDummyModel
 
 @Composable
 internal fun NoteListItem(
     notePreviewUiModel: NotePreviewUiModel,
-    onClickListener: (String) -> Unit,
+    onClickListener: (noteId: String) -> Unit,
 ) {
     with(notePreviewUiModel) {
         ThemedCard(
             modifier = Modifier
-                .clickable {
-                    onClickListener.invoke(notePreviewUiModel.id)
-                }
-                .fillMaxWidth()
+                .fillMaxWidth(),
         ) {
-            ContentColumn() {
-                TitleText(
-                    text = unwrapText(titleTextWrapper),
-                )
+            Box(
+                modifier = Modifier
+                    .clickable {
+                        onClickListener.invoke(notePreviewUiModel.id)
+                    },
+            ) {
+                ContentColumn() {
+                    TitleText(
+                        textWrapper = titleTextWrapper,
+                    )
 
-                SubtitleAndInfoRow(
-                    subtitleText = unwrapText(subtitleTextWrapper),
-                    infoText = dateTimeLastEdited.getDateTimeString(),
-                )
+                    SubtitleAndInfoRow(
+                        subtitleTextWrapper = subtitleTextWrapper,
+                        infoTextWrapper = TextWrapper.PlainText(value = dateTimeLastEdited.getDateTimeString()),
+                    )
+                }
             }
         }
     }
@@ -55,38 +60,38 @@ private fun ContentColumn(
     content: @Composable ColumnScope.() -> Unit,
 ) = Column(
     modifier = Modifier
-        .padding(8.dp),
+        .padding(Theme.paddings.contentDefault),
     verticalArrangement = Arrangement.spacedBy(4.dp),
     content = content,
 )
 
 @Composable
 private fun TitleText(
-    text: String,
+    textWrapper: TextWrapper,
 ) = ThemedText(
     themedTextType = ThemedTextType.TITLE,
-    text = text,
+    textWrapper = textWrapper,
     overflow = TextOverflow.Ellipsis,
     maxLines = 1,
 )
 
 @Composable
 private fun SubtitleAndInfoRow(
-    subtitleText: String,
-    infoText: String,
+    subtitleTextWrapper: TextWrapper,
+    infoTextWrapper: TextWrapper,
 ) = Row(
     modifier = Modifier
         .fillMaxWidth(),
-    horizontalArrangement = Arrangement.spacedBy(8.dp),
+    horizontalArrangement = Arrangement.spacedBy(Theme.paddings.contentDefault),
     verticalAlignment = Alignment.CenterVertically,
 ) {
     SubtitleText(
-        text = subtitleText,
+        textWrapper = subtitleTextWrapper,
         modifier = Modifier
             .weight(1f)
     )
     InfoText(
-        text = infoText,
+        textWrapper = infoTextWrapper,
         modifier = Modifier
             .wrapContentWidth()
     )
@@ -94,11 +99,11 @@ private fun SubtitleAndInfoRow(
 
 @Composable
 private fun SubtitleText(
-    text: String,
+    textWrapper: TextWrapper,
     modifier: Modifier,
 ) = ThemedText(
     themedTextType = ThemedTextType.BODY,
-    text = text,
+    textWrapper = textWrapper,
     modifier = modifier,
     maxLines = 1,
     overflow = TextOverflow.Ellipsis,
@@ -106,21 +111,15 @@ private fun SubtitleText(
 
 @Composable
 private fun InfoText(
-    text: String,
+    textWrapper: TextWrapper,
     modifier: Modifier,
 ) = ThemedText(
     themedTextType = ThemedTextType.LABEL,
-    text = text,
+    textWrapper = textWrapper,
     modifier = modifier,
     textAlign = TextAlign.End,
     maxLines = 1,
 )
-
-@Composable
-private fun unwrapText(textWrapper: TextWrapper) = when (textWrapper) {
-    is TextWrapper.PlainText -> textWrapper.value
-    is TextWrapper.StringResource -> stringResource(id = textWrapper.resourceId)
-}
 
 @Preview
 @Composable

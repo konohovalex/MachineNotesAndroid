@@ -4,4 +4,5 @@
     <string name="no_additional_text">No additional text</string>
     <string name="image">Image</string>
     <string name="audio">Audio</string>
+    <string name="back">Back</string>
 </resources>

@@ -1,4 +1,4 @@
-package ru.konohovalex.feature.notes.presentation.list.model
+package ru.konohovalex.core.ui.compose.model
 
 import androidx.annotation.StringRes
 

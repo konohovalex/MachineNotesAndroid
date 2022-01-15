@@ -29,7 +29,7 @@ fun createDummyNote(
     val dateTimeLastEdited = DateTime()
 
     val noteContentOrderNumber = 1
-    val noteContentId = "${id}_${noteContentOrderNumber}}"
+    val noteContentId = "${id}_${noteContentOrderNumber}"
 
     return Note(
         id = id,

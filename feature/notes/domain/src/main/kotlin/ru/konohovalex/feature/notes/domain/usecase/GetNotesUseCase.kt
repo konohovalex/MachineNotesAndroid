@@ -15,17 +15,46 @@ class GetNotesUseCase
     private val notesRepository: NotesRepository,
     private val noteToNoteDomainModelMapper: Mapper<Note, NoteDomainModel>,
 ) {
-    operator fun invoke(paginationData: PaginationData): Flow<OperationStatus<PaginationData, List<NoteDomainModel>>> = flow {
-        emit(OperationStatus.Processing(paginationData))
+    operator fun invoke(
+        filter: String? = null,
+        paginationData: PaginationData,
+    ): Flow<OperationStatus<Pair<String?, PaginationData>, List<NoteDomainModel>>> = flow {
+        emit(
+            OperationStatus.Processing(
+                inputData = Pair(
+                    filter,
+                    paginationData,
+                )
+            )
+        )
 
         try {
-            val notes = notesRepository.getNotes(paginationData)
+            val notes = notesRepository.getNotes(
+                filter,
+                paginationData,
+            )
             val notesDomainModels = notes.map(noteToNoteDomainModelMapper)
 
-            emit(OperationStatus.Completed(paginationData, notesDomainModels))
+            emit(
+                OperationStatus.Completed(
+                    Pair(
+                        filter,
+                        paginationData,
+                    ),
+                    notesDomainModels,
+                )
+            )
         }
         catch (throwable: Throwable) {
-            emit(OperationStatus.Error(paginationData, throwable))
+            emit(
+                OperationStatus.Error(
+                    Pair(
+                        filter,
+                        paginationData,
+                    ),
+                    throwable,
+                )
+            )
         }
     }
 }

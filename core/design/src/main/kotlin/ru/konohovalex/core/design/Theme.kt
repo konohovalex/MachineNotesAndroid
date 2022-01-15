@@ -12,13 +12,21 @@ object Theme {
         @Composable
         get() = LocalPalette.current
 
-    val textStyles: TextStyles
+    val typography: Typography
         @Composable
-        get() = LocalTextStyles.current
+        get() = LocalTypography.current
 
     val shapes: Shapes
         @Composable
         get() = LocalShapes.current
+
+    val materialElevations: MaterialElevations
+        @Composable
+        get() = LocalMaterialElevations.current
+
+    val paddings: Paddings
+        @Composable
+        get() = LocalPaddings.current
 }
 
 @Composable
@@ -27,13 +35,17 @@ fun Theme(
     content: @Composable () -> Unit,
 ) {
     val palette = if (darkTheme) darkPalette else lightPalette
-    val textStyles = TextStyles()
-    val shapes = shapes
+    val typography = Typography()
+    val shapes = roundedCornerShapes
+    val materialElevations = MaterialElevations()
+    val paddings = Paddings()
 
     CompositionLocalProvider(
         LocalPalette provides palette,
-        LocalTextStyles provides textStyles,
+        LocalTypography provides typography,
         LocalShapes provides shapes,
+        LocalMaterialElevations provides materialElevations,
+        LocalPaddings provides paddings,
         content = content
     )
 }
@@ -42,10 +54,18 @@ val LocalPalette = staticCompositionLocalOf<Palette> {
     error("No colors provided")
 }
 
-val LocalTextStyles = staticCompositionLocalOf<TextStyles> {
+val LocalTypography = staticCompositionLocalOf<Typography> {
     error("No typography provided")
 }
 
 val LocalShapes = staticCompositionLocalOf<Shapes> {
     error("No shapes provided")
+}
+
+val LocalMaterialElevations = staticCompositionLocalOf<MaterialElevations> {
+    error("No elevations provided")
+}
+
+val LocalPaddings = staticCompositionLocalOf<Paddings> {
+    error("No paddings provided")
 }

@@ -1,6 +1,6 @@
 package ru.konohovalex.feature.notes.presentation.details.model
 
-sealed class NoteContentUiModel(open val id: String) {
+internal sealed class NoteContentUiModel(open val id: String) {
     data class Text(
         override val id: String,
         val content: String,

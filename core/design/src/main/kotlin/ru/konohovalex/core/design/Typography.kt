@@ -4,8 +4,8 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 
-// tbd remove defaults and create concrete TextStyle in app module
-data class TextStyles(
+// tbd remove defaults and create concrete Typography in app module
+data class Typography(
     val display: TextStyle = TextStyle(
         fontSize = 36.sp,
         lineHeight = 44.sp,
@@ -24,19 +24,19 @@ data class TextStyles(
     val body: TextStyle = TextStyle(
         fontSize = 16.sp,
         lineHeight = 24.sp,
-        letterSpacing = 0.5.sp,
         fontWeight = FontWeight.Normal,
+        letterSpacing = 0.5.sp,
     ),
     val label: TextStyle = TextStyle(
         fontSize = 12.sp,
         lineHeight = 16.sp,
-        letterSpacing = 0.5.sp,
         fontWeight = FontWeight.Medium,
+        letterSpacing = 0.5.sp,
     ),
     val button: TextStyle = TextStyle(
         fontSize = 14.sp,
         lineHeight = 20.sp,
-        letterSpacing = 0.1.sp,
         fontWeight = FontWeight.Medium,
+        letterSpacing = 0.1.sp,
     ),
 )

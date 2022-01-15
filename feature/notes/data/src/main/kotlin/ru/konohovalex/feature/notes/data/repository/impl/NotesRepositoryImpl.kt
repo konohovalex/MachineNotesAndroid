@@ -4,6 +4,7 @@ import kotlinx.coroutines.delay
 import ru.konohovalex.core.data.model.PaginationData
 import ru.konohovalex.core.utils.Mapper
 import ru.konohovalex.feature.notes.data.model.Note
+import ru.konohovalex.feature.notes.data.model.NoteContent
 import ru.konohovalex.feature.notes.data.model.NoteUpdateParams
 import ru.konohovalex.feature.notes.data.model.entity.NoteEntity
 import ru.konohovalex.feature.notes.data.model.remote.NoteDto
@@ -42,10 +43,25 @@ internal class NotesRepositoryImpl
         delay(3000)
     }
 
-    override suspend fun getNotes(paginationData: PaginationData): List<Note> {
-        delay(3000)
-        val noteDtoList = notesApi.getNotes(paginationData.pageSize, paginationData.pageNumber)
-        return noteDtoList.map(noteDtoToNoteMapper)
+    override suspend fun getNotes(
+        filter: String?,
+        paginationData: PaginationData,
+    ): List<Note> {
+        val notesDummyList = createDummyNoteList(25).let { list ->
+            filter?.takeIf { it.isNotEmpty() }?.let { filterValue ->
+                mutableListOf<Note>().apply {
+                    list.forEach { note ->
+                        val containsFilterValue = note.noteContent.any {
+                            it is NoteContent.Text && it.content.contains(filterValue, ignoreCase = true)
+                        }
+                        if (containsFilterValue) add(note)
+                    }
+                }
+            } ?: list
+        }
+        return notesDummyList
+        /*val noteDtoList = notesApi.getNotes(paginationData.pageSize, paginationData.pageNumber)
+        return noteDtoList.map(noteDtoToNoteMapper)*/
     }
 
     override suspend fun synchronizeNotes(notes: List<Note>): List<Note> {
