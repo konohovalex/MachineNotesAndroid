@@ -18,6 +18,7 @@ dependencies {
         Dependencies.Android.coreKtx,
         Dependencies.Android.appCompat,
         Dependencies.Android.material,
+        Dependencies.Android.splashScreen,
 
         Dependencies.Android.Compose.getAllRuntimeDependencies(),
     )

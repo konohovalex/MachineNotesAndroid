@@ -24,6 +24,7 @@ object Dependencies {
         const val coreKtx = "androidx.core:core-ktx:1.7.0"
         const val appCompat = "androidx.appcompat:appcompat:1.4.0"
         const val material = "com.google.android.material:material:1.4.0"
+        const val splashScreen = "androidx.core:core-splashscreen:1.0.0-beta01"
 
         object Compose {
             const val version = "1.0.5"
