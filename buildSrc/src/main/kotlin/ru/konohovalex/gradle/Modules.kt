@@ -6,6 +6,7 @@ object Modules {
 
         const val data = "$corePrefix:data"
         const val design = "$corePrefix:design"
+        const val presentation = "$corePrefix:presentation"
         const val ui = "$corePrefix:ui"
         const val utils = "$corePrefix:utils"
     }

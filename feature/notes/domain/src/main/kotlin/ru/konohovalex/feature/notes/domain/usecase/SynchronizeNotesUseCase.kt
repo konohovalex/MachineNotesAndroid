@@ -3,6 +3,7 @@ package ru.konohovalex.feature.notes.domain.usecase
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import ru.konohovalex.core.data.model.OperationStatus
+import ru.konohovalex.core.data.utils.unwrap
 import ru.konohovalex.core.utils.Mapper
 import ru.konohovalex.feature.notes.data.model.Note
 import ru.konohovalex.feature.notes.data.repository.contract.NotesRepository
@@ -17,18 +18,20 @@ class SynchronizeNotesUseCase
 ) {
     operator fun invoke(
         noteDomainModels: List<NoteDomainModel>,
-    ): Flow<OperationStatus<List<NoteDomainModel>, List<NoteDomainModel>>> = flow {
-        emit(OperationStatus.Processing(noteDomainModels))
-
+    ): Flow<OperationStatus.WithInputData<List<NoteDomainModel>, List<NoteDomainModel>>> = flow {
         try {
+            emit(OperationStatus.WithInputData.Pending(noteDomainModels))
+
+            emit(OperationStatus.WithInputData.Processing(noteDomainModels))
+
             val notes = noteDomainModels.map(noteDomainModelToNoteMapper)
-            val synchronizedNotes = notesRepository.synchronizeNotes(notes)
+            val synchronizedNotes = notesRepository.synchronizeNotes(notes).unwrap()
             val synchronizedNotesDomainModels = synchronizedNotes.map(noteToNoteDomainModelMapper)
 
-            emit(OperationStatus.Completed(noteDomainModels, synchronizedNotesDomainModels))
+            emit(OperationStatus.WithInputData.Completed(noteDomainModels, synchronizedNotesDomainModels))
         }
         catch (throwable: Throwable) {
-            emit(OperationStatus.Error(noteDomainModels, throwable))
+            emit(OperationStatus.WithInputData.Error(noteDomainModels, throwable))
         }
     }
 }

@@ -7,7 +7,7 @@ import retrofit2.http.POST
 import retrofit2.http.PUT
 import retrofit2.http.Path
 import retrofit2.http.Query
-import ru.konohovalex.core.data.source.contract.Api
+import ru.konohovalex.core.data.arch.source.api.Api
 import ru.konohovalex.feature.notes.data.model.remote.NoteDto
 import ru.konohovalex.feature.notes.data.model.remote.NoteUpdateParamsDto
 

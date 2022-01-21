@@ -25,6 +25,18 @@ object Dependencies {
         const val appCompat = "androidx.appcompat:appcompat:1.4.0"
         const val material = "com.google.android.material:material:1.4.0"
         const val splashScreen = "androidx.core:core-splashscreen:1.0.0-beta01"
+        const val dataStorePreferences = "androidx.datastore:datastore-preferences:1.0.0"
+
+        object Lifecycle {
+            private const val version = "2.4.0"
+
+            const val viewModel = "androidx.lifecycle:lifecycle-viewmodel-ktx:$version"
+            const val viewModelSavedState = "androidx.lifecycle:lifecycle-viewmodel-savedstate:$version"
+            const val viewModelCompose = "androidx.lifecycle:lifecycle-viewmodel-compose:$version"
+            const val liveData = "androidx.lifecycle:lifecycle-livedata-ktx:$version"
+            const val service = "androidx.lifecycle:lifecycle-service:$version"
+            const val process = "androidx.lifecycle:lifecycle-process:$version"
+        }
 
         object Compose {
             const val version = "1.0.5"
@@ -35,7 +47,6 @@ object Dependencies {
             const val animation = "androidx.compose.animation:animation:$version"
             const val activity = "androidx.activity:activity-compose:1.4.0"
             const val navigation = "androidx.navigation:navigation-compose:2.4.0-rc01"
-            const val viewModel = "androidx.lifecycle:lifecycle-viewmodel-compose:2.4.0"
             const val livedata = "androidx.compose.runtime:runtime-livedata:$version"
             // tbd
             // Grab necessary from here:
@@ -48,10 +59,14 @@ object Dependencies {
                 animation,
                 activity,
                 navigation,
-                viewModel,
                 livedata,
             )
         }
+    }
+
+    object Google {
+        // version, that Retrofit2 depends on
+        const val gson = "com.google.code.gson:gson:2.8.5"
     }
 
     object Dagger {
@@ -102,6 +117,7 @@ object Dependencies {
     }
 
     object Retrofit {
+        // Always check, that version of Google.gson dependency is the same, as in Retrofit2 dependencies
         private const val version = "2.9.0"
 
         const val core = "com.squareup.retrofit2:retrofit:$version"

@@ -4,6 +4,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import ru.konohovalex.core.data.model.OperationStatus
 import ru.konohovalex.core.data.model.PaginationData
+import ru.konohovalex.core.data.utils.unwrap
 import ru.konohovalex.core.utils.Mapper
 import ru.konohovalex.feature.notes.data.model.Note
 import ru.konohovalex.feature.notes.data.repository.contract.NotesRepository
@@ -18,42 +19,31 @@ class GetNotesUseCase
     operator fun invoke(
         filter: String? = null,
         paginationData: PaginationData,
-    ): Flow<OperationStatus<Pair<String?, PaginationData>, List<NoteDomainModel>>> = flow {
-        emit(
-            OperationStatus.Processing(
-                inputData = Pair(
-                    filter,
-                    paginationData,
-                )
-            )
-        )
-
+    ): Flow<OperationStatus.WithInputData<Pair<String?, PaginationData>, List<NoteDomainModel>>> = flow {
         try {
+            emit(OperationStatus.WithInputData.Pending(Pair(filter, paginationData)))
+
+            emit(OperationStatus.WithInputData.Processing(Pair(filter, paginationData)))
+
             val notes = notesRepository.getNotes(
-                filter,
-                paginationData,
-            )
+                filter = filter,
+                paginationData = paginationData,
+            ).unwrap()
             val notesDomainModels = notes.map(noteToNoteDomainModelMapper)
 
             emit(
-                OperationStatus.Completed(
-                    Pair(
-                        filter,
-                        paginationData,
-                    ),
-                    notesDomainModels,
-                )
+                value = OperationStatus.WithInputData.Completed(
+                    inputData = Pair(filter, paginationData),
+                    outputData = notesDomainModels,
+                ),
             )
         }
         catch (throwable: Throwable) {
             emit(
-                OperationStatus.Error(
-                    Pair(
-                        filter,
-                        paginationData,
-                    ),
-                    throwable,
-                )
+                value = OperationStatus.WithInputData.Error(
+                    inputData = Pair(filter, paginationData),
+                    throwable = throwable,
+                ),
             )
         }
     }

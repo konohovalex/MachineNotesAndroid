@@ -19,7 +19,7 @@ internal class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
 
         installSplashScreen().apply {
-            // tbd
+            // tbd fix white screen after SplashScreen
         }
 
         setContent {

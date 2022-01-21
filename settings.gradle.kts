@@ -4,6 +4,7 @@ include(
 
     ":core:data",
     ":core:design",
+    ":core:presentation",
     ":core:ui",
     ":core:utils",
 
@@ -12,6 +13,8 @@ include(
     ":feature:notes:presentation",
 
     ":feature:preferences:data",
+    ":feature:preferences:domain",
+    ":feature:preferences:presentation",
 
     ":feature:profile:data",
 )

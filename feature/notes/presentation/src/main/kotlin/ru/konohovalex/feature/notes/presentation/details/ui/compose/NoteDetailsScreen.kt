@@ -29,7 +29,7 @@ internal fun NoteDetailsScreen(
                     // tbd show popping-up fabs for image/audio addition
                 },
                 modifier = Modifier
-                    .padding(PaddingValues(2.dp)),
+                    .padding(PaddingValues(Theme.paddings.floatingActionButtonCompensation)),
             )
         },
         backgroundColor = Theme.palette.backgroundColor,
@@ -37,7 +37,7 @@ internal fun NoteDetailsScreen(
         ThemedCard(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(8.dp),
+                .padding(Theme.paddings.contentDefault),
         ) {
             Box(
                 modifier = Modifier

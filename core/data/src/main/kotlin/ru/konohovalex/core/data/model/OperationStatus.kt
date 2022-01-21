@@ -1,23 +1,47 @@
 package ru.konohovalex.core.data.model
 
-sealed class OperationStatus<I, O> {
-    abstract val inputData: I
+sealed interface OperationStatus<O> {
+    interface Pending<O> : OperationStatus<O>
 
-    data class Pending<I, O>(
-        override val inputData: I,
-    ) : OperationStatus<I, O>()
+    interface Processing<O> : OperationStatus<O>
 
-    data class Processing<I, O>(
-        override val inputData: I,
-    ) : OperationStatus<I, O>()
+    interface Completed<O> : OperationStatus<O> {
+        val outputData: O
+    }
 
-    data class Completed<I, O>(
-        override val inputData: I,
-        val outputData: O,
-    ) : OperationStatus<I, O>()
+    interface Error<O> : OperationStatus<O> {
+        val throwable: Throwable
+    }
 
-    data class Error<I, O>(
-        override val inputData: I,
-        val throwable: Throwable,
-    ) : OperationStatus<I, O>()
+    sealed class Plain<O> : OperationStatus<O> {
+        class Pending<O> : Plain<O>(), OperationStatus.Pending<O>
+
+        class Processing<O> : Plain<O>(), OperationStatus.Processing<O>
+
+        data class Completed<O>(override val outputData: O) : Plain<O>(), OperationStatus.Completed<O>
+
+        data class Error<O>(override val throwable: Throwable) : Plain<O>(), OperationStatus.Error<O>
+    }
+
+    sealed class WithInputData<I, O> : OperationStatus<O> {
+        abstract val inputData: I
+
+        data class Pending<I, O>(
+            override val inputData: I,
+        ) : WithInputData<I, O>(), OperationStatus.Pending<O>
+
+        data class Processing<I, O>(
+            override val inputData: I,
+        ) : WithInputData<I, O>(), OperationStatus.Processing<O>
+
+        data class Completed<I, O>(
+            override val inputData: I,
+            override val outputData: O,
+        ) : WithInputData<I, O>(), OperationStatus.Completed<O>
+
+        data class Error<I, O>(
+            override val inputData: I,
+            override val throwable: Throwable,
+        ) : WithInputData<I, O>(), OperationStatus.Error<O>
+    }
 }

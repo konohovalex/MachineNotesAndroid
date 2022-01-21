@@ -7,6 +7,6 @@ import ru.konohovalex.core.ui.compose.model.ImageWrapper
 
 @Composable
 fun ImageWrapper.unwrap() = when (this) {
-    is ImageWrapper.ImageResource -> painterResource(id = resourceId)
+    is ImageWrapper.ImageResource -> painterResource(resourceId)
     is ImageWrapper.PlainImage -> BitmapPainter(value)
 }

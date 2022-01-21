@@ -3,14 +3,13 @@ package ru.konohovalex.machinenotes
 import android.app.Application
 import android.content.Context
 import dagger.hilt.android.HiltAndroidApp
-import ru.konohovalex.core.data.LanguageCodes
-import ru.konohovalex.core.utils.changeLocale
+import ru.konohovalex.core.presentation.utils.changeLocale
 import java.util.Locale
 
 @HiltAndroidApp
 internal class MachineNotesApp : Application() {
-    // tbd place SharedPreferences of language in Preferences feature and make dynamic changes with Compose
+    // tbd make dynamic changes
     override fun attachBaseContext(base: Context?) {
-        super.attachBaseContext(base?.changeLocale(Locale(LanguageCodes.ENGLISH)))
+        super.attachBaseContext(base?.changeLocale(Locale("en")))
     }
 }

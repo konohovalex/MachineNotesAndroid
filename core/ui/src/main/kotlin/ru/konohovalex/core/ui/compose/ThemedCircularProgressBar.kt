@@ -1,5 +1,6 @@
 package ru.konohovalex.core.ui.compose
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.CircularProgressIndicator
@@ -10,10 +11,12 @@ import androidx.compose.ui.tooling.preview.Preview
 import ru.konohovalex.core.design.Theme
 
 @Composable
-fun ThemedCircularProgressBar() {
+fun ThemedCircularProgressBar(
+    modifier: Modifier = Modifier,
+) {
     Box(
-        modifier = Modifier
-            .fillMaxSize(),
+        modifier = modifier
+            .clickable(false) {},
     ) {
         CircularProgressIndicator(
             modifier = Modifier
@@ -30,6 +33,9 @@ fun ThemedCircularProgressBar() {
 @Composable
 private fun ThemedCircularProgressBarPreview() {
     Theme(darkTheme = true) {
-        ThemedCircularProgressBar()
+        ThemedCircularProgressBar(
+            modifier = Modifier
+                .fillMaxSize(),
+        )
     }
 }

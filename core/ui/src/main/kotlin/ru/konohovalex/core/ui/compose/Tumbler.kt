@@ -7,7 +7,9 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -29,55 +31,147 @@ import ru.konohovalex.core.ui.R
 import ru.konohovalex.core.ui.compose.model.ImageWrapper
 import ru.konohovalex.core.ui.compose.model.Position
 import ru.konohovalex.core.ui.compose.model.TextWrapper
+import ru.konohovalex.core.ui.compose.model.TumblerData
+
+/** To use enums or classes, which instances can be unambiguously compared, as [D]
+ * is a recommended solution, as the selected one of [tumblerData]'s [TumblerData.positions]
+ * will be determined by comparison with [selectedPositionDataState]'s value */
+@Composable
+fun <D> Tumbler(
+    tumblerData: TumblerData<D>,
+    modifier: Modifier = Modifier,
+    actionsEnabledState: State<Boolean>,
+    selectedPositionDataState: State<D?>,
+    onSelectedPositionChanged: (positionData: D) -> Unit,
+) {
+    with(tumblerData) {
+        Row(
+            modifier = modifier
+                .padding(Theme.paddings.contentDefault),
+            horizontalArrangement = Arrangement.spacedBy(Theme.paddings.contentDefault),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            TitleAndInfo(
+                titleTextWrapper = titleTextWrapper,
+                infoTextWrapper = infoTextWrapper,
+            )
+
+            PositionsBox(
+                positions = positions,
+                actionsEnabledState = actionsEnabledState,
+                selectedPositionDataState = selectedPositionDataState,
+                onSelectedPositionChanged = onSelectedPositionChanged,
+            )
+        }
+    }
+}
 
 @Composable
-fun Tumbler(
-    positions: List<Position>,
-    selectedPositionIdState: State<String>,
-    onSelectedPositionChanged: (String) -> Unit,
+private fun RowScope.TitleAndInfo(
+    titleTextWrapper: TextWrapper?,
+    infoTextWrapper: TextWrapper?,
 ) {
-    ThemedCard(shape = Theme.shapes.large) {
-        Row(
+    if (titleTextWrapper != null || infoTextWrapper != null) {
+        Column(
             modifier = Modifier
-                .height(IntrinsicSize.Min),
+                .weight(1f),
+            verticalArrangement = Arrangement.spacedBy(Theme.paddings.contentDefault),
         ) {
-            positions.forEachIndexed { index, position ->
-                TumblerPosition(
-                    position = position,
-                    selectedPositionIdState = selectedPositionIdState,
-                    onSelectedPositionChanged = onSelectedPositionChanged,
+            titleTextWrapper?.let {
+                ThemedText(
+                    themedTextType = ThemedTextType.BUTTON,
+                    textWrapper = it,
+                    modifier = Modifier
+                        .fillMaxWidth(),
                 )
-
-                val shouldDrawDivider = index < positions.size - 1 && positions.isNotEmpty()
-                if (shouldDrawDivider) {
-                    Divider(
-                        color = Theme.palette.accentColor,
-                        modifier = Modifier
-                            .width(1.dp)
-                            .fillMaxHeight(),
-                    )
-                }
+            }
+            infoTextWrapper?.let {
+                ThemedText(
+                    themedTextType = ThemedTextType.LABEL,
+                    textWrapper = it,
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                )
             }
         }
     }
 }
 
 @Composable
-private fun TumblerPosition(
-    position: Position,
-    selectedPositionIdState: State<String>,
-    onSelectedPositionChanged: (String) -> Unit,
+private fun <D> PositionsBox(
+    positions: List<Position<D>>,
+    actionsEnabledState: State<Boolean>,
+    selectedPositionDataState: State<D?>,
+    onSelectedPositionChanged: (positionData: D) -> Unit,
 ) {
-    val selectedPositionId by selectedPositionIdState
-    val id = position.id
+    ThemedCard(shape = Theme.shapes.large) {
+        Box(
+            contentAlignment = Alignment.Center,
+        ) {
+            PositionsRow(
+                positions = positions,
+                selectedPositionDataState = selectedPositionDataState,
+                onSelectedPositionChanged = onSelectedPositionChanged,
+            )
+
+            val actionsEnabled by actionsEnabledState
+
+            if (!actionsEnabled) {
+                ThemedCircularProgressBar(
+                    modifier = Modifier
+                        .matchParentSize(),
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun <D> PositionsRow(
+    positions: List<Position<D>>,
+    selectedPositionDataState: State<D?>,
+    onSelectedPositionChanged: (positionData: D) -> Unit,
+) {
+    Row(
+        modifier = Modifier
+            .height(IntrinsicSize.Min),
+    ) {
+        positions.forEachIndexed { index, position ->
+            TumblerPosition(
+                position = position,
+                selectedPositionDataState = selectedPositionDataState,
+                onSelectedPositionChanged = onSelectedPositionChanged,
+            )
+
+            val shouldDrawDivider = index < positions.size - 1 && positions.isNotEmpty()
+            if (shouldDrawDivider) {
+                Divider(
+                    color = Theme.palette.accentColor,
+                    modifier = Modifier
+                        .width(1.dp)
+                        .fillMaxHeight(),
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun <D> TumblerPosition(
+    position: Position<D>,
+    selectedPositionDataState: State<D?>,
+    onSelectedPositionChanged: (positionData: D) -> Unit,
+) {
+    val selectedPositionData by selectedPositionDataState
+    val isSelectedPosition = selectedPositionData == position.data
     val backgroundColor =
-        if (selectedPositionId == id) Theme.palette.fillEnabledColor
+        if (isSelectedPosition) Theme.palette.fillEnabledColor
         else Theme.palette.backgroundColor
 
     Box(
         modifier = Modifier
             .clickable {
-                onSelectedPositionChanged.invoke(id)
+                if (!isSelectedPosition) onSelectedPositionChanged.invoke(position.data)
             }
     ) {
         val baseModifier = Modifier
@@ -99,8 +193,8 @@ private fun TumblerPosition(
 }
 
 @Composable
-private fun TextTumblerPosition(
-    position: Position.Text,
+private fun <D> TextTumblerPosition(
+    position: Position.Text<D>,
     modifier: Modifier,
 ) = with(position) {
     ThemedText(
@@ -114,8 +208,8 @@ private fun TextTumblerPosition(
 }
 
 @Composable
-private fun ImageTumblerPosition(
-    position: Position.Image,
+private fun <D> ImageTumblerPosition(
+    position: Position.Image<D>,
     modifier: Modifier,
 ) = with(position) {
     ThemedImage(
@@ -127,42 +221,54 @@ private fun ImageTumblerPosition(
 @Preview
 @Composable
 private fun TumblersPreview() {
-    val selectedPositionIdState = derivedStateOf { "0" }
+    val selectedPositionState = derivedStateOf { "0" }
+    val actionsDisabledState = derivedStateOf { false }
+    val actionsEnabledState = derivedStateOf { true }
 
     Theme {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(32.dp),
         ) {
             Tumbler(
-                positions = listOf(
-                    Position.Text(
-                        id = "0",
-                        textWrapper = TextWrapper.PlainText(value = "Eng"),
-                    ),
-                    Position.Text(
-                        id = "1",
-                        textWrapper = TextWrapper.PlainText(value = "Рус"),
+                tumblerData = TumblerData(
+                    titleTextWrapper = TextWrapper.PlainText(value = "Язык приложения"),
+                    infoTextWrapper = TextWrapper.PlainText(value = "Распознавание речи будет доступно только языка приложения"),
+                    positions = listOf(
+                        Position.Text(
+                            data = "0",
+                            textWrapper = TextWrapper.PlainText(value = "Eng"),
+                        ),
+                        Position.Text(
+                            data = "1",
+                            textWrapper = TextWrapper.PlainText(value = "Рус"),
+                        ),
                     ),
                 ),
-                selectedPositionIdState = selectedPositionIdState,
-                onSelectedPositionChanged = {},
-            )
+                actionsEnabledState = actionsDisabledState,
+                selectedPositionDataState = selectedPositionState,
+            ) {}
 
             Tumbler(
-                positions = listOf(
-                    Position.Image(
-                        id = "0",
-                        imageWrapper = ImageWrapper.ImageResource(resourceId = R.drawable.ic_light_mode),
-                    ),
-                    Position.Image(
-                        id = "1",
-                        imageWrapper = ImageWrapper.ImageResource(resourceId = R.drawable.ic_dark_mode),
+                tumblerData = TumblerData(
+                    titleTextWrapper = TextWrapper.PlainText(value = "Тема (светлая|системная|тёмная)"),
+                    positions = listOf(
+                        Position.Image(
+                            data = "0",
+                            imageWrapper = ImageWrapper.ImageResource(resourceId = R.drawable.ic_light_mode),
+                        ),
+                        Position.Image(
+                            data = "1",
+                            imageWrapper = ImageWrapper.ImageResource(resourceId = R.drawable.ic_device),
+                        ),
+                        Position.Image(
+                            data = "2",
+                            imageWrapper = ImageWrapper.ImageResource(resourceId = R.drawable.ic_dark_mode),
+                        ),
                     ),
                 ),
-                selectedPositionIdState = selectedPositionIdState,
-                onSelectedPositionChanged = {},
-            )
+                actionsEnabledState = actionsEnabledState,
+                selectedPositionDataState = selectedPositionState,
+            ) {}
         }
     }
 }

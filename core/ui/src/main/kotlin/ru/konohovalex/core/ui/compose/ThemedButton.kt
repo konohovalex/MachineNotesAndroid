@@ -168,7 +168,7 @@ private fun ThemedButtonsPreview() {
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(32.dp),
         ) {
-            val imageWrapper = ImageWrapper.ImageResource(resourceId = R.drawable.ic_pensil)
+            val imageWrapper = ImageWrapper.ImageResource(resourceId = R.drawable.ic_notes)
             val textWrapper = TextWrapper.PlainText(value = "Редактировать")
 
             ThemedButton(

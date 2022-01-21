@@ -8,7 +8,7 @@ import ru.konohovalex.machinenotes.compose.HomeScreen
 
 internal fun NavGraphBuilder.mainGraph(navController: NavController) {
     composable(route = MainRoute.Home.buildGraphRoute()) {
-        HomeScreen(homeNavController = navController)
+        HomeScreen(navController)
     }
 
     noteDetailsScreen()

@@ -1,21 +1,24 @@
 package ru.konohovalex.feature.notes.presentation.list
 
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import ru.konohovalex.core.data.model.OperationStatus
 import ru.konohovalex.core.data.model.PaginationData
+import ru.konohovalex.core.presentation.arch.event.EventHandler
+import ru.konohovalex.core.presentation.arch.state.ScreenStateProvider
+import ru.konohovalex.core.presentation.arch.state.ScreenStateProviderDelegate
 import ru.konohovalex.core.utils.Mapper
 import ru.konohovalex.feature.notes.domain.model.NoteDomainModel
 import ru.konohovalex.feature.notes.domain.usecase.GetNotesUseCase
-import ru.konohovalex.feature.notes.presentation.list.model.NoteListState
+import ru.konohovalex.feature.notes.domain.utils.isValidNotesFilterValue
+import ru.konohovalex.feature.notes.presentation.list.model.NoteListScreenEvent
+import ru.konohovalex.feature.notes.presentation.list.model.NoteListScreenState
 import ru.konohovalex.feature.notes.presentation.list.model.NotePreviewUiModel
 import javax.inject.Inject
 
@@ -24,92 +27,61 @@ internal class NoteListViewModel
 @Inject constructor(
     private val getNotesUseCase: GetNotesUseCase,
     private val noteDomainModelToNotePreviewUiModelMapper: Mapper<NoteDomainModel, NotePreviewUiModel>,
-) : ViewModel() {
-    private val _state = MutableLiveData<NoteListState>(NoteListState.Loading)
-    val state: LiveData<NoteListState> = _state
-
-//    private val _notes = mutableListOf<NotePreviewUiModel>()
-    private var _notes = listOf<NotePreviewUiModel>()
-
-    private var _filter: String? = null
-    private var _paginationData = PaginationData(
-        pageSize = 25,
-        pageNumber = 0,
-    )
-
+) : ViewModel(),
+    EventHandler<NoteListScreenEvent>,
+    ScreenStateProvider<NoteListScreenState> by ScreenStateProviderDelegate(NoteListScreenState.Idle) {
     private var getNotesJob: Job? = null
-    private var filterJob: Job? = null
 
-    init {
-        getNextNotes()
+    private var _filter: String = ""
+
+    override fun handle(event: NoteListScreenEvent) {
+        when (event) {
+            is NoteListScreenEvent.GetNotes -> getNextNotes(event.filter)
+        }
     }
 
-    fun getNextNotes() {
-        getNotesJob?.cancel()
-        getNotesJob = getNotesUseCase.invoke(_filter, _paginationData)
-            .onEach {
-                when (it) {
-                    is OperationStatus.Pending, is OperationStatus.Processing -> handleLoadingState(
-                        it.inputData.first,
-                        it.inputData.second,
-                    )
-                    is OperationStatus.Completed -> handleDataLoaded(
-                        it.inputData.first,
-                        it.inputData.second,
-                        it.outputData,
-                    )
-                    is OperationStatus.Error -> handleError(
-                        it.inputData.first,
-                        it.inputData.second,
-                        it.throwable,
-                    )
-                }
-            }
-            .launchIn(viewModelScope)
-    }
-
-    fun filterNotes(filter: String?) {
-        if (filter != _filter) {
-            _filter = filter
-            filterJob?.cancel()
-            filterJob = viewModelScope.launch {
-                delay(1000)
-                getNextNotes()
+    private fun getNextNotes(filter: String) {
+        val previousFilterWasValid = _filter.isValidNotesFilterValue()
+        _filter = filter
+        val filterIsValid = _filter.isValidNotesFilterValue()
+        val needToLaunchGetNotes = filterIsValid
+                || !filterIsValid && previousFilterWasValid
+                || _filter.isEmpty() && screenState.value is NoteListScreenState.Idle
+        if (needToLaunchGetNotes) {
+            getNotesJob?.cancel()
+            getNotesJob = viewModelScope.launch {
+                if (filterIsValid) delay(500)
+                getNextNotesFlow(if (filterIsValid) _filter else "").collect()
             }
         }
     }
 
-    fun refresh() {
+    private fun getNextNotesFlow(filter: String) =
+        getNotesUseCase.invoke(
+            filter = filter,
+            paginationData = PaginationData(
+                pageSize = 20,
+                pageNumber = 0,
+            )
+        ).onEach {
+            when (it) {
+                is OperationStatus.WithInputData.Pending -> setLoadingState()
+                is OperationStatus.WithInputData.Processing -> {}
+                is OperationStatus.WithInputData.Completed -> setDataState(it.outputData)
+                is OperationStatus.WithInputData.Error -> setErrorState(it.throwable)
+            }
+        }
+
+    private fun setLoadingState() {
+        setScreenState(NoteListScreenState.Loading)
     }
 
-    private fun handleLoadingState(
-        filter: String?,
-        paginationData: PaginationData,
-    ) {
-        _filter = filter
-        _paginationData = paginationData
-        _state.value = NoteListState.Loading
+    private fun setDataState(noteDomainModelList: List<NoteDomainModel>) {
+        val notesUiModelList = noteDomainModelList.map(noteDomainModelToNotePreviewUiModelMapper)
+        setScreenState(NoteListScreenState.Data(notesUiModelList))
     }
 
-    private fun handleDataLoaded(
-        filter: String?,
-        paginationData: PaginationData,
-        notes: List<NoteDomainModel>,
-    ) {
-        _filter = filter
-        _paginationData = paginationData
-//        _notes.addAll(notes.map(noteDomainModelToNotePreviewUiModelMapper))
-        _notes = notes.map(noteDomainModelToNotePreviewUiModelMapper)
-        _state.value = NoteListState.Data(_notes)
-    }
-
-    private fun handleError(
-        filter: String?,
-        paginationData: PaginationData,
-        throwable: Throwable,
-    ) {
-        _filter = filter
-        _paginationData = paginationData
-        _state.value = NoteListState.Error(throwable)
+    private fun setErrorState(throwable: Throwable) {
+        setScreenState(NoteListScreenState.Error(throwable))
     }
 }

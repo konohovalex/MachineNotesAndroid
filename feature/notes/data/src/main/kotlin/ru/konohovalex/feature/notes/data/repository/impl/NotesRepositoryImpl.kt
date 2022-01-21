@@ -1,8 +1,10 @@
 package ru.konohovalex.feature.notes.data.repository.impl
 
 import kotlinx.coroutines.delay
+import ru.konohovalex.core.data.model.OperationResult
 import ru.konohovalex.core.data.model.PaginationData
 import ru.konohovalex.core.utils.Mapper
+import ru.konohovalex.core.utils.withIo
 import ru.konohovalex.feature.notes.data.model.Note
 import ru.konohovalex.feature.notes.data.model.NoteContent
 import ru.konohovalex.feature.notes.data.model.NoteUpdateParams
@@ -12,6 +14,8 @@ import ru.konohovalex.feature.notes.data.model.remote.NoteUpdateParamsDto
 import ru.konohovalex.feature.notes.data.repository.contract.NotesRepository
 import ru.konohovalex.feature.notes.data.source.api.NotesApi
 import ru.konohovalex.feature.notes.data.source.storage.NotesDao
+import ru.konohovalex.feature.notes.data.utils.createDummyNote
+import ru.konohovalex.feature.notes.data.utils.createDummyNoteList
 import javax.inject.Inject
 
 internal class NotesRepositoryImpl
@@ -24,52 +28,63 @@ internal class NotesRepositoryImpl
     private val noteToNoteEntityMapper: Mapper<Note, NoteEntity>,
     private val noteEntityToNoteMapper: Mapper<NoteEntity, Note>,
 ) : NotesRepository {
-    override suspend fun createNote(): Note {
+    private val dummyNoteList = createDummyNoteList(25)
+
+    override suspend fun createNote(): OperationResult<Note> = withIo {
         delay(3000)
-        return createDummyNote("1", 0)
+        val dummyNote = createDummyNote("${dummyNoteList.size}", 0)
+        OperationResult.Success(dummyNote)
     }
 
-    override suspend fun getNoteDetails(noteId: String): Note {
+    override suspend fun getNoteDetails(noteId: String): OperationResult<Note> = withIo {
         delay(3000)
-        return createDummyNote("1", 0)
+        OperationResult.Success(dummyNoteList.find { it.id == noteId }!!)
     }
 
-    override suspend fun updateNote(noteUpdateParams: NoteUpdateParams): Note {
+    override suspend fun updateNote(noteUpdateParams: NoteUpdateParams): OperationResult<Note> = withIo {
         delay(3000)
-        return createDummyNote("1", 0)
+        val indexOfNoteToUpdate = dummyNoteList.indexOfFirst { it.id == noteUpdateParams.id }
+        val noteToUpdate = dummyNoteList[indexOfNoteToUpdate]
+        val updatedNote = noteToUpdate.copy(
+            dateTimeLastEdited = noteUpdateParams.dateTimeLastEdited,
+            noteContent = noteUpdateParams.noteContent,
+        )
+        dummyNoteList[indexOfNoteToUpdate] = updatedNote
+        OperationResult.Success(updatedNote)
     }
 
-    override suspend fun deleteNote(noteId: String) {
+    override suspend fun deleteNote(noteId: String) = withIo {
         delay(3000)
+        dummyNoteList.removeAll { it.id == noteId }
+        OperationResult.Success(Unit)
     }
 
     override suspend fun getNotes(
         filter: String?,
         paginationData: PaginationData,
-    ): List<Note> {
-        val notesDummyList = createDummyNoteList(25).let { list ->
-            filter?.takeIf { it.isNotEmpty() }?.let { filterValue ->
-                mutableListOf<Note>().apply {
-                    list.forEach { note ->
-                        val containsFilterValue = note.noteContent.any {
-                            it is NoteContent.Text && it.content.contains(filterValue, ignoreCase = true)
-                        }
-                        if (containsFilterValue) add(note)
+    ): OperationResult<List<Note>> = withIo {
+        delay(3000)
+        val outputList = filter?.takeIf { it.isNotBlank() }?.let { filterValue ->
+            mutableListOf<Note>().apply {
+                dummyNoteList.forEach { note ->
+                    val containsFilterValue = note.noteContent.any {
+                        it is NoteContent.Text && it.content.contains(filterValue, ignoreCase = true)
                     }
+                    if (containsFilterValue) add(note)
                 }
-            } ?: list
-        }
-        return notesDummyList
-        /*val noteDtoList = notesApi.getNotes(paginationData.pageSize, paginationData.pageNumber)
-        return noteDtoList.map(noteDtoToNoteMapper)*/
+            }
+        } ?: dummyNoteList
+        OperationResult.Success(outputList)
     }
 
-    override suspend fun synchronizeNotes(notes: List<Note>): List<Note> {
+    override suspend fun synchronizeNotes(notes: List<Note>): OperationResult<List<Note>> = withIo {
         delay(3000)
-        return createDummyNoteList(25)
+        OperationResult.Success(dummyNoteList)
     }
 
-    override suspend fun deleteAllNotes() {
+    override suspend fun deleteAllNotes() = withIo {
         delay(3000)
+        dummyNoteList.clear()
+        OperationResult.Success(Unit)
     }
 }

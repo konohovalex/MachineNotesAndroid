@@ -4,6 +4,7 @@ import com.google.gson.GsonBuilder
 import com.google.gson.JsonDeserializationContext
 import com.google.gson.JsonDeserializer
 import com.google.gson.JsonElement
+import ru.konohovalex.core.utils.fromJson
 import ru.konohovalex.feature.notes.data.model.remote.NoteContentDto
 import ru.konohovalex.feature.notes.data.model.remote.NoteContentDtoType
 import java.lang.reflect.Type
@@ -18,13 +19,13 @@ internal class NoteContentDtoJsonDeserializer : JsonDeserializer<NoteContentDto>
 
         return when (typeSerializedName) {
             NoteContentDtoType.TEXT.serializedName -> {
-                gson.fromJson(noteContentDtoJson, NoteContentDto.Text::class.java)
+                gson.fromJson<NoteContentDto.Text>(noteContentDtoJson)
             }
             NoteContentDtoType.IMAGE.serializedName -> {
-                gson.fromJson(noteContentDtoJson, NoteContentDto.Image::class.java)
+                gson.fromJson<NoteContentDto.Image>(noteContentDtoJson)
             }
             NoteContentDtoType.AUDIO.serializedName -> {
-                gson.fromJson(noteContentDtoJson, NoteContentDto.Audio::class.java)
+                gson.fromJson<NoteContentDto.Audio>(noteContentDtoJson)
             }
             else -> null
         }

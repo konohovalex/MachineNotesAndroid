@@ -11,6 +11,6 @@ dependencies {
         project(Modules.Core.data),
         project(Modules.Core.utils),
 
-        Dependencies.Retrofit.getAllRuntimeDependencies(),
+        Dependencies.Android.dataStorePreferences,
     )
 }

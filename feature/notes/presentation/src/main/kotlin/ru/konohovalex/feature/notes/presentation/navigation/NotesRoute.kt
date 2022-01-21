@@ -1,7 +1,7 @@
 package ru.konohovalex.feature.notes.presentation.navigation
 
-import ru.konohovalex.core.data.navigation.NavigationParameter
-import ru.konohovalex.core.data.navigation.NavigationRoute
+import ru.konohovalex.core.presentation.arch.navigation.NavigationParameter
+import ru.konohovalex.core.presentation.arch.navigation.NavigationRoute
 
 internal sealed class NotesRoute(override val destinations: List<String>) : NavigationRoute {
     override val entryPoint = notes

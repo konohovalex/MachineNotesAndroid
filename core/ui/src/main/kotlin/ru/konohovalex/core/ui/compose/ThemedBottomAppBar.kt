@@ -22,11 +22,15 @@ import ru.konohovalex.core.ui.compose.model.Position
 import ru.konohovalex.core.ui.compose.model.TextWrapper
 import ru.konohovalex.core.ui.compose.utils.unwrap
 
+/** To use enums or classes, which instances can be unambiguously compared, as [D]
+ * is a recommended solution, as the selected one of [positions]
+ * will be determined by comparison with [selectedPositionDataState]'s value.
+ * Description for the item can be set as [Position.Image.imageWrapper]'s [ImageWrapper.contentDescription] */
 @Composable
-fun ThemedBottomAppBar(
-    positions: List<Position.Image>,
-    selectedPositionIdState: State<String>,
-    onSelectedPositionChanged: (String) -> Unit,
+fun <D> ThemedBottomAppBar(
+    positions: List<Position.Image<D>>,
+    selectedPositionDataState: State<D>,
+    onSelectedPositionChanged: (D) -> Unit,
 ) {
     Surface(
         modifier = Modifier
@@ -48,7 +52,7 @@ fun ThemedBottomAppBar(
             positions.forEach {
                 BottomAppBarPosition(
                     position = it,
-                    selectedPositionIdState = selectedPositionIdState,
+                    selectedPositionDataState = selectedPositionDataState,
                     onSelectedPositionChanged = onSelectedPositionChanged,
                 )
             }
@@ -57,17 +61,18 @@ fun ThemedBottomAppBar(
 }
 
 @Composable
-private fun BottomAppBarPosition(
-    position: Position.Image,
-    selectedPositionIdState: State<String>,
-    onSelectedPositionChanged: (String) -> Unit,
+private fun <D> BottomAppBarPosition(
+    position: Position.Image<D>,
+    selectedPositionDataState: State<D>,
+    onSelectedPositionChanged: (D) -> Unit,
 ) = with(position) {
-    val selectedPositionId by selectedPositionIdState
+    val selectedPositionData by selectedPositionDataState
+    val isSelectedPosition = selectedPositionData == data
 
     ThemedButton(
         buttonData = ButtonData.Selectable(
             onClickListener = {
-                onSelectedPositionChanged.invoke(id)
+                if (!isSelectedPosition) onSelectedPositionChanged.invoke(data)
             },
             content = mutableListOf<ButtonData.Content>(
                 ButtonData.Content.Image(imageWrapper = imageWrapper)
@@ -84,7 +89,7 @@ private fun BottomAppBarPosition(
             },
             contentArrangement = ButtonData.ContentArrangement.VERTICAL,
             contentSpacing = 4.dp,
-            selected = selectedPositionId == id,
+            selected = isSelectedPosition,
         )
     )
 }
@@ -98,18 +103,18 @@ private fun ThemedBottomAppBarPreview() {
         ThemedBottomAppBar(
             positions = listOf(
                 Position.Image(
-                    id = "0",
-                    imageWrapper = ImageWrapper.ImageResource(resourceId = R.drawable.ic_pensil),
+                    data = "0",
+                    imageWrapper = ImageWrapper.ImageResource(resourceId = R.drawable.ic_notes),
                 ),
                 Position.Image(
-                    id = "1",
+                    data = "1",
                     imageWrapper = ImageWrapper.ImageResource(
                         resourceId = R.drawable.ic_preferences,
                         contentDescription = TextWrapper.PlainText(value = "Настройки"),
                     ),
                 ),
             ),
-            selectedPositionIdState = selectedPositionIdState,
+            selectedPositionDataState = selectedPositionIdState,
             onSelectedPositionChanged = {},
         )
     }

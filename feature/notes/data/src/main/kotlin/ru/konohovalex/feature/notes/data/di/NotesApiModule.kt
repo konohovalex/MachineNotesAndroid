@@ -7,13 +7,13 @@ import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import retrofit2.converter.gson.GsonConverterFactory
 import ru.konohovalex.core.data.model.TypeAdapterParams
-import ru.konohovalex.core.data.source.contract.provider.ApiProvider
-import ru.konohovalex.core.data.source.contract.provider.Provider
+import ru.konohovalex.core.data.arch.source.api.provider.ApiProvider
+import ru.konohovalex.core.data.arch.provider.Provider
 import ru.konohovalex.feature.notes.data.source.api.NotesApi
-import ru.konohovalex.feature.notes.data.source.api.NotesGsonConverterFactoryProvider
-import ru.konohovalex.feature.notes.data.source.api.NotesGsonProvider
-import ru.konohovalex.feature.notes.data.source.api.NotesGsonTypeAdapterProvider
-import ru.konohovalex.feature.notes.data.source.provider.NotesApiProvider
+import ru.konohovalex.feature.notes.data.source.api.provider.NotesGsonConverterFactoryProvider
+import ru.konohovalex.feature.notes.data.source.api.provider.NotesGsonProvider
+import ru.konohovalex.feature.notes.data.source.api.provider.NotesGsonTypeAdapterProvider
+import ru.konohovalex.feature.notes.data.source.api.provider.NotesApiProvider
 import javax.inject.Singleton
 
 @Module
