@@ -15,7 +15,7 @@ internal class NoteUpdateParamsDomainModelToNoteUpdateParamsMapper
         NoteUpdateParams(
             id = id,
             dateTimeLastEdited = dateTimeLastEdited,
-            noteContent = noteContent.map(noteContentDomainModelToNoteContentMapper)
+            noteContent = noteContent.map(noteContentDomainModelToNoteContentMapper),
         )
     }
 }

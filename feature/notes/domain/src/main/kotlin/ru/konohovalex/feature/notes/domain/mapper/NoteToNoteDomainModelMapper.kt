@@ -16,7 +16,7 @@ internal class NoteToNoteDomainModelMapper
             id,
             dateTimeCreated,
             dateTimeLastEdited,
-            noteContent.map(noteContentToNoteContentDomainModelMapper)
+            noteContent.map(noteContentToNoteContentDomainModelMapper),
         )
     }
 }

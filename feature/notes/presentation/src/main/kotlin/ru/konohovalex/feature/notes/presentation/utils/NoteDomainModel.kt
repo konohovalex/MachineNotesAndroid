@@ -7,7 +7,7 @@ import ru.konohovalex.feature.notes.domain.model.NoteDomainModel
 import ru.konohovalex.feature.notes.presentation.R
 import ru.konohovalex.core.ui.compose.model.TextWrapper
 
-internal fun NoteDomainModel.getTitleTextWrapper(): TextWrapper = noteContent
+internal fun NoteDomainModel.getTitleTextWrapper(emptyIfAbsent: Boolean = false): TextWrapper = noteContent
     .firstOfClassOrNull<NoteContentDomainModel.Text>()
     ?.content
     ?.substringBefore(delimiter = "\n")
@@ -17,7 +17,8 @@ internal fun NoteDomainModel.getTitleTextWrapper(): TextWrapper = noteContent
         endIndex = 100
     )
     ?.let(TextWrapper::PlainText)
-    ?: TextWrapper.StringResource(resourceId = R.string.untitled)
+    ?: if (emptyIfAbsent) TextWrapper.PlainText("")
+    else TextWrapper.StringResource(resourceId = R.string.untitled)
 
 internal fun NoteDomainModel.getSubtitleTextWrapper(): TextWrapper = when (val firstContent = noteContent.getOrNull(0)) {
     is NoteContentDomainModel.Text -> firstContent.content

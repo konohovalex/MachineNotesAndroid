@@ -5,42 +5,40 @@ import androidx.compose.material.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Modifier
-import androidx.hilt.navigation.compose.hiltViewModel
 import ru.konohovalex.core.design.Theme
-import ru.konohovalex.core.presentation.arch.event.EventHandler
-import ru.konohovalex.core.presentation.arch.state.ScreenStateProvider
+import ru.konohovalex.core.presentation.arch.viewevent.ViewEventHandler
+import ru.konohovalex.core.presentation.arch.viewstate.ViewStateProvider
 import ru.konohovalex.core.ui.compose.ThemedCircularProgressBar
-import ru.konohovalex.feature.notes.presentation.list.NoteListViewModel
-import ru.konohovalex.feature.notes.presentation.list.model.NoteListScreenEvent
-import ru.konohovalex.feature.notes.presentation.list.model.NoteListScreenState
+import ru.konohovalex.feature.notes.presentation.list.model.NoteListScreenViewEvent
+import ru.konohovalex.feature.notes.presentation.list.model.NoteListViewState
 import ru.konohovalex.feature.notes.presentation.list.model.NotePreviewUiModel
 
 @Composable
 internal fun NoteListScreen(
-    eventHandler: EventHandler<NoteListScreenEvent> = hiltViewModel<NoteListViewModel>(),
-    screenStateProvider: ScreenStateProvider<NoteListScreenState> = hiltViewModel<NoteListViewModel>(),
+    viewEventHandler: ViewEventHandler<NoteListScreenViewEvent>,
+    viewStateProvider: ViewStateProvider<NoteListViewState>,
     onNoteClick: (noteId: String?) -> Unit,
 ) {
+    // tbd too much recompositions
     Scaffold(
         topBar = {
-            NoteListTopAppBar(eventHandler)
+            NoteListTopAppBar(viewEventHandler)
         },
         floatingActionButton = {
             NoteListFloatingActionButton(onNoteClick)
         },
         backgroundColor = Theme.palette.backgroundColor,
     ) {
-        // tbd too much recompositions called as PaddingValues changing frequently
-        val screenState = screenStateProvider.screenState.observeAsState()
+        val viewState = viewStateProvider.viewState.observeAsState()
 
-        when (val screenStateValue = screenState.value) {
-            is NoteListScreenState.Idle -> eventHandler.handle(NoteListScreenEvent.GetNotes(filter = ""))
-            is NoteListScreenState.Loading -> LoadingState()
-            is NoteListScreenState.Data -> DataState(
-                notes = screenStateValue.notes,
+        when (val viewStateValue = viewState.value) {
+            is NoteListViewState.Idle -> viewEventHandler.handle(NoteListScreenViewEvent.GetNotes(filter = ""))
+            is NoteListViewState.Loading -> LoadingState()
+            is NoteListViewState.Data -> DataState(
+                notes = viewStateValue.notes,
                 onNoteClick = onNoteClick,
             )
-            is NoteListScreenState.Error -> ErrorState()
+            is NoteListViewState.Error -> ErrorState()
         }
     }
 }

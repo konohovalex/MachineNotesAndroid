@@ -11,5 +11,5 @@ internal fun NavGraphBuilder.mainGraph(navController: NavController) {
         HomeScreen(navController)
     }
 
-    noteDetailsScreen()
+    noteDetailsScreen(navController)
 }

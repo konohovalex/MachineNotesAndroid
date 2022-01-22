@@ -1,4 +1,4 @@
-package ru.konohovalex.feature.notes.presentation.list
+package ru.konohovalex.feature.notes.presentation.list.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -10,15 +10,15 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import ru.konohovalex.core.data.model.OperationStatus
 import ru.konohovalex.core.data.model.PaginationData
-import ru.konohovalex.core.presentation.arch.event.EventHandler
-import ru.konohovalex.core.presentation.arch.state.ScreenStateProvider
-import ru.konohovalex.core.presentation.arch.state.ScreenStateProviderDelegate
+import ru.konohovalex.core.presentation.arch.viewevent.ViewEventHandler
+import ru.konohovalex.core.presentation.arch.viewstate.ViewStateProvider
+import ru.konohovalex.core.presentation.arch.viewstate.ViewStateProviderDelegate
 import ru.konohovalex.core.utils.Mapper
 import ru.konohovalex.feature.notes.domain.model.NoteDomainModel
 import ru.konohovalex.feature.notes.domain.usecase.GetNotesUseCase
 import ru.konohovalex.feature.notes.domain.utils.isValidNotesFilterValue
-import ru.konohovalex.feature.notes.presentation.list.model.NoteListScreenEvent
-import ru.konohovalex.feature.notes.presentation.list.model.NoteListScreenState
+import ru.konohovalex.feature.notes.presentation.list.model.NoteListScreenViewEvent
+import ru.konohovalex.feature.notes.presentation.list.model.NoteListViewState
 import ru.konohovalex.feature.notes.presentation.list.model.NotePreviewUiModel
 import javax.inject.Inject
 
@@ -28,15 +28,15 @@ internal class NoteListViewModel
     private val getNotesUseCase: GetNotesUseCase,
     private val noteDomainModelToNotePreviewUiModelMapper: Mapper<NoteDomainModel, NotePreviewUiModel>,
 ) : ViewModel(),
-    EventHandler<NoteListScreenEvent>,
-    ScreenStateProvider<NoteListScreenState> by ScreenStateProviderDelegate(NoteListScreenState.Idle) {
+    ViewEventHandler<NoteListScreenViewEvent>,
+    ViewStateProvider<NoteListViewState> by ViewStateProviderDelegate(NoteListViewState.Idle) {
     private var getNotesJob: Job? = null
 
     private var _filter: String = ""
 
-    override fun handle(event: NoteListScreenEvent) {
-        when (event) {
-            is NoteListScreenEvent.GetNotes -> getNextNotes(event.filter)
+    override fun handle(viewEvent: NoteListScreenViewEvent) {
+        when (viewEvent) {
+            is NoteListScreenViewEvent.GetNotes -> getNextNotes(viewEvent.filter)
         }
     }
 
@@ -46,7 +46,7 @@ internal class NoteListViewModel
         val filterIsValid = _filter.isValidNotesFilterValue()
         val needToLaunchGetNotes = filterIsValid
                 || !filterIsValid && previousFilterWasValid
-                || _filter.isEmpty() && screenState.value is NoteListScreenState.Idle
+                || _filter.isEmpty() && viewState.value is NoteListViewState.Idle
         if (needToLaunchGetNotes) {
             getNotesJob?.cancel()
             getNotesJob = viewModelScope.launch {
@@ -73,15 +73,15 @@ internal class NoteListViewModel
         }
 
     private fun setLoadingState() {
-        setScreenState(NoteListScreenState.Loading)
+        setViewState(NoteListViewState.Loading)
     }
 
     private fun setDataState(noteDomainModelList: List<NoteDomainModel>) {
         val notesUiModelList = noteDomainModelList.map(noteDomainModelToNotePreviewUiModelMapper)
-        setScreenState(NoteListScreenState.Data(notesUiModelList))
+        setViewState(NoteListViewState.Data(notesUiModelList))
     }
 
     private fun setErrorState(throwable: Throwable) {
-        setScreenState(NoteListScreenState.Error(throwable))
+        setViewState(NoteListViewState.Error(throwable))
     }
 }

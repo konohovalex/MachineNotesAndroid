@@ -4,30 +4,30 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import ru.konohovalex.core.presentation.arch.event.EventHandler
+import ru.konohovalex.core.presentation.arch.viewevent.ViewEventHandler
 import ru.konohovalex.core.ui.compose.Tumbler
 import ru.konohovalex.core.ui.compose.model.Position
 import ru.konohovalex.core.ui.compose.model.TextWrapper
 import ru.konohovalex.core.ui.compose.model.TumblerData
 import ru.konohovalex.feature.preferences.presentation.R
 import ru.konohovalex.feature.preferences.presentation.model.LanguageUiModel
-import ru.konohovalex.feature.preferences.presentation.model.PreferencesScreenEffect
-import ru.konohovalex.feature.preferences.presentation.model.PreferencesScreenEvent
+import ru.konohovalex.feature.preferences.presentation.model.PreferencesScreenViewEffect
+import ru.konohovalex.feature.preferences.presentation.model.PreferencesScreenViewEvent
 
 @Composable
 internal fun LanguageTumbler(
     currentLanguageUiModel: LanguageUiModel,
     availableLanguages: List<LanguageUiModel>,
-    eventHandler: EventHandler<PreferencesScreenEvent>,
-    effectState: State<PreferencesScreenEffect?>,
+    viewEventHandler: ViewEventHandler<PreferencesScreenViewEvent>,
+    viewEffectState: State<PreferencesScreenViewEffect?>,
 ) {
-    val effectStateValue = effectState.value
+    val viewEffectStateValue = viewEffectState.value
 
     val actionsEnabledState = remember {
         mutableStateOf(true)
     }
-    if (effectStateValue is PreferencesScreenEffect.EnableLanguageUpdates) {
-        actionsEnabledState.value = effectStateValue.value
+    if (viewEffectStateValue is PreferencesScreenViewEffect.EnableLanguageUpdates) {
+        actionsEnabledState.value = viewEffectStateValue.value
     }
 
     val selectedLanguageState = remember {
@@ -36,7 +36,7 @@ internal fun LanguageTumbler(
     selectedLanguageState.value = currentLanguageUiModel
 
     val onSelectedLanguageChanged = { selectedLanguageUiModel: LanguageUiModel ->
-        eventHandler.handle(PreferencesScreenEvent.UpdateCurrentLanguage(selectedLanguageUiModel))
+        viewEventHandler.handle(PreferencesScreenViewEvent.UpdateCurrentLanguage(selectedLanguageUiModel))
     }
 
     Tumbler(

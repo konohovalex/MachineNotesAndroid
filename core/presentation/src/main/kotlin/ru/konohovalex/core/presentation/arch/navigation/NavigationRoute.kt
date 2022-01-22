@@ -24,7 +24,7 @@ interface NavigationRoute {
                 index = index,
                 parametersSize = parameters.size,
             )
-            append("${entry.key}={${entry.value}}")
+            append("${entry.key}=${entry.value}")
         }
     }
 

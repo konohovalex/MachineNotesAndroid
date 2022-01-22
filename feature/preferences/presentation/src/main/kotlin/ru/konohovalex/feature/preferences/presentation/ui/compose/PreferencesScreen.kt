@@ -12,21 +12,21 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
 import ru.konohovalex.core.design.Theme
-import ru.konohovalex.core.presentation.arch.effect.EffectPublisher
-import ru.konohovalex.core.presentation.arch.event.EventHandler
-import ru.konohovalex.core.presentation.arch.state.ScreenStateProvider
+import ru.konohovalex.core.presentation.arch.vieweffect.ViewEffectPublisher
+import ru.konohovalex.core.presentation.arch.viewevent.ViewEventHandler
+import ru.konohovalex.core.presentation.arch.viewstate.ViewStateProvider
 import ru.konohovalex.core.ui.compose.ThemedCircularProgressBar
-import ru.konohovalex.feature.preferences.presentation.PreferencesViewModel
+import ru.konohovalex.feature.preferences.presentation.viewmodel.PreferencesViewModel
 import ru.konohovalex.feature.preferences.presentation.R
-import ru.konohovalex.feature.preferences.presentation.model.PreferencesScreenEffect
-import ru.konohovalex.feature.preferences.presentation.model.PreferencesScreenEvent
-import ru.konohovalex.feature.preferences.presentation.model.PreferencesScreenState
+import ru.konohovalex.feature.preferences.presentation.model.PreferencesScreenViewEffect
+import ru.konohovalex.feature.preferences.presentation.model.PreferencesScreenViewEvent
+import ru.konohovalex.feature.preferences.presentation.model.PreferencesViewState
 
 @Composable
 internal fun PreferencesScreen(
-    screenStateProvider: ScreenStateProvider<PreferencesScreenState> = hiltViewModel<PreferencesViewModel>(),
-    eventHandler: EventHandler<PreferencesScreenEvent> = hiltViewModel<PreferencesViewModel>(),
-    effectPublisher: EffectPublisher<PreferencesScreenEffect> = hiltViewModel<PreferencesViewModel>(),
+    viewStateProvider: ViewStateProvider<PreferencesViewState> = hiltViewModel<PreferencesViewModel>(),
+    viewEventHandler: ViewEventHandler<PreferencesScreenViewEvent> = hiltViewModel<PreferencesViewModel>(),
+    viewEffectPublisher: ViewEffectPublisher<PreferencesScreenViewEffect> = hiltViewModel<PreferencesViewModel>(),
 ) {
     Column(
         modifier = Modifier
@@ -35,17 +35,17 @@ internal fun PreferencesScreen(
     ) {
         Logo()
 
-        val screenState = screenStateProvider.screenState.observeAsState()
+        val viewState = viewStateProvider.viewState.observeAsState()
 
-        when (val screenStateValue = screenState.value) {
-            is PreferencesScreenState.Idle -> eventHandler.handle(PreferencesScreenEvent.GetPreferences)
-            is PreferencesScreenState.Loading -> LoadingState()
-            is PreferencesScreenState.Data -> DataState(
-                data = screenStateValue,
-                eventHandler = eventHandler,
-                effectPublisher = effectPublisher,
+        when (val viewStateValue = viewState.value) {
+            is PreferencesViewState.Idle -> viewEventHandler.handle(PreferencesScreenViewEvent.GetPreferences)
+            is PreferencesViewState.Loading -> LoadingState()
+            is PreferencesViewState.Data -> DataState(
+                data = viewStateValue,
+                viewEventHandler = viewEventHandler,
+                viewEffectPublisher = viewEffectPublisher,
             )
-            is PreferencesScreenState.Error -> ErrorState()
+            is PreferencesViewState.Error -> ErrorState()
         }
     }
 }
@@ -70,24 +70,24 @@ private fun LoadingState() {
 
 @Composable
 private fun DataState(
-    data: PreferencesScreenState.Data,
-    eventHandler: EventHandler<PreferencesScreenEvent>,
-    effectPublisher: EffectPublisher<PreferencesScreenEffect>,
+    data: PreferencesViewState.Data,
+    viewEventHandler: ViewEventHandler<PreferencesScreenViewEvent>,
+    viewEffectPublisher: ViewEffectPublisher<PreferencesScreenViewEffect>,
 ) {
-    val effectState = effectPublisher.effect.observeAsState()
+    val viewEffectState = viewEffectPublisher.viewEffect.observeAsState()
 
     LanguageTumbler(
         currentLanguageUiModel = data.preferencesUiModel.currentLanguageUiModel,
         availableLanguages = data.preferencesUiModel.availableLanguages,
-        eventHandler = eventHandler,
-        effectState = effectState,
+        viewEventHandler = viewEventHandler,
+        viewEffectState = viewEffectState,
     )
 
     ThemeModeTumbler(
         currentThemeModeUiModel = data.preferencesUiModel.currentThemeModeUiModel,
         availableThemeModes = data.preferencesUiModel.availableThemeModes,
-        eventHandler = eventHandler,
-        effectState = effectState,
+        viewEventHandler = viewEventHandler,
+        viewEffectState = viewEffectState,
     )
 }
 

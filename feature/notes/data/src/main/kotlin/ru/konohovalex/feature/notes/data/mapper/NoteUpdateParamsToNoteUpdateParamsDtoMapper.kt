@@ -14,7 +14,7 @@ internal class NoteUpdateParamsToNoteUpdateParamsDtoMapper
     override fun invoke(input: NoteUpdateParams) = with(input) {
         NoteUpdateParamsDto(
             dateTimeLastEdited = dateTimeLastEdited,
-            noteContent = noteContent.map(noteContentToNoteContentDtoMapper)
+            noteContent = noteContent.map(noteContentToNoteContentDtoMapper),
         )
     }
 }

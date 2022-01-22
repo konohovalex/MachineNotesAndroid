@@ -1,4 +1,4 @@
-package ru.konohovalex.feature.preferences.presentation
+package ru.konohovalex.feature.preferences.presentation.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -7,11 +7,11 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import ru.konohovalex.core.data.model.MergedOperationStatus2
 import ru.konohovalex.core.data.model.OperationStatus
-import ru.konohovalex.core.presentation.arch.effect.EffectPublisher
-import ru.konohovalex.core.presentation.arch.effect.EffectPublisherDelegate
-import ru.konohovalex.core.presentation.arch.event.EventHandler
-import ru.konohovalex.core.presentation.arch.state.ScreenStateProvider
-import ru.konohovalex.core.presentation.arch.state.ScreenStateProviderDelegate
+import ru.konohovalex.core.presentation.arch.vieweffect.ViewEffectPublisher
+import ru.konohovalex.core.presentation.arch.vieweffect.ViewEffectPublisherDelegate
+import ru.konohovalex.core.presentation.arch.viewevent.ViewEventHandler
+import ru.konohovalex.core.presentation.arch.viewstate.ViewStateProvider
+import ru.konohovalex.core.presentation.arch.viewstate.ViewStateProviderDelegate
 import ru.konohovalex.core.utils.Mapper
 import ru.konohovalex.core.utils.combineToMergedOperationStatus2
 import ru.konohovalex.core.utils.safeCast
@@ -22,9 +22,9 @@ import ru.konohovalex.feature.preferences.domain.usecase.GetCurrentThemeModeUseC
 import ru.konohovalex.feature.preferences.domain.usecase.UpdateCurrentLanguageUseCase
 import ru.konohovalex.feature.preferences.domain.usecase.UpdateCurrentThemeModeUseCase
 import ru.konohovalex.feature.preferences.presentation.model.LanguageUiModel
-import ru.konohovalex.feature.preferences.presentation.model.PreferencesScreenEffect
-import ru.konohovalex.feature.preferences.presentation.model.PreferencesScreenEvent
-import ru.konohovalex.feature.preferences.presentation.model.PreferencesScreenState
+import ru.konohovalex.feature.preferences.presentation.model.PreferencesScreenViewEffect
+import ru.konohovalex.feature.preferences.presentation.model.PreferencesScreenViewEvent
+import ru.konohovalex.feature.preferences.presentation.model.PreferencesViewState
 import ru.konohovalex.feature.preferences.presentation.model.PreferencesUiModel
 import ru.konohovalex.feature.preferences.presentation.model.ThemeModeUiModel
 import javax.inject.Inject
@@ -41,13 +41,13 @@ internal class PreferencesViewModel
     private val themeModeDomainModelToThemeModeUiModelMapper: Mapper<ThemeModeDomainModel, ThemeModeUiModel>,
     private val themeModeUiModelToThemeModeDomainModelMapper: Mapper<ThemeModeUiModel, ThemeModeDomainModel>,
 ) : ViewModel(),
-    EventHandler<PreferencesScreenEvent>,
-    ScreenStateProvider<PreferencesScreenState> by ScreenStateProviderDelegate(PreferencesScreenState.Idle),
-    EffectPublisher<PreferencesScreenEffect> by EffectPublisherDelegate() {
-    override fun handle(event: PreferencesScreenEvent) = when (event) {
-        is PreferencesScreenEvent.GetPreferences -> getPreferences()
-        is PreferencesScreenEvent.UpdateCurrentLanguage -> updateCurrentLanguage(event.languageUiModel)
-        is PreferencesScreenEvent.UpdateCurrentThemeMode -> updateCurrentThemeMode(event.themeModeUiModel)
+    ViewEventHandler<PreferencesScreenViewEvent>,
+    ViewStateProvider<PreferencesViewState> by ViewStateProviderDelegate(PreferencesViewState.Idle),
+    ViewEffectPublisher<PreferencesScreenViewEffect> by ViewEffectPublisherDelegate() {
+    override fun handle(viewEvent: PreferencesScreenViewEvent) = when (viewEvent) {
+        is PreferencesScreenViewEvent.GetPreferences -> getPreferences()
+        is PreferencesScreenViewEvent.UpdateCurrentLanguage -> updateCurrentLanguage(viewEvent.languageUiModel)
+        is PreferencesScreenViewEvent.UpdateCurrentThemeMode -> updateCurrentThemeMode(viewEvent.themeModeUiModel)
     }
 
     private fun getPreferences() {
@@ -65,7 +65,7 @@ internal class PreferencesViewModel
     }
 
     private fun setLoadingState() {
-        setScreenState(PreferencesScreenState.Loading)
+        setViewState(PreferencesViewState.Loading)
     }
 
     private fun setDataState(
@@ -78,8 +78,8 @@ internal class PreferencesViewModel
         val availableThemeModes = ThemeModeUiModel.values().toList()
         val currentThemeModeUiModel = themeModeDomainModelToThemeModeUiModelMapper.invoke(currentThemeModeDomainModel)
 
-        setScreenState(
-            screenState = PreferencesScreenState.Data(
+        setViewState(
+            viewState = PreferencesViewState.Data(
                 PreferencesUiModel(
                     availableLanguages = availableLanguages,
                     currentLanguageUiModel = currentLanguageUiModel,
@@ -94,7 +94,7 @@ internal class PreferencesViewModel
         operationStatus: MergedOperationStatus2.Plain.Error<LanguageDomainModel, ThemeModeDomainModel>,
     ) {
         // tbd create real error handling
-        setScreenState(PreferencesScreenState.Error(IllegalStateException()))
+        setViewState(PreferencesViewState.Error(IllegalStateException()))
     }
 
     private fun updateCurrentLanguage(languageUiModel: LanguageUiModel) {
@@ -103,16 +103,16 @@ internal class PreferencesViewModel
             .onEach { operationStatus ->
                 when (operationStatus) {
                     is OperationStatus.WithInputData.Pending -> {
-                        publishEffect(PreferencesScreenEffect.EnableLanguageUpdates(value = false))
+                        publish(PreferencesScreenViewEffect.EnableLanguageUpdates(value = false))
                     }
                     is OperationStatus.WithInputData.Processing -> {}
                     is OperationStatus.WithInputData.Completed -> {
-                        publishEffect(PreferencesScreenEffect.EnableLanguageUpdates(value = true))
+                        publish(PreferencesScreenViewEffect.EnableLanguageUpdates(value = true))
 
                         val updatedLanguageDomainModel = languageDomainModelToLanguageUiModelMapper.invoke(operationStatus.outputData)
-                        withScreenState { preferencesScreenState ->
-                            preferencesScreenState.safeCast<PreferencesScreenState.Data>()?.let {
-                                setScreenState(
+                        withViewState { preferencesViewState ->
+                            preferencesViewState.safeCast<PreferencesViewState.Data>()?.let {
+                                setViewState(
                                     it.copy(
                                         preferencesUiModel = it.preferencesUiModel.copy(
                                             currentLanguageUiModel = updatedLanguageDomainModel
@@ -123,7 +123,7 @@ internal class PreferencesViewModel
                         }
                     }
                     is OperationStatus.WithInputData.Error -> {
-                        publishEffect(PreferencesScreenEffect.EnableLanguageUpdates(value = true))
+                        publish(PreferencesScreenViewEffect.EnableLanguageUpdates(value = true))
                         showErrorNotification(operationStatus)
                     }
                 }
@@ -137,16 +137,16 @@ internal class PreferencesViewModel
             .onEach { operationStatus ->
                 when (operationStatus) {
                     is OperationStatus.WithInputData.Pending -> {
-                        publishEffect(PreferencesScreenEffect.EnableThemeModeUpdates(value = false))
+                        publish(PreferencesScreenViewEffect.EnableThemeModeUpdates(value = false))
                     }
                     is OperationStatus.WithInputData.Processing -> {}
                     is OperationStatus.WithInputData.Completed -> {
-                        publishEffect(PreferencesScreenEffect.EnableThemeModeUpdates(value = true))
+                        publish(PreferencesScreenViewEffect.EnableThemeModeUpdates(value = true))
 
                         val updatedThemeModeDomainModel = themeModeDomainModelToThemeModeUiModelMapper.invoke(operationStatus.outputData)
-                        withScreenState { preferencesScreenState ->
-                            preferencesScreenState.safeCast<PreferencesScreenState.Data>()?.let {
-                                setScreenState(
+                        withViewState { preferencesViewState ->
+                            preferencesViewState.safeCast<PreferencesViewState.Data>()?.let {
+                                setViewState(
                                     it.copy(
                                         preferencesUiModel = it.preferencesUiModel.copy(
                                             currentThemeModeUiModel = updatedThemeModeDomainModel
@@ -157,7 +157,7 @@ internal class PreferencesViewModel
                         }
                     }
                     is OperationStatus.WithInputData.Error -> {
-                        publishEffect(PreferencesScreenEffect.EnableThemeModeUpdates(value = true))
+                        publish(PreferencesScreenViewEffect.EnableThemeModeUpdates(value = true))
                         showErrorNotification(operationStatus)
                     }
                 }

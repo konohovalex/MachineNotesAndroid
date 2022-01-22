@@ -4,13 +4,13 @@ import ru.konohovalex.core.presentation.arch.navigation.NavigationParameter
 import ru.konohovalex.core.presentation.arch.navigation.NavigationRoute
 
 internal sealed class NotesRoute(override val destinations: List<String>) : NavigationRoute {
-    override val entryPoint = notes
-
     companion object {
         private const val notes = "notes"
         private const val noteList = "noteList"
         private const val noteDetails = "noteDetails"
     }
+
+    override val entryPoint = notes
 
     object NoteList : NotesRoute(destinations = listOf(noteList))
 

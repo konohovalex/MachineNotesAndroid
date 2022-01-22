@@ -7,17 +7,17 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import ru.konohovalex.core.design.Theme
-import ru.konohovalex.core.presentation.arch.event.EventHandler
+import ru.konohovalex.core.presentation.arch.viewevent.ViewEventHandler
 import ru.konohovalex.core.ui.R
 import ru.konohovalex.core.ui.compose.OutlinedThemedTextField
 import ru.konohovalex.core.ui.compose.model.ImageWrapper
 import ru.konohovalex.core.ui.compose.model.TextWrapper
-import ru.konohovalex.feature.notes.presentation.list.model.NoteListScreenEvent
+import ru.konohovalex.feature.notes.presentation.list.model.NoteListScreenViewEvent
 
 @Composable
-internal fun NoteListTopAppBar(eventHandler: EventHandler<NoteListScreenEvent>) {
+internal fun NoteListTopAppBar(viewEventHandler: ViewEventHandler<NoteListScreenViewEvent>) {
     val onSearchBarTextChanged = { text: String ->
-        eventHandler.handle(NoteListScreenEvent.GetNotes(filter = text))
+        viewEventHandler.handle(NoteListScreenViewEvent.GetNotes(filter = text))
     }
 
     TopAppBar(
@@ -40,7 +40,7 @@ internal fun NoteListTopAppBar(eventHandler: EventHandler<NoteListScreenEvent>) 
 @Preview
 @Composable
 private fun NoteListTopAppBarPreview() {
-    val eventHandler = EventHandler<NoteListScreenEvent> { }
+    val eventHandler = ViewEventHandler<NoteListScreenViewEvent> { }
 
     Theme {
         NoteListTopAppBar(eventHandler)
