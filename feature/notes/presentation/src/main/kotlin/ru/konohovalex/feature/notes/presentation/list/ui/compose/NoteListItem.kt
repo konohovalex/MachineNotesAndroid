@@ -15,19 +15,18 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
-import ru.konohovalex.core.design.Theme
+import ru.konohovalex.core.design.model.Theme
 import ru.konohovalex.core.ui.compose.ThemedCard
 import ru.konohovalex.core.ui.compose.ThemedText
 import ru.konohovalex.core.ui.compose.ThemedTextType
-import ru.konohovalex.core.ui.compose.model.TextWrapper
+import ru.konohovalex.core.ui.model.TextWrapper
 import ru.konohovalex.feature.notes.presentation.list.model.NotePreviewUiModel
-import ru.konohovalex.feature.notes.presentation.utils.createNotePreviewDummyModel
+import ru.konohovalex.feature.notes.presentation.extension.createNotePreviewDummyModel
 
 @Composable
 internal fun NoteListItem(
     notePreviewUiModel: NotePreviewUiModel,
-    onClickListener: (noteId: String) -> Unit,
+    onClick: (noteId: String) -> Unit,
 ) {
     with(notePreviewUiModel) {
         ThemedCard(
@@ -37,7 +36,7 @@ internal fun NoteListItem(
             Box(
                 modifier = Modifier
                     .clickable {
-                        onClickListener.invoke(notePreviewUiModel.id)
+                        onClick.invoke(notePreviewUiModel.id)
                     },
             ) {
                 ContentColumn() {
@@ -60,8 +59,8 @@ private fun ContentColumn(
     content: @Composable ColumnScope.() -> Unit,
 ) = Column(
     modifier = Modifier
-        .padding(Theme.paddings.contentDefault),
-    verticalArrangement = Arrangement.spacedBy(4.dp),
+        .padding(Theme.paddings.contentSmall),
+    verticalArrangement = Arrangement.spacedBy(Theme.paddings.contentExtraSmall),
     content = content,
 )
 
@@ -82,7 +81,7 @@ private fun SubtitleAndInfoRow(
 ) = Row(
     modifier = Modifier
         .fillMaxWidth(),
-    horizontalArrangement = Arrangement.spacedBy(Theme.paddings.contentDefault),
+    horizontalArrangement = Arrangement.spacedBy(Theme.paddings.contentSmall),
     verticalAlignment = Alignment.CenterVertically,
 ) {
     SubtitleText(

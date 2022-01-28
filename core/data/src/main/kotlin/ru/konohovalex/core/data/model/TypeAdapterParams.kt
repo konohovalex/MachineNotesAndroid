@@ -4,5 +4,5 @@ import java.lang.reflect.Type
 
 data class TypeAdapterParams(
     val type: Type,
-    val adapter: Any,
+    val typeAdapter: Any,
 )

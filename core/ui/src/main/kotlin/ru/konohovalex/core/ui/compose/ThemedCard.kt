@@ -7,8 +7,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
-import ru.konohovalex.core.design.Theme
+import ru.konohovalex.core.design.model.Theme
 
 @Composable
 fun ThemedCard(
@@ -22,7 +21,7 @@ fun ThemedCard(
         shape = shape,
         backgroundColor = Theme.palette.backgroundColor,
         border = BorderStroke(
-            width = 1.dp,
+            width = Theme.sizes.border,
             color = Theme.palette.accentColor,
         ),
         content = content,

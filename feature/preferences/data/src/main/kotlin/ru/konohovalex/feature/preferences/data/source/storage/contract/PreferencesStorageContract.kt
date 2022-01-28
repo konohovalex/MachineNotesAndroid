@@ -1,12 +1,16 @@
 package ru.konohovalex.feature.preferences.data.source.storage.contract
 
-import ru.konohovalex.feature.preferences.data.model.Language
 import ru.konohovalex.core.data.arch.source.storage.Storage
-import ru.konohovalex.feature.preferences.data.model.ThemeMode
+import ru.konohovalex.feature.preferences.data.model.entity.LanguageEntity
+import ru.konohovalex.feature.preferences.data.model.entity.ThemeModeEntity
 
 internal interface PreferencesStorageContract : Storage {
-    suspend fun getCurrentLanguage(): Language
-    suspend fun updateCurrentLanguage(language: Language): Language
-    suspend fun getCurrentThemeMode(): ThemeMode
-    suspend fun updateCurrentThemeMode(themeMode: ThemeMode): ThemeMode
+    companion object {
+        const val PREFERENCES_FILE_NAME = "preferences_storage"
+    }
+
+    suspend fun getCurrentLanguage(): LanguageEntity
+    suspend fun updateCurrentLanguage(language: LanguageEntity): LanguageEntity
+    suspend fun getCurrentThemeMode(): ThemeModeEntity
+    suspend fun updateCurrentThemeMode(themeMode: ThemeModeEntity): ThemeModeEntity
 }

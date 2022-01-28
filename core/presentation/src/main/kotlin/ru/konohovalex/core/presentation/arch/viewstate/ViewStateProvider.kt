@@ -2,10 +2,10 @@ package ru.konohovalex.core.presentation.arch.viewstate
 
 import androidx.lifecycle.LiveData
 
-interface ViewStateProvider<S : ViewState> {
-    val viewState: LiveData<S>
+interface ViewStateProvider<VS : ViewState> {
+    val viewState: LiveData<VS>
 
-    fun setViewState(viewState: S)
+    fun setViewState(viewState: VS)
 
-    fun withViewState(block: (viewState: S) -> Unit)
+    fun <VS> withViewState(viewStateClass: Class<VS>, block: (viewState: VS) -> Unit)
 }

@@ -2,17 +2,17 @@ package ru.konohovalex.feature.preferences.domain.usecase
 
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
-import ru.konohovalex.core.data.model.OperationStatus
-import ru.konohovalex.core.data.utils.unwrap
-import ru.konohovalex.core.utils.Mapper
+import ru.konohovalex.core.utils.model.OperationStatus
+import ru.konohovalex.core.utils.extension.unwrap
+import ru.konohovalex.core.utils.model.Mapper
 import ru.konohovalex.feature.preferences.data.model.Language
-import ru.konohovalex.feature.preferences.data.repository.contract.PreferencesRepository
+import ru.konohovalex.feature.preferences.data.repository.contract.PreferencesRepositoryContract
 import ru.konohovalex.feature.preferences.domain.model.LanguageDomainModel
 import javax.inject.Inject
 
 class UpdateCurrentLanguageUseCase
 @Inject constructor(
-    private val preferencesRepository: PreferencesRepository,
+    private val preferencesRepository: PreferencesRepositoryContract,
     private val languageDomainModelToLanguageMapper: Mapper<LanguageDomainModel, Language>,
     private val languageToLanguageDomainModelMapper: Mapper<Language, LanguageDomainModel>,
 ) {

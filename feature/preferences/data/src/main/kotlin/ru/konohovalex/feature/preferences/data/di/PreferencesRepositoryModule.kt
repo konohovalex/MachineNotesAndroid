@@ -4,7 +4,7 @@ import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
-import ru.konohovalex.feature.preferences.data.repository.contract.PreferencesRepository
+import ru.konohovalex.feature.preferences.data.repository.contract.PreferencesRepositoryContract
 import ru.konohovalex.feature.preferences.data.repository.impl.PreferencesRepositoryImpl
 import javax.inject.Singleton
 
@@ -13,5 +13,5 @@ import javax.inject.Singleton
 internal interface PreferencesRepositoryModule {
     @Binds
     @Singleton
-    fun bindPreferencesRepository(preferencesRepository: PreferencesRepositoryImpl): PreferencesRepository
+    fun bindPreferencesRepository(preferencesRepository: PreferencesRepositoryImpl): PreferencesRepositoryContract
 }

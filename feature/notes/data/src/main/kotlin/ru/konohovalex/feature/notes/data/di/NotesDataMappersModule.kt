@@ -4,7 +4,7 @@ import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
-import ru.konohovalex.core.utils.Mapper
+import ru.konohovalex.core.utils.model.Mapper
 import ru.konohovalex.feature.notes.data.mapper.NoteContentDtoToNoteContentMapper
 import ru.konohovalex.feature.notes.data.mapper.NoteContentEntityToNoteContentMapper
 import ru.konohovalex.feature.notes.data.mapper.NoteContentToNoteContentDtoMapper

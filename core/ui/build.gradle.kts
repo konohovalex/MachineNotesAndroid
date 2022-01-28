@@ -13,6 +13,7 @@ dependencies {
         Dependencies.Android.Compose.ui,
         Dependencies.Android.Compose.material,
         Dependencies.Android.Compose.uiTooling,
+        Dependencies.Android.Compose.navigation,
         // tbd
         // This dependency should not be here, but for some weird reasons, Compose Preview needs it to just be rendered
         Dependencies.Android.Compose.activity,

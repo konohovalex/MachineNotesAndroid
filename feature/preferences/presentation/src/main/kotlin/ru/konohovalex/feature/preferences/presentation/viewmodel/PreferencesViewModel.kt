@@ -5,27 +5,27 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
-import ru.konohovalex.core.data.model.MergedOperationStatus2
-import ru.konohovalex.core.data.model.OperationStatus
-import ru.konohovalex.core.presentation.arch.vieweffect.ViewEffectPublisher
-import ru.konohovalex.core.presentation.arch.vieweffect.ViewEffectPublisherDelegate
 import ru.konohovalex.core.presentation.arch.viewevent.ViewEventHandler
 import ru.konohovalex.core.presentation.arch.viewstate.ViewStateProvider
 import ru.konohovalex.core.presentation.arch.viewstate.ViewStateProviderDelegate
-import ru.konohovalex.core.utils.Mapper
-import ru.konohovalex.core.utils.combineToMergedOperationStatus2
-import ru.konohovalex.core.utils.safeCast
+import ru.konohovalex.core.ui.model.Position
+import ru.konohovalex.core.ui.model.TextWrapper
+import ru.konohovalex.core.ui.model.TumblerData
+import ru.konohovalex.core.utils.extension.combineToMergedOperationStatus2
+import ru.konohovalex.core.utils.model.Mapper
+import ru.konohovalex.core.utils.model.MergedOperationStatus2
+import ru.konohovalex.core.utils.model.OperationStatus
 import ru.konohovalex.feature.preferences.domain.model.LanguageDomainModel
 import ru.konohovalex.feature.preferences.domain.model.ThemeModeDomainModel
 import ru.konohovalex.feature.preferences.domain.usecase.GetCurrentLanguageUseCase
 import ru.konohovalex.feature.preferences.domain.usecase.GetCurrentThemeModeUseCase
 import ru.konohovalex.feature.preferences.domain.usecase.UpdateCurrentLanguageUseCase
 import ru.konohovalex.feature.preferences.domain.usecase.UpdateCurrentThemeModeUseCase
+import ru.konohovalex.feature.preferences.presentation.R
 import ru.konohovalex.feature.preferences.presentation.model.LanguageUiModel
-import ru.konohovalex.feature.preferences.presentation.model.PreferencesScreenViewEffect
 import ru.konohovalex.feature.preferences.presentation.model.PreferencesScreenViewEvent
-import ru.konohovalex.feature.preferences.presentation.model.PreferencesViewState
 import ru.konohovalex.feature.preferences.presentation.model.PreferencesUiModel
+import ru.konohovalex.feature.preferences.presentation.model.PreferencesViewState
 import ru.konohovalex.feature.preferences.presentation.model.ThemeModeUiModel
 import javax.inject.Inject
 
@@ -42,8 +42,7 @@ internal class PreferencesViewModel
     private val themeModeUiModelToThemeModeDomainModelMapper: Mapper<ThemeModeUiModel, ThemeModeDomainModel>,
 ) : ViewModel(),
     ViewEventHandler<PreferencesScreenViewEvent>,
-    ViewStateProvider<PreferencesViewState> by ViewStateProviderDelegate(PreferencesViewState.Idle),
-    ViewEffectPublisher<PreferencesScreenViewEffect> by ViewEffectPublisherDelegate() {
+    ViewStateProvider<PreferencesViewState> by ViewStateProviderDelegate(PreferencesViewState.Idle) {
     override fun handle(viewEvent: PreferencesScreenViewEvent) = when (viewEvent) {
         is PreferencesScreenViewEvent.GetPreferences -> getPreferences()
         is PreferencesScreenViewEvent.UpdateCurrentLanguage -> updateCurrentLanguage(viewEvent.languageUiModel)
@@ -74,27 +73,47 @@ internal class PreferencesViewModel
     ) {
         val availableLanguages = LanguageUiModel.values().toList()
         val currentLanguageUiModel = languageDomainModelToLanguageUiModelMapper.invoke(currentLanguageDomainModel)
+        val languageTumblerData = TumblerData(
+            titleTextWrapper = TextWrapper.StringResource(resourceId = R.string.theme_mode_tumbler_title),
+            positions = availableLanguages.mapToTumblerPositions(),
+        )
 
         val availableThemeModes = ThemeModeUiModel.values().toList()
         val currentThemeModeUiModel = themeModeDomainModelToThemeModeUiModelMapper.invoke(currentThemeModeDomainModel)
+        val themeModeTumblerData = TumblerData(
+            titleTextWrapper = TextWrapper.StringResource(resourceId = R.string.language_tumbler_title),
+            infoTextWrapper = TextWrapper.StringResource(resourceId = R.string.language_tumbler_info),
+            positions = availableThemeModes.mapToTumblerPositions(),
+        )
 
         setViewState(
             viewState = PreferencesViewState.Data(
                 PreferencesUiModel(
-                    availableLanguages = availableLanguages,
+                    availableLanguagesTumblerData = languageTumblerData,
                     currentLanguageUiModel = currentLanguageUiModel,
-                    availableThemeModes = availableThemeModes,
+                    languageActionsEnabled = true,
+                    availableThemeModesTumblerData = themeModeTumblerData,
                     currentThemeModeUiModel = currentThemeModeUiModel,
+                    themeModeActionsEnabled = true,
                 )
             ),
         )
     }
 
-    private fun setErrorState(
-        operationStatus: MergedOperationStatus2.Plain.Error<LanguageDomainModel, ThemeModeDomainModel>,
-    ) {
-        // tbd create real error handling
-        setViewState(PreferencesViewState.Error(IllegalStateException()))
+    @JvmName("mapLanguageUiModelsToTumblerPositions")
+    private fun List<LanguageUiModel>.mapToTumblerPositions() = map {
+        Position.Text(
+            data = it,
+            textWrapper = it.textWrapper,
+        )
+    }
+
+    @JvmName("mapThemeModeUiModelsToTumblerPositions")
+    private fun List<ThemeModeUiModel>.mapToTumblerPositions() = map {
+        Position.Image(
+            data = it,
+            imageWrapper = it.imageWrapper,
+        )
     }
 
     private fun updateCurrentLanguage(languageUiModel: LanguageUiModel) {
@@ -102,33 +121,54 @@ internal class PreferencesViewModel
         updateCurrentLanguageUseCase.invoke(languageDomainModel)
             .onEach { operationStatus ->
                 when (operationStatus) {
-                    is OperationStatus.WithInputData.Pending -> {
-                        publish(PreferencesScreenViewEffect.EnableLanguageUpdates(value = false))
-                    }
+                    is OperationStatus.WithInputData.Pending -> disableLanguageUpdates()
                     is OperationStatus.WithInputData.Processing -> {}
-                    is OperationStatus.WithInputData.Completed -> {
-                        publish(PreferencesScreenViewEffect.EnableLanguageUpdates(value = true))
-
-                        val updatedLanguageDomainModel = languageDomainModelToLanguageUiModelMapper.invoke(operationStatus.outputData)
-                        withViewState { preferencesViewState ->
-                            preferencesViewState.safeCast<PreferencesViewState.Data>()?.let {
-                                setViewState(
-                                    it.copy(
-                                        preferencesUiModel = it.preferencesUiModel.copy(
-                                            currentLanguageUiModel = updatedLanguageDomainModel
-                                        )
-                                    )
-                                )
-                            }
-                        }
-                    }
-                    is OperationStatus.WithInputData.Error -> {
-                        publish(PreferencesScreenViewEffect.EnableLanguageUpdates(value = true))
-                        showErrorNotification(operationStatus)
-                    }
+                    is OperationStatus.WithInputData.Completed -> languageUpdated(operationStatus.outputData)
+                    is OperationStatus.WithInputData.Error -> showLanguageUpdateErrorNotification(operationStatus)
                 }
             }
             .launchIn(viewModelScope)
+    }
+
+    private fun disableLanguageUpdates() {
+        withViewState(PreferencesViewState.Data::class.java) {
+            setViewState(
+                it.copy(
+                    preferencesUiModel = it.preferencesUiModel.copy(
+                        languageActionsEnabled = false,
+                    )
+                )
+            )
+        }
+    }
+
+    private fun languageUpdated(languageDomainModel: LanguageDomainModel) {
+        val updatedLanguageDomainModel = languageDomainModelToLanguageUiModelMapper.invoke(languageDomainModel)
+        withViewState(PreferencesViewState.Data::class.java) {
+            setViewState(
+                it.copy(
+                    preferencesUiModel = it.preferencesUiModel.copy(
+                        currentLanguageUiModel = updatedLanguageDomainModel,
+                        languageActionsEnabled = true,
+                    )
+                )
+            )
+        }
+    }
+
+    private inline fun <reified I, reified O> showLanguageUpdateErrorNotification(
+        operationStatus: OperationStatus.WithInputData.Error<I, O>,
+    ) {
+        // tbd
+        withViewState(PreferencesViewState.Data::class.java) {
+            setViewState(
+                it.copy(
+                    preferencesUiModel = it.preferencesUiModel.copy(
+                        languageActionsEnabled = true,
+                    )
+                )
+            )
+        }
     }
 
     private fun updateCurrentThemeMode(themeModeUiModel: ThemeModeUiModel) {
@@ -136,36 +176,60 @@ internal class PreferencesViewModel
         updateCurrentThemeModeUseCase.invoke(themeModeDomainModel)
             .onEach { operationStatus ->
                 when (operationStatus) {
-                    is OperationStatus.WithInputData.Pending -> {
-                        publish(PreferencesScreenViewEffect.EnableThemeModeUpdates(value = false))
-                    }
+                    is OperationStatus.WithInputData.Pending -> disableThemeModeUpdates()
                     is OperationStatus.WithInputData.Processing -> {}
-                    is OperationStatus.WithInputData.Completed -> {
-                        publish(PreferencesScreenViewEffect.EnableThemeModeUpdates(value = true))
-
-                        val updatedThemeModeDomainModel = themeModeDomainModelToThemeModeUiModelMapper.invoke(operationStatus.outputData)
-                        withViewState { preferencesViewState ->
-                            preferencesViewState.safeCast<PreferencesViewState.Data>()?.let {
-                                setViewState(
-                                    it.copy(
-                                        preferencesUiModel = it.preferencesUiModel.copy(
-                                            currentThemeModeUiModel = updatedThemeModeDomainModel
-                                        )
-                                    )
-                                )
-                            }
-                        }
-                    }
-                    is OperationStatus.WithInputData.Error -> {
-                        publish(PreferencesScreenViewEffect.EnableThemeModeUpdates(value = true))
-                        showErrorNotification(operationStatus)
-                    }
+                    is OperationStatus.WithInputData.Completed -> themeModeUpdated(operationStatus.outputData)
+                    is OperationStatus.WithInputData.Error -> showThemeModeUpdateUpdateErrorNotification(operationStatus)
                 }
             }
             .launchIn(viewModelScope)
     }
 
-    private inline fun <reified I, reified O> showErrorNotification(operationStatus: OperationStatus.WithInputData.Error<I, O>) {
+    private fun disableThemeModeUpdates() {
+        withViewState(PreferencesViewState.Data::class.java) {
+            setViewState(
+                it.copy(
+                    preferencesUiModel = it.preferencesUiModel.copy(
+                        themeModeActionsEnabled = false,
+                    )
+                )
+            )
+        }
+    }
+
+    private fun themeModeUpdated(themeModeUiModel: ThemeModeDomainModel) {
+        val updatedThemeModeDomainModel = themeModeDomainModelToThemeModeUiModelMapper.invoke(themeModeUiModel)
+        withViewState(PreferencesViewState.Data::class.java) {
+            setViewState(
+                it.copy(
+                    preferencesUiModel = it.preferencesUiModel.copy(
+                        currentThemeModeUiModel = updatedThemeModeDomainModel,
+                        themeModeActionsEnabled = true,
+                    )
+                )
+            )
+        }
+    }
+
+    private inline fun <reified I, reified O> showThemeModeUpdateUpdateErrorNotification(
+        operationStatus: OperationStatus.WithInputData.Error<I, O>,
+    ) {
         // tbd
+        withViewState(PreferencesViewState.Data::class.java) {
+            setViewState(
+                it.copy(
+                    preferencesUiModel = it.preferencesUiModel.copy(
+                        themeModeActionsEnabled = true,
+                    )
+                )
+            )
+        }
+    }
+
+    private fun setErrorState(
+        operationStatus: MergedOperationStatus2.Plain.Error<LanguageDomainModel, ThemeModeDomainModel>,
+    ) {
+        // tbd create real error handling
+        setViewState(PreferencesViewState.Error(IllegalStateException()))
     }
 }

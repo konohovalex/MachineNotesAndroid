@@ -10,7 +10,7 @@ import javax.inject.Inject
 internal class NotesApiProvider
 @Inject constructor() : ApiProvider<GsonConverterFactory, NotesApi> {
     override fun provide(providerParams: GsonConverterFactory): NotesApi = Retrofit.Builder()
-        .baseUrl(Constants.BASE_NOTES_API_URL)
+        .baseUrl(Constants.BASE_API_URL)
         .addConverterFactory(providerParams)
         .build()
         .create(NotesApi::class.java)

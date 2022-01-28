@@ -1,6 +1,6 @@
 package ru.konohovalex.feature.preferences.presentation.model
 
-import ru.konohovalex.core.ui.compose.model.ImageWrapper
+import ru.konohovalex.core.ui.model.ImageWrapper
 import ru.konohovalex.feature.preferences.presentation.R
 
 internal enum class ThemeModeUiModel(val imageWrapper: ImageWrapper.ImageResource) {

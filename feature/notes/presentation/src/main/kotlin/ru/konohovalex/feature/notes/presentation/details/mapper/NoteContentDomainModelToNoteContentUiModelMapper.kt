@@ -1,6 +1,6 @@
 package ru.konohovalex.feature.notes.presentation.details.mapper
 
-import ru.konohovalex.core.utils.Mapper
+import ru.konohovalex.core.utils.model.Mapper
 import ru.konohovalex.feature.notes.domain.model.NoteContentDomainModel
 import ru.konohovalex.feature.notes.presentation.details.model.NoteContentUiModel
 import javax.inject.Inject

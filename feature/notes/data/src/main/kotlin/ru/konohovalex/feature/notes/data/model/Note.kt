@@ -1,6 +1,6 @@
 package ru.konohovalex.feature.notes.data.model
 
-import ru.konohovalex.core.data.model.DateTime
+import ru.konohovalex.core.utils.model.DateTime
 
 data class Note(
     val id: String,

@@ -16,5 +16,7 @@ include(
     ":feature:preferences:domain",
     ":feature:preferences:presentation",
 
-    ":feature:profile:data",
+    ":feature:account:data",
+    ":feature:account:domain",
+    ":feature:account:presentation",
 )

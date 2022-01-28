@@ -5,11 +5,11 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
-import ru.konohovalex.core.data.model.OperationStatus
+import ru.konohovalex.core.utils.model.OperationStatus
 import ru.konohovalex.core.presentation.arch.viewevent.ViewEventHandler
 import ru.konohovalex.core.presentation.arch.viewstate.ViewStateProvider
 import ru.konohovalex.core.presentation.arch.viewstate.ViewStateProviderDelegate
-import ru.konohovalex.core.utils.Mapper
+import ru.konohovalex.core.utils.model.Mapper
 import ru.konohovalex.feature.notes.domain.model.NoteDomainModel
 import ru.konohovalex.feature.notes.domain.usecase.CreateNoteUseCase
 import ru.konohovalex.feature.notes.domain.usecase.GetNoteDetailsUseCase

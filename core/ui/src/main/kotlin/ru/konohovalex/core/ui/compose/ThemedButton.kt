@@ -10,155 +10,264 @@ import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.OutlinedButton
 import androidx.compose.material.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.State
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.dp
-import ru.konohovalex.core.design.Theme
-import ru.konohovalex.core.design.utils.buttonPaddingsAsPaddingValues
+import ru.konohovalex.core.design.extension.buttonPaddingsAsPaddingValues
+import ru.konohovalex.core.design.model.Theme
 import ru.konohovalex.core.ui.R
-import ru.konohovalex.core.ui.compose.model.ButtonData
-import ru.konohovalex.core.ui.compose.model.ImageWrapper
-import ru.konohovalex.core.ui.compose.model.TextWrapper
+import ru.konohovalex.core.ui.model.ButtonData
+import ru.konohovalex.core.ui.model.ImageWrapper
+import ru.konohovalex.core.ui.model.TextWrapper
 
 @Composable
 fun ThemedButton(
     buttonData: ButtonData,
     modifier: Modifier = Modifier,
 ) {
+    val onClickState = remember {
+        mutableStateOf(buttonData.onClick)
+    }
+    onClickState.value = buttonData.onClick
+
+    val enabledState = remember {
+        mutableStateOf(buttonData.enabled)
+    }
+    enabledState.value = buttonData.enabled
+
+    val fillEnabledColorState = remember {
+        mutableStateOf(buttonData.fillEnabledColor)
+    }
+    fillEnabledColorState.value = buttonData.fillEnabledColor
+
     when (buttonData) {
-        is ButtonData.Regular -> RegularButton(
+        is ButtonData.WithContent -> ButtonWithContent(
             buttonData = buttonData,
-            modifier = modifier,
-        )
-        is ButtonData.Outlined -> OutlinedButton(
-            buttonData = buttonData,
+            onClickState = onClickState,
+            enabledState = enabledState,
+            fillEnabledColorState = fillEnabledColorState,
             modifier = modifier,
         )
         is ButtonData.Text -> TextButton(
             buttonData = buttonData,
+            onClickState = onClickState,
+            enabledState = enabledState,
             modifier = modifier,
         )
     }
 }
 
 @Composable
-private fun RegularButton(
-    buttonData: ButtonData.Regular,
+private fun ButtonWithContent(
+    buttonData: ButtonData.WithContent,
+    onClickState: State<() -> Unit>,
+    enabledState: State<Boolean>,
+    fillEnabledColorState: State<Color?>,
     modifier: Modifier,
-) = with(buttonData) {
+) {
+    with(buttonData) {
+        val contentState = remember {
+            mutableStateOf(content)
+        }
+        contentState.value = content
+
+        val contentArrangementState = remember {
+            mutableStateOf(contentArrangement)
+        }
+        contentArrangementState.value = contentArrangement
+
+        val contentSpacingState = remember {
+            mutableStateOf(contentSpacing)
+        }
+        contentSpacingState.value = contentSpacing
+
+        val backgroundColorState = remember {
+            mutableStateOf(Color.Transparent)
+        }
+
+        when (buttonData) {
+            is ButtonData.Regular -> {
+                backgroundColorState.value = fillEnabledColorState.value ?: Theme.palette.fillEnabledColor
+
+                RegularButton(
+                    onClickState = onClickState,
+                    enabledState = enabledState,
+                    backgroundColorState = backgroundColorState,
+                    contentState = contentState,
+                    contentArrangementState = contentArrangementState,
+                    contentSpacingState = contentSpacingState,
+                    modifier = modifier,
+                )
+            }
+            is ButtonData.Outlined -> {
+                backgroundColorState.value =
+                    if (buttonData.selected) fillEnabledColorState.value ?: Theme.palette.fillEnabledColor
+                    else Theme.palette.backgroundColor
+
+                OutlinedButton(
+                    onClickState = onClickState,
+                    enabledState = enabledState,
+                    backgroundColorState = backgroundColorState,
+                    contentState = contentState,
+                    contentArrangementState = contentArrangementState,
+                    contentSpacingState = contentSpacingState,
+                    modifier = modifier,
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun RegularButton(
+    onClickState: State<() -> Unit>,
+    enabledState: State<Boolean>,
+    backgroundColorState: State<Color>,
+    contentState: State<List<ButtonData.Content>>,
+    contentArrangementState: State<ButtonData.ContentArrangement>,
+    contentSpacingState: State<Dp>,
+    modifier: Modifier,
+) {
     Button(
-        onClick = onClickListener,
+        onClick = onClickState.value,
         modifier = modifier,
-        enabled = enabled,
+        enabled = enabledState.value,
         shape = Theme.shapes.large,
         contentPadding = Theme.paddings.buttonPaddingsAsPaddingValues(),
         colors = ButtonDefaults.buttonColors(
-            backgroundColor = Theme.palette.fillEnabledColor,
+            backgroundColor = backgroundColorState.value,
             disabledBackgroundColor = Theme.palette.fillDisabledColor,
         ),
     ) {
         Content(
-            content = content,
-            contentArrangement = contentArrangement,
-            contentSpacing = contentSpacing,
+            contentState = contentState,
+            contentArrangementState = contentArrangementState,
+            contentSpacingState = contentSpacingState,
         )
     }
 }
 
 @Composable
 private fun OutlinedButton(
-    buttonData: ButtonData.Outlined,
+    onClickState: State<() -> Unit>,
+    enabledState: State<Boolean>,
+    backgroundColorState: State<Color>,
+    contentState: State<List<ButtonData.Content>>,
+    contentArrangementState: State<ButtonData.ContentArrangement>,
+    contentSpacingState: State<Dp>,
     modifier: Modifier,
-) = with(buttonData) {
+) {
     OutlinedButton(
-        onClick = onClickListener,
+        onClick = onClickState.value,
         modifier = modifier,
-        enabled = enabled,
+        enabled = enabledState.value,
         shape = Theme.shapes.large,
         contentPadding = Theme.paddings.buttonPaddingsAsPaddingValues(),
         colors = ButtonDefaults.buttonColors(
-            backgroundColor =
-            if (this is ButtonData.Selectable)
-                if (selected) Theme.palette.fillEnabledColor
-                else Theme.palette.backgroundColor
-            else Theme.palette.fillEnabledColor,
+            backgroundColor = backgroundColorState.value,
             disabledBackgroundColor = Theme.palette.fillDisabledColor,
         ),
         border = BorderStroke(
-            width = 1.dp,
+            width = Theme.sizes.border,
             color = Theme.palette.accentColor,
         ),
     ) {
         Content(
-            content = content,
-            contentArrangement = contentArrangement,
-            contentSpacing = contentSpacing,
+            contentState = contentState,
+            contentArrangementState = contentArrangementState,
+            contentSpacingState = contentSpacingState,
         )
     }
 }
+
+@Composable
+private fun Content(
+    contentState: State<List<ButtonData.Content>>,
+    contentArrangementState: State<ButtonData.ContentArrangement>,
+    contentSpacingState: State<Dp>,
+) {
+    when (contentArrangementState.value) {
+        ButtonData.ContentArrangement.HORIZONTAL -> Row(
+            horizontalArrangement = Arrangement.spacedBy(contentSpacingState.value),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            contentState.value.Compose()
+        }
+        ButtonData.ContentArrangement.VERTICAL -> Column(
+            verticalArrangement = Arrangement.spacedBy(contentSpacingState.value),
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            contentState.value.Compose()
+        }
+    }
+}
+
+@Composable
+private fun List<ButtonData.Content>.Compose() = forEach {
+    when (it) {
+        is ButtonData.Content.Text -> TextContent(
+            content = it,
+            textColor = it.textColor,
+        )
+        is ButtonData.Content.Image -> ImageContent(
+            content = it,
+        )
+    }
+}
+
+@Composable
+private fun TextContent(
+    content: ButtonData.Content.Text,
+    textColor: Color?,
+) = ThemedText(
+    textWrapper = content.textWrapper,
+    themedTextType = ThemedTextType.BUTTON,
+    textColor = textColor,
+)
+
+@Composable
+private fun ImageContent(content: ButtonData.Content.Image) = ThemedImage(
+    imageWrapper = content.imageWrapper,
+    modifier = Modifier
+        .size(Theme.sizes.icon),
+)
 
 @Composable
 private fun TextButton(
     buttonData: ButtonData.Text,
+    onClickState: State<() -> Unit>,
+    enabledState: State<Boolean>,
     modifier: Modifier,
-) = with(buttonData) {
-    TextButton(
-        onClick = onClickListener,
-        modifier = modifier,
-        contentPadding = Theme.paddings.buttonPaddingsAsPaddingValues(),
-        enabled = enabled,
-    ) {
-        TextContent(
-            content = content,
-        )
-    }
-}
-
-@Composable
-fun Content(
-    content: List<ButtonData.Content>,
-    contentArrangement: ButtonData.ContentArrangement,
-    contentSpacing: Dp,
 ) {
-    val contentAction: @Composable () -> Unit = {
-        content.forEach {
-            when (it) {
-                is ButtonData.Content.Text -> TextContent(content = it)
-                is ButtonData.Content.Image -> ImageContent(content = it)
-            }
+    with(buttonData) {
+        val contentState = remember {
+            mutableStateOf(content)
         }
-    }
+        contentState.value = content
 
-    when (contentArrangement) {
-        ButtonData.ContentArrangement.HORIZONTAL -> Row(
-            horizontalArrangement = Arrangement.spacedBy(contentSpacing),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            contentAction.invoke()
+        val textColorState = remember {
+            mutableStateOf(content.textColor)
         }
-        ButtonData.ContentArrangement.VERTICAL -> Column(
-            verticalArrangement = Arrangement.spacedBy(contentSpacing),
-            horizontalAlignment = Alignment.CenterHorizontally,
+        textColorState.value = content.textColor
+
+        TextButton(
+            onClick = onClickState.value,
+            modifier = modifier,
+            contentPadding = Theme.paddings.buttonPaddingsAsPaddingValues(),
+            enabled = enabledState.value,
         ) {
-            contentAction.invoke()
+            TextContent(
+                content = contentState.value,
+                textColor = textColorState.value,
+            )
         }
     }
 }
-
-@Composable
-fun TextContent(content: ButtonData.Content.Text) = ThemedText(
-    textWrapper = content.textWrapper,
-    themedTextType = ThemedTextType.BUTTON,
-)
-
-@Composable
-fun ImageContent(content: ButtonData.Content.Image) = ThemedImage(
-    imageWrapper = content.imageWrapper,
-    modifier = Modifier
-        .size(24.dp),
-)
 
 @Preview
 @Composable
@@ -166,7 +275,7 @@ private fun ThemedButtonsPreview() {
     Theme(darkTheme = true) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(32.dp),
+            verticalArrangement = Arrangement.spacedBy(Theme.paddings.contentExtraLarge),
         ) {
             val imageWrapper = ImageWrapper.ImageResource(resourceId = R.drawable.ic_notes)
             val textWrapper = TextWrapper.PlainText(value = "Редактировать")
@@ -174,38 +283,49 @@ private fun ThemedButtonsPreview() {
             ThemedButton(
                 ButtonData.Regular(
                     enabled = false,
+                    onClick = {},
                     content = listOf(
                         ButtonData.Content.Image(imageWrapper = imageWrapper)
                     ),
-                    onClickListener = {},
-                )
-            )
-
-            ThemedButton(
-                ButtonData.Selectable(
-                    content = listOf(
-                        ButtonData.Content.Image(imageWrapper = imageWrapper)
-                    ),
-                    onClickListener = {},
-                    selected = false,
                 )
             )
 
             ThemedButton(
                 ButtonData.Outlined(
+                    onClick = {},
+                    content = listOf(
+                        ButtonData.Content.Image(imageWrapper = imageWrapper)
+                    ),
+                    selected = true,
+                )
+            )
+
+            ThemedButton(
+                ButtonData.Outlined(
+                    onClick = {},
+                    content = listOf(
+                        ButtonData.Content.Image(imageWrapper = imageWrapper)
+                    ),
+                    selected = false,
+                )
+            )
+
+            ThemedButton(
+                ButtonData.Regular(
+                    onClick = {},
+                    fillEnabledColor = Theme.palette.errorColor,
                     content = listOf(
                         ButtonData.Content.Text(textWrapper = textWrapper),
                         ButtonData.Content.Image(imageWrapper = imageWrapper),
                     ),
-                    onClickListener = {},
-                    contentSpacing = Theme.paddings.contentDefault,
+                    contentSpacing = Theme.paddings.contentSmall,
                 )
             )
 
             ThemedButton(
                 ButtonData.Text(
+                    onClick = {},
                     content = ButtonData.Content.Text(textWrapper = textWrapper),
-                    onClickListener = {},
                 )
             )
         }

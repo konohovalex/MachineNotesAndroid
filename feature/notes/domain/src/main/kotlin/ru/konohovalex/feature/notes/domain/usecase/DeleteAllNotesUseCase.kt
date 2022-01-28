@@ -2,14 +2,14 @@ package ru.konohovalex.feature.notes.domain.usecase
 
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
-import ru.konohovalex.core.data.model.OperationStatus
-import ru.konohovalex.core.data.utils.unwrap
-import ru.konohovalex.feature.notes.data.repository.contract.NotesRepository
+import ru.konohovalex.core.utils.model.OperationStatus
+import ru.konohovalex.core.utils.extension.unwrap
+import ru.konohovalex.feature.notes.data.repository.contract.NotesRepositoryContract
 import javax.inject.Inject
 
 class DeleteAllNotesUseCase
 @Inject constructor(
-    private val notesRepository: NotesRepository,
+    private val notesRepository: NotesRepositoryContract,
 ) {
     operator fun invoke(): Flow<OperationStatus.Plain<Unit>> = flow {
         try {

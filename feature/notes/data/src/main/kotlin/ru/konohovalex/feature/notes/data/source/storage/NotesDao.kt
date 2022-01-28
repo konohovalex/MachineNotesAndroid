@@ -4,6 +4,7 @@ import androidx.room.Dao
 
 @Dao
 internal interface NotesDao {
+    // tbd fix
     /*@Query("SELECT * FROM ${NoteEntity.TABLE_NAME}")
     suspend fun getNoteDetails(noteId: String): NoteEntity?
 

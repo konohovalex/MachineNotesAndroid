@@ -4,39 +4,52 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import ru.konohovalex.core.design.Theme
+import ru.konohovalex.core.design.model.Theme
 import ru.konohovalex.core.presentation.arch.viewevent.ViewEventHandler
 import ru.konohovalex.core.presentation.arch.viewstate.ViewStateProvider
 import ru.konohovalex.core.ui.compose.ThemedCircularProgressBar
-import ru.konohovalex.feature.notes.presentation.list.model.NoteListScreenViewEvent
+import ru.konohovalex.feature.notes.presentation.list.model.NoteListViewEvent
 import ru.konohovalex.feature.notes.presentation.list.model.NoteListViewState
 import ru.konohovalex.feature.notes.presentation.list.model.NotePreviewUiModel
 
 @Composable
 internal fun NoteListScreen(
-    viewEventHandler: ViewEventHandler<NoteListScreenViewEvent>,
+    viewEventHandler: ViewEventHandler<NoteListViewEvent>,
     viewStateProvider: ViewStateProvider<NoteListViewState>,
-    onNoteClick: (noteId: String?) -> Unit,
+    navigateToNoteDetails: (noteId: String?) -> Unit
 ) {
     // tbd too much recompositions
+    val onSearchBarTextChanged = remember {
+        { text: String ->
+            viewEventHandler.handle(NoteListViewEvent.GetNotes(filter = text))
+        }
+    }
+
+    val onFloatingActionButtonClick = remember {
+        {
+            navigateToNoteDetails.invoke(null)
+        }
+    }
+
     Scaffold(
         topBar = {
-            NoteListTopAppBar(viewEventHandler)
+            NoteListTopAppBar(onSearchBarTextChanged)
         },
         floatingActionButton = {
-            NoteListFloatingActionButton(onNoteClick)
+            NoteListFloatingActionButton(onFloatingActionButtonClick)
         },
         backgroundColor = Theme.palette.backgroundColor,
     ) {
         val viewState = viewStateProvider.viewState.observeAsState()
 
         when (val viewStateValue = viewState.value) {
-            is NoteListViewState.Idle -> viewEventHandler.handle(NoteListScreenViewEvent.GetNotes(filter = ""))
+            is NoteListViewState.Idle -> viewEventHandler.handle(NoteListViewEvent.GetNotes(filter = ""))
             is NoteListViewState.Loading -> LoadingState()
             is NoteListViewState.Data -> DataState(
                 notes = viewStateValue.notes,
-                onNoteClick = onNoteClick,
+                onNoteClick = navigateToNoteDetails,
             )
             is NoteListViewState.Error -> ErrorState()
         }

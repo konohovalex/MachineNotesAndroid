@@ -1,26 +1,22 @@
 package ru.konohovalex.feature.notes.presentation.details.ui.compose
 
-import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
-import androidx.navigation.NavController
-import ru.konohovalex.core.design.Theme
+import ru.konohovalex.core.design.model.Theme
 import ru.konohovalex.core.presentation.arch.viewevent.ViewEventHandler
 import ru.konohovalex.core.presentation.arch.viewstate.ViewStateProvider
 import ru.konohovalex.core.ui.compose.ThemedCard
 import ru.konohovalex.core.ui.compose.ThemedCircularProgressBar
 import ru.konohovalex.core.ui.compose.ThemedText
 import ru.konohovalex.core.ui.compose.ThemedTextType
-import ru.konohovalex.core.ui.compose.model.TextWrapper
-import ru.konohovalex.core.ui.compose.utils.unwrap
+import ru.konohovalex.core.ui.extension.unwrap
+import ru.konohovalex.core.ui.model.TextWrapper
 import ru.konohovalex.feature.notes.presentation.details.model.NoteContentUiModel
 import ru.konohovalex.feature.notes.presentation.details.model.NoteDetailsViewEvent
 import ru.konohovalex.feature.notes.presentation.details.model.NoteDetailsViewState
@@ -29,13 +25,13 @@ import ru.konohovalex.feature.notes.presentation.details.model.NoteUiModel
 @Composable
 internal fun NoteDetailsScreen(
     noteId: String?,
-    navController: NavController,
     viewEventHandler: ViewEventHandler<NoteDetailsViewEvent>,
     viewStateProvider: ViewStateProvider<NoteDetailsViewState>,
+    navigateBack: () -> Unit,
 ) {
     Scaffold(
         topBar = {
-            NoteDetailsTopAppBar(navController)
+            NoteDetailsTopAppBar(navigateBack)
         },
         floatingActionButton = {
             NoteDetailsFloatingActionButton()
@@ -45,12 +41,12 @@ internal fun NoteDetailsScreen(
         ThemedCard(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(Theme.paddings.contentDefault),
+                .padding(Theme.paddings.contentSmall),
         ) {
             val viewState = viewStateProvider.viewState.observeAsState()
 
             when (val viewStateValue = viewState.value) {
-                NoteDetailsViewState.Idle -> viewEventHandler.handle(NoteDetailsViewEvent.GetNoteDetails(noteId))
+                is NoteDetailsViewState.Idle -> viewEventHandler.handle(NoteDetailsViewEvent.GetNoteDetails(noteId))
                 is NoteDetailsViewState.Loading -> LoadingState()
                 is NoteDetailsViewState.Data -> DataState(viewStateValue.noteUiModel)
                 is NoteDetailsViewState.Error -> ErrorState()
@@ -72,11 +68,10 @@ private fun DataState(noteUiModel: NoteUiModel) {
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(Theme.paddings.contentDefault)
-            .verticalScroll(ScrollState(0)),
-        verticalArrangement = Arrangement.spacedBy(4.dp)
+            .padding(Theme.paddings.contentSmall),
+        verticalArrangement = Arrangement.spacedBy(Theme.paddings.contentExtraSmall)
     ) {
-        // tbd this is just a dummy implementation
+        // tbd this is just a dummy implementation, don't forget about remember calls
         with(noteUiModel) {
             title.unwrap()
                 .takeIf { it.isNotBlank() }

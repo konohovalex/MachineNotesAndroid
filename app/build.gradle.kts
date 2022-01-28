@@ -16,14 +16,18 @@ dependencies {
 
         project(Modules.Feature.Notes.presentation),
         project(Modules.Feature.Preferences.presentation),
+        project(Modules.Feature.Account.presentation),
 
         Dependencies.Android.coreKtx,
         Dependencies.Android.appCompat,
         Dependencies.Android.material,
         Dependencies.Android.splashScreen,
+        Dependencies.Android.dataStorePreferences,
 
         Dependencies.Android.Lifecycle.viewModelCompose,
 
         Dependencies.Android.Compose.getAllRuntimeDependencies(),
+
+        Dependencies.Hilt.navigationCompose,
     )
 }

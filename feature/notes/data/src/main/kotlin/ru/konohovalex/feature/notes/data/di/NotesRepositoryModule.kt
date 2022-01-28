@@ -4,7 +4,7 @@ import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
-import ru.konohovalex.feature.notes.data.repository.contract.NotesRepository
+import ru.konohovalex.feature.notes.data.repository.contract.NotesRepositoryContract
 import ru.konohovalex.feature.notes.data.repository.impl.NotesRepositoryImpl
 import javax.inject.Singleton
 
@@ -13,5 +13,5 @@ import javax.inject.Singleton
 internal interface NotesRepositoryModule {
     @Binds
     @Singleton
-    fun bindNotesRepository(notesRepository: NotesRepositoryImpl): NotesRepository
+    fun bindNotesRepository(notesRepository: NotesRepositoryImpl): NotesRepositoryContract
 }

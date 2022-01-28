@@ -1,49 +1,60 @@
 package ru.konohovalex.feature.preferences.presentation.ui.compose
 
-import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
-import androidx.hilt.navigation.compose.hiltViewModel
-import ru.konohovalex.core.design.Theme
-import ru.konohovalex.core.presentation.arch.vieweffect.ViewEffectPublisher
+import ru.konohovalex.core.design.model.Theme
 import ru.konohovalex.core.presentation.arch.viewevent.ViewEventHandler
 import ru.konohovalex.core.presentation.arch.viewstate.ViewStateProvider
+import ru.konohovalex.core.ui.compose.Logo
 import ru.konohovalex.core.ui.compose.ThemedCircularProgressBar
-import ru.konohovalex.feature.preferences.presentation.viewmodel.PreferencesViewModel
-import ru.konohovalex.feature.preferences.presentation.R
-import ru.konohovalex.feature.preferences.presentation.model.PreferencesScreenViewEffect
+import ru.konohovalex.core.ui.compose.Tumbler
+import ru.konohovalex.feature.preferences.presentation.model.LanguageUiModel
 import ru.konohovalex.feature.preferences.presentation.model.PreferencesScreenViewEvent
+import ru.konohovalex.feature.preferences.presentation.model.PreferencesUiModel
 import ru.konohovalex.feature.preferences.presentation.model.PreferencesViewState
+import ru.konohovalex.feature.preferences.presentation.model.ThemeModeUiModel
 
 @Composable
 internal fun PreferencesScreen(
-    viewStateProvider: ViewStateProvider<PreferencesViewState> = hiltViewModel<PreferencesViewModel>(),
-    viewEventHandler: ViewEventHandler<PreferencesScreenViewEvent> = hiltViewModel<PreferencesViewModel>(),
-    viewEffectPublisher: ViewEffectPublisher<PreferencesScreenViewEffect> = hiltViewModel<PreferencesViewModel>(),
+    viewStateProvider: ViewStateProvider<PreferencesViewState>,
+    viewEventHandler: ViewEventHandler<PreferencesScreenViewEvent>,
 ) {
     Column(
         modifier = Modifier
-            .fillMaxSize(),
+            .fillMaxWidth()
+            .background(Theme.palette.backgroundColor),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Logo()
 
         val viewState = viewStateProvider.viewState.observeAsState()
 
+        val onSelectedLanguageChanged = remember {
+            { languageUiModel: LanguageUiModel ->
+                viewEventHandler.handle(PreferencesScreenViewEvent.UpdateCurrentLanguage(languageUiModel))
+            }
+        }
+        val onSelectedThemeModeChanged = remember {
+            { themeModeUiModel: ThemeModeUiModel ->
+                viewEventHandler.handle(PreferencesScreenViewEvent.UpdateCurrentThemeMode(themeModeUiModel))
+            }
+        }
+
         when (val viewStateValue = viewState.value) {
             is PreferencesViewState.Idle -> viewEventHandler.handle(PreferencesScreenViewEvent.GetPreferences)
             is PreferencesViewState.Loading -> LoadingState()
             is PreferencesViewState.Data -> DataState(
-                data = viewStateValue,
-                viewEventHandler = viewEventHandler,
-                viewEffectPublisher = viewEffectPublisher,
+                preferencesUiModel = viewStateValue.preferencesUiModel,
+                onSelectedLanguageChanged = onSelectedLanguageChanged,
+                onSelectedThemeModeChanged = onSelectedThemeModeChanged,
             )
             is PreferencesViewState.Error -> ErrorState()
         }
@@ -51,44 +62,35 @@ internal fun PreferencesScreen(
 }
 
 @Composable
-private fun Logo() {
-    Image(
-        painter = painterResource(id = R.drawable.ic_logo),
-        contentDescription = stringResource(id = R.string.logo),
+private fun LoadingState() {
+    ThemedCircularProgressBar(
         modifier = Modifier
+            .size(Theme.sizes.logo)
             .padding(Theme.paddings.contentMedium),
     )
 }
 
 @Composable
-private fun LoadingState() {
-    ThemedCircularProgressBar(
-        modifier = Modifier
-            .fillMaxSize(),
-    )
-}
-
-@Composable
 private fun DataState(
-    data: PreferencesViewState.Data,
-    viewEventHandler: ViewEventHandler<PreferencesScreenViewEvent>,
-    viewEffectPublisher: ViewEffectPublisher<PreferencesScreenViewEffect>,
+    preferencesUiModel: PreferencesUiModel,
+    onSelectedLanguageChanged: (LanguageUiModel) -> Unit,
+    onSelectedThemeModeChanged: (ThemeModeUiModel) -> Unit,
 ) {
-    val viewEffectState = viewEffectPublisher.viewEffect.observeAsState()
+    with(preferencesUiModel) {
+        Tumbler(
+            tumblerData = availableLanguagesTumblerData,
+            selectedPositionData = currentLanguageUiModel,
+            actionsEnabled = languageActionsEnabled,
+            onSelectedPositionChanged = onSelectedLanguageChanged,
+        )
 
-    LanguageTumbler(
-        currentLanguageUiModel = data.preferencesUiModel.currentLanguageUiModel,
-        availableLanguages = data.preferencesUiModel.availableLanguages,
-        viewEventHandler = viewEventHandler,
-        viewEffectState = viewEffectState,
-    )
-
-    ThemeModeTumbler(
-        currentThemeModeUiModel = data.preferencesUiModel.currentThemeModeUiModel,
-        availableThemeModes = data.preferencesUiModel.availableThemeModes,
-        viewEventHandler = viewEventHandler,
-        viewEffectState = viewEffectState,
-    )
+        Tumbler(
+            tumblerData = availableThemeModesTumblerData,
+            selectedPositionData = currentThemeModeUiModel,
+            actionsEnabled = themeModeActionsEnabled,
+            onSelectedPositionChanged = onSelectedThemeModeChanged,
+        )
+    }
 }
 
 @Composable

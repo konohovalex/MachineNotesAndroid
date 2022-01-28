@@ -1,6 +1,6 @@
 package ru.konohovalex.feature.preferences.domain.mapper
 
-import ru.konohovalex.core.utils.Mapper
+import ru.konohovalex.core.utils.model.Mapper
 import ru.konohovalex.feature.preferences.data.model.Language
 import ru.konohovalex.feature.preferences.domain.model.LanguageDomainModel
 import javax.inject.Inject

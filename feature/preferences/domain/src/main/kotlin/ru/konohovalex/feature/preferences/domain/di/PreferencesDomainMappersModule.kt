@@ -4,7 +4,7 @@ import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
-import ru.konohovalex.core.utils.Mapper
+import ru.konohovalex.core.utils.model.Mapper
 import ru.konohovalex.feature.preferences.domain.mapper.LanguageDomainModelToLanguageMapper
 import ru.konohovalex.feature.preferences.domain.mapper.LanguageToLanguageDomainModelMapper
 import ru.konohovalex.feature.preferences.domain.mapper.ThemeModeDomainModelToThemeModeMapper

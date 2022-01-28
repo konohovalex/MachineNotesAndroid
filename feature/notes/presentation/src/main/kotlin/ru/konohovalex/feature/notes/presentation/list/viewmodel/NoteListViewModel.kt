@@ -8,16 +8,16 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
-import ru.konohovalex.core.data.model.OperationStatus
-import ru.konohovalex.core.data.model.PaginationData
 import ru.konohovalex.core.presentation.arch.viewevent.ViewEventHandler
 import ru.konohovalex.core.presentation.arch.viewstate.ViewStateProvider
 import ru.konohovalex.core.presentation.arch.viewstate.ViewStateProviderDelegate
-import ru.konohovalex.core.utils.Mapper
+import ru.konohovalex.core.utils.model.Mapper
+import ru.konohovalex.core.utils.model.OperationStatus
+import ru.konohovalex.core.utils.model.PaginationData
 import ru.konohovalex.feature.notes.domain.model.NoteDomainModel
 import ru.konohovalex.feature.notes.domain.usecase.GetNotesUseCase
-import ru.konohovalex.feature.notes.domain.utils.isValidNotesFilterValue
-import ru.konohovalex.feature.notes.presentation.list.model.NoteListScreenViewEvent
+import ru.konohovalex.feature.notes.domain.extension.isValidNotesFilterValue
+import ru.konohovalex.feature.notes.presentation.list.model.NoteListViewEvent
 import ru.konohovalex.feature.notes.presentation.list.model.NoteListViewState
 import ru.konohovalex.feature.notes.presentation.list.model.NotePreviewUiModel
 import javax.inject.Inject
@@ -28,15 +28,15 @@ internal class NoteListViewModel
     private val getNotesUseCase: GetNotesUseCase,
     private val noteDomainModelToNotePreviewUiModelMapper: Mapper<NoteDomainModel, NotePreviewUiModel>,
 ) : ViewModel(),
-    ViewEventHandler<NoteListScreenViewEvent>,
+    ViewEventHandler<NoteListViewEvent>,
     ViewStateProvider<NoteListViewState> by ViewStateProviderDelegate(NoteListViewState.Idle) {
     private var getNotesJob: Job? = null
 
     private var _filter: String = ""
 
-    override fun handle(viewEvent: NoteListScreenViewEvent) {
+    override fun handle(viewEvent: NoteListViewEvent) {
         when (viewEvent) {
-            is NoteListScreenViewEvent.GetNotes -> getNextNotes(viewEvent.filter)
+            is NoteListViewEvent.GetNotes -> getNextNotes(viewEvent.filter)
         }
     }
 

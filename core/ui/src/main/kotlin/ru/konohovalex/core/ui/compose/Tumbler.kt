@@ -17,65 +17,90 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.material.Divider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
-import androidx.compose.runtime.derivedStateOf
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
-import ru.konohovalex.core.design.Theme
-import ru.konohovalex.core.design.utils.buttonPaddingsAsPaddingValues
+import ru.konohovalex.core.design.extension.buttonPaddingsAsPaddingValues
+import ru.konohovalex.core.design.model.Theme
 import ru.konohovalex.core.ui.R
-import ru.konohovalex.core.ui.compose.model.ImageWrapper
-import ru.konohovalex.core.ui.compose.model.Position
-import ru.konohovalex.core.ui.compose.model.TextWrapper
-import ru.konohovalex.core.ui.compose.model.TumblerData
+import ru.konohovalex.core.ui.model.ImageWrapper
+import ru.konohovalex.core.ui.model.Position
+import ru.konohovalex.core.ui.model.TextWrapper
+import ru.konohovalex.core.ui.model.TumblerData
 
 /** To use enums or classes, which instances can be unambiguously compared, as [D]
  * is a recommended solution, as the selected one of [tumblerData]'s [TumblerData.positions]
- * will be determined by comparison with [selectedPositionDataState]'s value */
+ * will be determined by comparison with [selectedPositionData] */
 @Composable
 fun <D> Tumbler(
     tumblerData: TumblerData<D>,
+    selectedPositionData: D?,
+    actionsEnabled: Boolean,
     modifier: Modifier = Modifier,
-    actionsEnabledState: State<Boolean>,
-    selectedPositionDataState: State<D?>,
     onSelectedPositionChanged: (positionData: D) -> Unit,
 ) {
-    with(tumblerData) {
-        Row(
-            modifier = modifier
-                .padding(Theme.paddings.contentDefault),
-            horizontalArrangement = Arrangement.spacedBy(Theme.paddings.contentDefault),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            TitleAndInfo(
-                titleTextWrapper = titleTextWrapper,
-                infoTextWrapper = infoTextWrapper,
-            )
+    val titleTextWrapperState = remember {
+        mutableStateOf(tumblerData.titleTextWrapper)
+    }
+    titleTextWrapperState.value = tumblerData.titleTextWrapper
 
-            PositionsBox(
-                positions = positions,
-                actionsEnabledState = actionsEnabledState,
-                selectedPositionDataState = selectedPositionDataState,
-                onSelectedPositionChanged = onSelectedPositionChanged,
-            )
-        }
+    val infoTextWrapperState = remember {
+        mutableStateOf(tumblerData.infoTextWrapper)
+    }
+    infoTextWrapperState.value = tumblerData.infoTextWrapper
+
+    val positionsState = remember {
+        mutableStateOf(tumblerData.positions)
+    }
+    positionsState.value = tumblerData.positions
+
+    val selectedPositionDataState = remember {
+        mutableStateOf(selectedPositionData)
+    }
+    selectedPositionDataState.value = selectedPositionData
+
+    val actionsEnabledState = remember {
+        mutableStateOf(true)
+    }
+    actionsEnabledState.value = actionsEnabled
+
+    Row(
+        modifier = modifier
+            .padding(Theme.paddings.contentSmall),
+        horizontalArrangement = Arrangement.spacedBy(Theme.paddings.contentSmall),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        TitleAndInfo(
+            titleTextWrapperState = titleTextWrapperState,
+            infoTextWrapperState = infoTextWrapperState,
+        )
+
+        PositionsBox(
+            positionsState = positionsState,
+            selectedPositionDataState = selectedPositionDataState,
+            actionsEnabledState = actionsEnabledState,
+            onSelectedPositionChanged = onSelectedPositionChanged,
+        )
     }
 }
 
 @Composable
 private fun RowScope.TitleAndInfo(
-    titleTextWrapper: TextWrapper?,
-    infoTextWrapper: TextWrapper?,
+    titleTextWrapperState: State<TextWrapper?>,
+    infoTextWrapperState: State<TextWrapper?>,
 ) {
-    if (titleTextWrapper != null || infoTextWrapper != null) {
+    val titleTextWrapper = titleTextWrapperState.value
+    val infoTextWrapper = infoTextWrapperState.value
+
+    if (titleTextWrapperState.value != null || infoTextWrapperState.value != null) {
         Column(
             modifier = Modifier
                 .weight(1f),
-            verticalArrangement = Arrangement.spacedBy(Theme.paddings.contentDefault),
+            verticalArrangement = Arrangement.spacedBy(Theme.paddings.contentSmall),
         ) {
             titleTextWrapper?.let {
                 ThemedText(
@@ -99,9 +124,9 @@ private fun RowScope.TitleAndInfo(
 
 @Composable
 private fun <D> PositionsBox(
-    positions: List<Position<D>>,
-    actionsEnabledState: State<Boolean>,
+    positionsState: State<List<Position<D>>>,
     selectedPositionDataState: State<D?>,
+    actionsEnabledState: State<Boolean>,
     onSelectedPositionChanged: (positionData: D) -> Unit,
 ) {
     ThemedCard(shape = Theme.shapes.large) {
@@ -109,14 +134,12 @@ private fun <D> PositionsBox(
             contentAlignment = Alignment.Center,
         ) {
             PositionsRow(
-                positions = positions,
+                positionsState = positionsState,
                 selectedPositionDataState = selectedPositionDataState,
                 onSelectedPositionChanged = onSelectedPositionChanged,
             )
 
-            val actionsEnabled by actionsEnabledState
-
-            if (!actionsEnabled) {
+            if (!actionsEnabledState.value) {
                 ThemedCircularProgressBar(
                     modifier = Modifier
                         .matchParentSize(),
@@ -127,11 +150,13 @@ private fun <D> PositionsBox(
 }
 
 @Composable
-fun <D> PositionsRow(
-    positions: List<Position<D>>,
+private fun <D> PositionsRow(
+    positionsState: State<List<Position<D>>>,
     selectedPositionDataState: State<D?>,
     onSelectedPositionChanged: (positionData: D) -> Unit,
 ) {
+    val positions = positionsState.value
+
     Row(
         modifier = Modifier
             .height(IntrinsicSize.Min),
@@ -148,7 +173,7 @@ fun <D> PositionsRow(
                 Divider(
                     color = Theme.palette.accentColor,
                     modifier = Modifier
-                        .width(1.dp)
+                        .width(Theme.sizes.border)
                         .fillMaxHeight(),
                 )
             }
@@ -162,8 +187,7 @@ private fun <D> TumblerPosition(
     selectedPositionDataState: State<D?>,
     onSelectedPositionChanged: (positionData: D) -> Unit,
 ) {
-    val selectedPositionData by selectedPositionDataState
-    val isSelectedPosition = selectedPositionData == position.data
+    val isSelectedPosition = selectedPositionDataState.value == position.data
     val backgroundColor =
         if (isSelectedPosition) Theme.palette.fillEnabledColor
         else Theme.palette.backgroundColor
@@ -177,7 +201,7 @@ private fun <D> TumblerPosition(
         val baseModifier = Modifier
             .background(color = backgroundColor)
             .padding(Theme.paddings.buttonPaddingsAsPaddingValues())
-            .size(24.dp)
+            .size(Theme.sizes.icon)
 
         when (position) {
             is Position.Text -> TextTumblerPosition(
@@ -221,10 +245,6 @@ private fun <D> ImageTumblerPosition(
 @Preview
 @Composable
 private fun TumblersPreview() {
-    val selectedPositionState = derivedStateOf { "0" }
-    val actionsDisabledState = derivedStateOf { false }
-    val actionsEnabledState = derivedStateOf { true }
-
     Theme {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -244,8 +264,8 @@ private fun TumblersPreview() {
                         ),
                     ),
                 ),
-                actionsEnabledState = actionsDisabledState,
-                selectedPositionDataState = selectedPositionState,
+                selectedPositionData = "0",
+                actionsEnabled = false,
             ) {}
 
             Tumbler(
@@ -266,8 +286,8 @@ private fun TumblersPreview() {
                         ),
                     ),
                 ),
-                actionsEnabledState = actionsEnabledState,
-                selectedPositionDataState = selectedPositionState,
+                selectedPositionData = "1",
+                actionsEnabled = true,
             ) {}
         }
     }

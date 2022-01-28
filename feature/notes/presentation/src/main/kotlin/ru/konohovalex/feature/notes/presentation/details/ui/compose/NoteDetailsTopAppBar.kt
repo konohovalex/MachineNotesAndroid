@@ -11,21 +11,19 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.navigation.NavController
-import androidx.navigation.compose.rememberNavController
-import ru.konohovalex.core.design.Theme
+import ru.konohovalex.core.design.model.Theme
 import ru.konohovalex.core.ui.compose.ThemedImage
 import ru.konohovalex.core.ui.compose.ThemedText
 import ru.konohovalex.core.ui.compose.ThemedTextType
-import ru.konohovalex.core.ui.compose.model.ImageWrapper
-import ru.konohovalex.core.ui.compose.model.TextWrapper
+import ru.konohovalex.core.ui.model.ImageWrapper
+import ru.konohovalex.core.ui.model.TextWrapper
 import ru.konohovalex.feature.notes.presentation.R
 
 @Composable
-internal fun NoteDetailsTopAppBar(navController: NavController) {
+internal fun NoteDetailsTopAppBar(onBackButtonClick: () -> Unit) {
     Surface(
         color = Theme.palette.backgroundColor,
-        elevation = Theme.materialElevations.appBar,
+        elevation = Theme.materialElevations.topAppBar,
     ) {
         Row(
             modifier = Modifier
@@ -33,17 +31,13 @@ internal fun NoteDetailsTopAppBar(navController: NavController) {
                 .padding(
                     PaddingValues(
                         horizontal = Theme.paddings.contentMedium,
-                        vertical = Theme.paddings.contentDefault,
+                        vertical = Theme.paddings.contentSmall,
                     )
                 ),
             horizontalArrangement = Arrangement.spacedBy(Theme.paddings.contentMedium),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            IconButton(
-                onClick = {
-                    navController.navigateUp()
-                },
-            ) {
+            IconButton(onClick = onBackButtonClick) {
                 ThemedImage(
                     imageWrapper = ImageWrapper.ImageResource(resourceId = R.drawable.ic_arrow_back),
                 )
@@ -61,6 +55,6 @@ internal fun NoteDetailsTopAppBar(navController: NavController) {
 @Composable
 private fun NoteListTopAppBarPreview() {
     Theme {
-        NoteDetailsTopAppBar(rememberNavController())
+        NoteDetailsTopAppBar {}
     }
 }

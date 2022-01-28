@@ -1,5 +1,5 @@
 package ru.konohovalex.core.presentation.arch.viewevent
 
-fun interface ViewEventHandler<T: ViewEvent> {
-    fun handle(viewEvent: T)
+fun interface ViewEventHandler<VE: ViewEvent> {
+    fun handle(viewEvent: VE)
 }

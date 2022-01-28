@@ -4,7 +4,7 @@ import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
-import ru.konohovalex.core.utils.Mapper
+import ru.konohovalex.core.utils.model.Mapper
 import ru.konohovalex.feature.notes.domain.model.NoteDomainModel
 import ru.konohovalex.feature.notes.presentation.list.mapper.NoteDomainModelToNotePreviewUiModelMapper
 import ru.konohovalex.feature.notes.presentation.list.model.NotePreviewUiModel

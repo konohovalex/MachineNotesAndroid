@@ -7,15 +7,16 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
-import ru.konohovalex.core.design.Theme
-import ru.konohovalex.core.ui.compose.model.TextWrapper
-import ru.konohovalex.core.ui.compose.utils.unwrap
+import ru.konohovalex.core.design.model.Theme
+import ru.konohovalex.core.ui.model.TextWrapper
+import ru.konohovalex.core.ui.extension.unwrap
 
 @Composable
 fun ThemedText(
     themedTextType: ThemedTextType,
     textWrapper: TextWrapper,
     modifier: Modifier = Modifier,
+    textColor: Color? = null,
     textAlign: TextAlign? = null,
     overflow: TextOverflow = TextOverflow.Clip,
     maxLines: Int = Int.MAX_VALUE,
@@ -26,23 +27,23 @@ fun ThemedText(
     with(Theme.palette) {
         when (themedTextType) {
             ThemedTextType.HEADLINE -> {
-                color = titleColor
+                color = textColor ?: titleColor
                 textStyle = Theme.typography.headline
             }
             ThemedTextType.TITLE -> {
-                color = titleColor
+                color = textColor ?: titleColor
                 textStyle = Theme.typography.title
             }
             ThemedTextType.BODY -> {
-                color = bodyColor
+                color = textColor ?: bodyColor
                 textStyle = Theme.typography.body
             }
             ThemedTextType.LABEL -> {
-                color = labelColor
+                color = textColor ?: labelColor
                 textStyle = Theme.typography.label
             }
             ThemedTextType.BUTTON -> {
-                color = titleColor
+                color = textColor ?: titleColor
                 textStyle = Theme.typography.button
             }
         }

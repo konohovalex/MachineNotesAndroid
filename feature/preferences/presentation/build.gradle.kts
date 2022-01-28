@@ -8,7 +8,6 @@ plugins {
 
 dependencies {
     implementation(
-        project(Modules.Core.data),
         project(Modules.Core.design),
         project(Modules.Core.presentation),
         project(Modules.Core.ui),
@@ -17,8 +16,6 @@ dependencies {
         project(Modules.Feature.Preferences.domain),
 
         Dependencies.Hilt.navigationCompose,
-
-        Dependencies.Android.Lifecycle.viewModelCompose,
 
         Dependencies.Android.Compose.getAllRuntimeDependencies(),
     )

@@ -1,6 +1,6 @@
 package ru.konohovalex.feature.notes.data.mapper
 
-import ru.konohovalex.core.utils.Mapper
+import ru.konohovalex.core.utils.model.Mapper
 import ru.konohovalex.feature.notes.data.model.Note
 import ru.konohovalex.feature.notes.data.model.NoteContent
 import ru.konohovalex.feature.notes.data.model.entity.NoteContentEntity

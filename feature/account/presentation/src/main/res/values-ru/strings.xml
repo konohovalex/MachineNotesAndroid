@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="guest">Гость</string>
+    <plurals name="notes_statistics">
+        <item quantity="one">%d заметка</item>
+        <item quantity="few">%d заметки</item>
+        <item quantity="many">%d заметок</item>
+        <item quantity="other">%d заметок</item>
+    </plurals>
+    <plurals name="audio_files_statistics">
+        <item quantity="one">%d аудиофайл (%d - с распознаванием речи)</item>
+        <item quantity="few">%d аудиофайла (%d - с распознаванием речи)</item>
+        <item quantity="many">%d аудиофайлов (%d - с распознаванием речи)</item>
+        <item quantity="other">%d аудиофайлов (%d - с распознаванием речи)</item>
+    </plurals>
+    <plurals name="images_statistics">
+        <item quantity="one">%d изображение (%d - с распознаванием образов)</item>
+        <item quantity="few">%d изображения (%d - с распознаванием образов)</item>
+        <item quantity="many">%d изображений (%d - с распознаванием образов)</item>
+        <item quantity="other">%d изображений (%d - с распознаванием образов)</item>
+    </plurals>
+
+    <string name="log_out">Выйти из аккаунта</string>
+    <string name="delete_account">Удалить аккаунт</string>
+
+    <string name="delete_all_notes">Удалить все заметки</string>
+
+    <string name="user_name">Имя пользователя</string>
+    <string name="password">Пароль</string>
+    <string name="log_in">Войти в аккаунт</string>
+    <string name="skip">Пропустить</string>
+    <string name="back">Назад</string>
+    <string name="min_length_limitation">Не менее %d символов</string>
+    <string name="max_length_limitation">Не более %d символов</string>
+    <string name="password_unique_symbols_limitation">Должен содержать не менее %d уникального символа на каждые %d</string>
+</resources>

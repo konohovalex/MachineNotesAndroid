@@ -5,10 +5,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.FloatingActionButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import ru.konohovalex.core.design.Theme
+import ru.konohovalex.core.design.model.Theme
 import ru.konohovalex.core.ui.R
 import ru.konohovalex.core.ui.compose.ThemedImage
-import ru.konohovalex.core.ui.compose.model.ImageWrapper
+import ru.konohovalex.core.ui.model.ImageWrapper
 
 // https://compose.academy/blog/building_a_multi-action_floating_action_button_in_jetpack_compose
 @Composable

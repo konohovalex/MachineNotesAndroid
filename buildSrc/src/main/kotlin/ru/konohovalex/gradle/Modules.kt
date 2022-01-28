@@ -20,10 +20,9 @@ object Modules {
             private const val presentationPostfix = ":presentation"
 
             private const val imageRecognition = ":imagerecognition"
-            private const val navigation = ":navigation"
             private const val notes = ":notes"
             private const val preferences = ":preferences"
-            private const val profile = ":profile"
+            private const val account = ":account"
             private const val speechRecognition = ":speechrecognition"
         }
 
@@ -31,17 +30,10 @@ object Modules {
         val domain = "$featurePrefix$featureName$domainPostfix"
         val presentation = "$featurePrefix$featureName$presentationPostfix"
 
-        fun getAllDependencies() = listOf(
-            data,
-            domain,
-            presentation,
-        )
-
         object ImageRecognition : Feature(imageRecognition)
-        object Navigation : Feature(navigation)
         object Notes : Feature(notes)
         object Preferences : Feature(preferences)
-        object Profile : Feature(profile)
+        object Account : Feature(account)
         object SpeechRecognition : Feature(speechRecognition)
     }
 }

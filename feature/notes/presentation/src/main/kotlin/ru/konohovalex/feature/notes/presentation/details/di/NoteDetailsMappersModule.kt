@@ -4,7 +4,7 @@ import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
-import ru.konohovalex.core.utils.Mapper
+import ru.konohovalex.core.utils.model.Mapper
 import ru.konohovalex.feature.notes.domain.model.NoteContentDomainModel
 import ru.konohovalex.feature.notes.domain.model.NoteDomainModel
 import ru.konohovalex.feature.notes.presentation.details.mapper.NoteContentDomainModelToNoteContentUiModelMapper
@@ -17,11 +17,11 @@ import ru.konohovalex.feature.notes.presentation.details.model.NoteUiModel
 internal interface NoteDetailsMappersModule {
     @Binds
     fun bindNoteContentDomainModelToNoteContentUiModelMapper(
-        noteContentDomainModelToNoteContentUiModelMapper: NoteContentDomainModelToNoteContentUiModelMapper,
+        mapper: NoteContentDomainModelToNoteContentUiModelMapper,
     ): Mapper<NoteContentDomainModel, NoteContentUiModel>
 
     @Binds
     fun bindNoteDomainModelToNoteUiModelMapper(
-        noteDomainModelToNoteUiModelMapper: NoteDomainModelToNoteUiModelMapper,
+        mapper: NoteDomainModelToNoteUiModelMapper,
     ): Mapper<NoteDomainModel, NoteUiModel>
 }

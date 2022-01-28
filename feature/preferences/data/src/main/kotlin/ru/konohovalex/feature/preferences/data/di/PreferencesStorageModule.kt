@@ -9,9 +9,9 @@ import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import ru.konohovalex.core.data.arch.provider.Provider
-import ru.konohovalex.feature.preferences.data.source.provider.PreferencesDataStoreProvider
+import ru.konohovalex.feature.preferences.data.source.storage.provider.PreferencesDataStoreProvider
 import ru.konohovalex.feature.preferences.data.source.storage.contract.PreferencesStorageContract
-import ru.konohovalex.feature.preferences.data.source.storage.impl.PreferencesStorage
+import ru.konohovalex.feature.preferences.data.source.storage.impl.PreferencesStorageImpl
 import javax.inject.Singleton
 
 @Module
@@ -31,7 +31,7 @@ internal class PreferencesStorageModule {
     @Singleton
     fun providePreferencesStorage(
         preferencesDataStore: DataStore<Preferences>,
-    ): PreferencesStorageContract = PreferencesStorage(
+    ): PreferencesStorageContract = PreferencesStorageImpl(
         preferencesDataStore = preferencesDataStore,
     )
 }

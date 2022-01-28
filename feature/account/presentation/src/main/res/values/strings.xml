@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="guest">Guest</string>
+    <plurals name="notes_statistics">
+        <item quantity="one">%d note</item>
+        <item quantity="other">%d notes</item>
+    </plurals>
+    <plurals name="audio_files_statistics">
+        <item quantity="one">%d audio file (%d - with voice recognition)</item>
+        <item quantity="other">%d audio files (%d - with voice recognition)</item>
+    </plurals>
+    <plurals name="images_statistics">
+        <item quantity="one">%d image (%d - with object recognition)</item>
+        <item quantity="other">%d images (%d - with object recognition)</item>
+    </plurals>
+
+    <string name="log_out">Log out</string>
+    <string name="delete_account">Delete account</string>
+
+    <string name="delete_all_notes">Delete all notes</string>
+
+    <string name="user_name">User name</string>
+    <string name="password">Password</string>
+    <string name="log_in">Log in</string>
+    <string name="skip">Skip</string>
+    <string name="back">Back</string>
+    <string name="min_length_limitation">At least %d symbols</string>
+    <string name="max_length_limitation">At most %d symbols</string>
+    <string name="password_unique_symbols_limitation">Should contain at least %d unique symbol for each %d</string>
+</resources>
