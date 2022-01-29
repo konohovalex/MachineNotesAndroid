@@ -12,5 +12,7 @@ dependencies {
         project(Modules.Core.utils),
 
         Dependencies.Android.dataStorePreferences,
+
+        Dependencies.Google.gson,
     )
 }

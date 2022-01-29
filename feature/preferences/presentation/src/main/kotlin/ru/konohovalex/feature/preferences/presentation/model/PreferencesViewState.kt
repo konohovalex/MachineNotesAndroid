@@ -7,7 +7,10 @@ internal sealed class PreferencesViewState : ViewState {
 
     object Loading : PreferencesViewState()
 
-    data class Data(val preferencesUiModel: PreferencesUiModel) : PreferencesViewState()
+    data class Data(
+        val preferencesUiModel: PreferencesUiModel,
+        val throwable: Throwable? = null,
+    ) : PreferencesViewState()
 
     data class Error(val throwable: Throwable) : PreferencesViewState()
 }

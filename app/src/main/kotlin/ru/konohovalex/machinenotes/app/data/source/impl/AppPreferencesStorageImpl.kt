@@ -23,11 +23,18 @@ class AppPreferencesStorageImpl
             ?.get(KEY_IS_FIRST_LAUNCH)
             ?: true
 
-    override suspend fun updateIsFirstLaunch(isFirstLaunch: Boolean): Boolean {
+    override suspend fun updateIsFirstLaunch(isFirstLaunch: Boolean): Boolean =
         preferencesDataStore
             .edit {
                 it[KEY_IS_FIRST_LAUNCH] = isFirstLaunch
             }
-        return isFirstLaunch
-    }
+            .let {
+                it[KEY_IS_FIRST_LAUNCH]
+                    ?: dataStoreUpdateError(isFirstLaunch)
+            }
+
+    private fun dataStoreUpdateError(isFirstLaunch: Boolean): Nothing =
+        throw IllegalStateException(
+            "Expecting $isFirstLaunch, but got null"
+        )
 }

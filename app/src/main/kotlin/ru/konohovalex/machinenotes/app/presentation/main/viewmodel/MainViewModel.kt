@@ -3,12 +3,20 @@ package ru.konohovalex.machinenotes.app.presentation.main.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.launch
 import ru.konohovalex.core.presentation.arch.viewevent.ViewEventHandler
 import ru.konohovalex.core.presentation.arch.viewstate.ViewStateProvider
 import ru.konohovalex.core.presentation.arch.viewstate.ViewStateProviderDelegate
+import ru.konohovalex.core.utils.model.Mapper
 import ru.konohovalex.core.utils.model.OperationStatus
+import ru.konohovalex.feature.preferences.domain.model.LanguageDomainModel
+import ru.konohovalex.feature.preferences.domain.model.ThemeModeDomainModel
+import ru.konohovalex.feature.preferences.domain.usecase.ObservePreferencesUseCase
+import ru.konohovalex.feature.preferences.presentation.model.LanguageUiModel
+import ru.konohovalex.feature.preferences.presentation.model.ThemeModeUiModel
 import ru.konohovalex.machinenotes.app.domain.usecase.GetIsFirstLaunchUseCase
 import ru.konohovalex.machinenotes.app.domain.usecase.SetIsFirstLaunchUseCase
 import ru.konohovalex.machinenotes.app.presentation.main.model.MainViewEvent
@@ -18,49 +26,102 @@ import javax.inject.Inject
 @HiltViewModel
 internal class MainViewModel
 @Inject constructor(
+    private val observePreferencesUseCase: ObservePreferencesUseCase,
     private val getIsFirstLaunchUseCase: GetIsFirstLaunchUseCase,
     private val setIsFirstLaunchUseCase: SetIsFirstLaunchUseCase,
+    private val languageDomainModelToLanguageUiModelMapper: Mapper<LanguageDomainModel, LanguageUiModel>,
+    private val themeModeDomainModelToThemeModeUiModelMapper: Mapper<ThemeModeDomainModel, ThemeModeUiModel>,
 ) : ViewModel(),
     ViewEventHandler<MainViewEvent>,
     ViewStateProvider<MainViewState> by ViewStateProviderDelegate(MainViewState.Idle) {
+    private var isFirstLaunch = true
+
     override fun handle(viewEvent: MainViewEvent) {
         when (viewEvent) {
-            is MainViewEvent.GetIsFirstLaunch -> getIsFirstLaunch()
+            is MainViewEvent.Init -> init()
             is MainViewEvent.FirstLaunchCompleted -> firstLaunchCompleted()
         }
     }
 
-    private fun getIsFirstLaunch() {
+    private fun init() {
         getIsFirstLaunchUseCase.invoke()
-            .onEach {
-                when (it) {
-                    is OperationStatus.Plain.Pending -> {}
-                    is OperationStatus.Plain.Processing -> {}
-                    is OperationStatus.Plain.Completed -> setDateState(it.outputData)
-                    is OperationStatus.Plain.Error -> setErrorState(it.throwable)
+            .onEach { operationStatus ->
+                when (operationStatus) {
+                    is OperationStatus.Plain.Pending, is OperationStatus.Plain.Processing -> {}
+                    is OperationStatus.Plain.Completed -> {
+                        isFirstLaunch = operationStatus.outputData
+                        observePreferences()
+                    }
+                    is OperationStatus.Plain.Error -> setErrorState(operationStatus.throwable)
                 }
             }
             .launchIn(viewModelScope)
+    }
+
+    private fun observePreferences() {
+        viewModelScope.launch {
+            observePreferencesUseCase.invoke()
+                .onEach {
+                    // tbd comes here twice
+                    when (it) {
+                        is OperationStatus.Plain.Pending, is OperationStatus.Plain.Processing -> {}
+                        is OperationStatus.Plain.Completed -> {
+                            val languageUiModel = languageDomainModelToLanguageUiModelMapper.invoke(
+                                it.outputData.languageDomainModel
+                            )
+                            val themeModeUiModel = themeModeDomainModelToThemeModeUiModelMapper.invoke(
+                                it.outputData.themeModeDomainModel
+                            )
+
+                            setDataState(languageUiModel, themeModeUiModel)
+                        }
+                        is OperationStatus.Plain.Error -> setErrorState(it.throwable)
+                    }
+                }
+                .collect()
+        }
     }
 
     private fun firstLaunchCompleted() {
-        setIsFirstLaunchUseCase.invoke(false)
-            .onEach {
-                when (it) {
-                    is OperationStatus.Plain.Pending -> {}
-                    is OperationStatus.Plain.Processing -> {}
-                    is OperationStatus.Plain.Completed -> setDateState(it.outputData)
-                    is OperationStatus.Plain.Error -> setErrorState(it.throwable)
+        withViewState(MainViewState.FirstLaunch::class.java) { viewState ->
+            setIsFirstLaunchUseCase.invoke(false)
+                .onEach {
+                    when (it) {
+                        is OperationStatus.Plain.Pending -> {}
+                        is OperationStatus.Plain.Processing -> {}
+                        is OperationStatus.Plain.Completed -> {
+                            isFirstLaunch = it.outputData
+                            setDataState(
+                                languageUiModel = viewState.languageUiModel,
+                                themeModeUiModel = viewState.themeModeUiModel,
+                            )
+                        }
+                        is OperationStatus.Plain.Error -> setErrorState(it.throwable)
+                    }
                 }
-            }
-            .launchIn(viewModelScope)
+                .launchIn(viewModelScope)
+        }
     }
 
-    private fun setDateState(isFirstLaunch: Boolean) {
-        setViewState(MainViewState.Data(isFirstLaunch))
+    private fun setDataState(
+        languageUiModel: LanguageUiModel?,
+        themeModeUiModel: ThemeModeUiModel?,
+    ) {
+        setViewState(
+            if (isFirstLaunch) MainViewState.FirstLaunch(languageUiModel, themeModeUiModel)
+            else MainViewState.NotFirstLaunch(languageUiModel, themeModeUiModel)
+        )
     }
 
     private fun setErrorState(throwable: Throwable) {
-        setViewState(MainViewState.Error(throwable))
+        viewState.value.let {
+            setViewState(
+                MainViewState.Error(
+                    throwable = throwable,
+                    languageUiModel = it?.languageUiModel,
+                    themeModeUiModel = it?.themeModeUiModel,
+                )
+            )
+        }
     }
 }

@@ -39,12 +39,12 @@ internal fun PreferencesScreen(
 
         val onSelectedLanguageChanged = remember {
             { languageUiModel: LanguageUiModel ->
-                viewEventHandler.handle(PreferencesScreenViewEvent.UpdateCurrentLanguage(languageUiModel))
+                viewEventHandler.handle(PreferencesScreenViewEvent.UpdateLanguage(languageUiModel))
             }
         }
         val onSelectedThemeModeChanged = remember {
             { themeModeUiModel: ThemeModeUiModel ->
-                viewEventHandler.handle(PreferencesScreenViewEvent.UpdateCurrentThemeMode(themeModeUiModel))
+                viewEventHandler.handle(PreferencesScreenViewEvent.UpdateThemeMode(themeModeUiModel))
             }
         }
 
@@ -55,6 +55,7 @@ internal fun PreferencesScreen(
                 preferencesUiModel = viewStateValue.preferencesUiModel,
                 onSelectedLanguageChanged = onSelectedLanguageChanged,
                 onSelectedThemeModeChanged = onSelectedThemeModeChanged,
+                throwable = viewStateValue.throwable,
             )
             is PreferencesViewState.Error -> ErrorState()
         }
@@ -75,7 +76,9 @@ private fun DataState(
     preferencesUiModel: PreferencesUiModel,
     onSelectedLanguageChanged: (LanguageUiModel) -> Unit,
     onSelectedThemeModeChanged: (ThemeModeUiModel) -> Unit,
+    throwable: Throwable?,
 ) {
+    // tbd if throwable is null, show notification
     with(preferencesUiModel) {
         Tumbler(
             tumblerData = availableLanguagesTumblerData,

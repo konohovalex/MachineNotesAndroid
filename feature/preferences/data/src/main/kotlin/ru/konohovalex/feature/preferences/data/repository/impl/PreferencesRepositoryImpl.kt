@@ -1,11 +1,13 @@
 package ru.konohovalex.feature.preferences.data.repository.impl
 
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
+import ru.konohovalex.core.utils.extension.withIo
 import ru.konohovalex.core.utils.model.Mapper
-import ru.konohovalex.core.utils.model.OperationResult
 import ru.konohovalex.feature.preferences.data.model.Language
+import ru.konohovalex.feature.preferences.data.model.Preferences
 import ru.konohovalex.feature.preferences.data.model.ThemeMode
-import ru.konohovalex.feature.preferences.data.model.entity.LanguageEntity
-import ru.konohovalex.feature.preferences.data.model.entity.ThemeModeEntity
+import ru.konohovalex.feature.preferences.data.model.entity.PreferencesEntity
 import ru.konohovalex.feature.preferences.data.repository.contract.PreferencesRepositoryContract
 import ru.konohovalex.feature.preferences.data.source.storage.contract.PreferencesStorageContract
 import javax.inject.Inject
@@ -13,50 +15,36 @@ import javax.inject.Inject
 internal class PreferencesRepositoryImpl
 @Inject constructor(
     private val preferencesStorage: PreferencesStorageContract,
-    private val languageEntityToLanguageMapper: Mapper<LanguageEntity, Language>,
-    private val languageToLanguageEntityMapper: Mapper<Language, LanguageEntity>,
-    private val themeModeEntityToThemeModeMapper: Mapper<ThemeModeEntity, ThemeMode>,
-    private val themeModeToThemeModeEntityMapper: Mapper<ThemeMode, ThemeModeEntity>,
+    private val preferencesEntityToPreferencesMapper: Mapper<PreferencesEntity, Preferences>,
+    private val preferencesToPreferencesEntityMapper: Mapper<Preferences, PreferencesEntity>,
 ) : PreferencesRepositoryContract {
-    override suspend fun getCurrentLanguage(): OperationResult<Language> =
-        try {
-            val languageEntity = preferencesStorage.getCurrentLanguage()
-            val language = languageEntityToLanguageMapper.invoke(languageEntity)
-            OperationResult.Success(language)
-        }
-        catch (throwable: Throwable) {
-            OperationResult.Error(throwable)
-        }
+    // tbd should there be safe update ops?
+    override suspend fun observePreferences(): Flow<Preferences> =
+        preferencesStorage.observePreferences()
+            .map { preferencesEntityToPreferencesMapper.invoke(it) }
 
-    override suspend fun updateCurrentLanguage(language: Language): OperationResult<Language> =
-        try {
-            val languageEntity = languageToLanguageEntityMapper.invoke(language)
-            val updatedLanguageEntity = preferencesStorage.updateCurrentLanguage(languageEntity)
-            val updatedLanguage = languageEntityToLanguageMapper.invoke(updatedLanguageEntity)
-            OperationResult.Success(updatedLanguage)
-        }
-        catch (throwable: Throwable) {
-            OperationResult.Error(throwable)
-        }
+    override suspend fun updatePreferences(preferences: Preferences): Preferences = withIo {
+        val preferencesEntity = preferencesToPreferencesEntityMapper.invoke(preferences)
+        val updatedPreferencesEntity = preferencesStorage.updatePreferences(preferencesEntity)
+        preferencesEntityToPreferencesMapper.invoke(updatedPreferencesEntity)
+    }
 
-    override suspend fun getCurrentThemeMode(): OperationResult<ThemeMode> =
-        try {
-            val themeModeEntity = preferencesStorage.getCurrentThemeMode()
-            val themeMode = themeModeEntityToThemeModeMapper.invoke(themeModeEntity)
-            OperationResult.Success(themeMode)
-        }
-        catch (throwable: Throwable) {
-            OperationResult.Error(throwable)
-        }
+    override suspend fun getCurrentLanguage(): Language = getCurrentPreferences().language
 
-    override suspend fun updateCurrentThemeMode(themeMode: ThemeMode): OperationResult<ThemeMode> =
-        try {
-            val themeModeEntity = themeModeToThemeModeEntityMapper.invoke(themeMode)
-            val updatedThemeModeEntity = preferencesStorage.updateCurrentThemeMode(themeModeEntity)
-            val updatedThemeMode = themeModeEntityToThemeModeMapper.invoke(updatedThemeModeEntity)
-            OperationResult.Success(updatedThemeMode)
-        }
-        catch (throwable: Throwable) {
-            OperationResult.Error(throwable)
-        }
+    override suspend fun updateLanguage(language: Language): Language =
+        updatePreferences(
+            getCurrentPreferences()
+                .copy(language = language)
+        ).language
+
+    override suspend fun getCurrentThemeMode(): ThemeMode = getCurrentPreferences().themeMode
+
+    override suspend fun updateThemeMode(themeMode: ThemeMode): ThemeMode =
+        updatePreferences(
+            getCurrentPreferences()
+                .copy(themeMode = themeMode)
+        ).themeMode
+
+    private suspend fun getCurrentPreferences(): Preferences =
+        preferencesEntityToPreferencesMapper.invoke(preferencesStorage.getCurrentPreferences())
 }

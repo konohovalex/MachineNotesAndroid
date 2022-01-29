@@ -13,4 +13,7 @@ internal interface ProfileApi : Api {
 
     @POST("${PROFILE_URL}/logIn")
     suspend fun logIn(@Body authData: AuthDataDto?): ProfileDto
+
+    @POST("${PROFILE_URL}/{accountId}/delete")
+    suspend fun deleteAccount(accountId: String): ProfileDto
 }

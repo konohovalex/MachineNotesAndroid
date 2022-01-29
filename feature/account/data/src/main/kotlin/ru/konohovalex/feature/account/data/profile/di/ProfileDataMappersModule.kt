@@ -19,6 +19,7 @@ internal interface ProfileDataMappersModule {
         mapper: ProfileEntityToProfileMapper,
     ): Mapper<ProfileEntity, Profile>
 
+
     @Binds
     fun bindProfileDtoToProfileEntityMapper(
         mapper: ProfileDtoToProfileEntityMapper,

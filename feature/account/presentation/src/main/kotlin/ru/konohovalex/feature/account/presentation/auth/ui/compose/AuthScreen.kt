@@ -29,6 +29,7 @@ internal fun AuthScreen(
         modifier = Modifier
             .fillMaxSize()
             .background(Theme.palette.backgroundColor),
+        // tbd either change this, or solve keyboard problem
         contentAlignment = Alignment.BottomCenter,
     ) {
         val viewState = viewStateProvider.viewState.observeAsState()

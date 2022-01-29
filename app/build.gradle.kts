@@ -14,6 +14,8 @@ dependencies {
         project(Modules.Core.ui),
         project(Modules.Core.utils),
 
+        project(Modules.Feature.Preferences.domain),
+
         project(Modules.Feature.Notes.presentation),
         project(Modules.Feature.Preferences.presentation),
         project(Modules.Feature.Account.presentation),

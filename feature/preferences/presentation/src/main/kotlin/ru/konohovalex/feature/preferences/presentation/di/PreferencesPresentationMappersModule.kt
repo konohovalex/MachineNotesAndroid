@@ -27,6 +27,7 @@ internal interface PreferencesPresentationMappersModule {
         mapper: LanguageUiModelToLanguageDomainModelMapper,
     ): Mapper<LanguageUiModel, LanguageDomainModel>
 
+
     @Binds
     fun bindThemeModeDomainModelToThemeModeUiModelMapper(
         mapper: ThemeModeDomainModelToThemeModeUiModelMapper,

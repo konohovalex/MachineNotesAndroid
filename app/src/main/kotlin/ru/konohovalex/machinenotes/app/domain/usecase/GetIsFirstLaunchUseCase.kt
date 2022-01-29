@@ -2,7 +2,6 @@ package ru.konohovalex.machinenotes.app.domain.usecase
 
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
-import ru.konohovalex.core.utils.extension.unwrap
 import ru.konohovalex.core.utils.model.OperationStatus
 import ru.konohovalex.machinenotes.app.data.repository.contract.AppPreferencesRepositoryContract
 import javax.inject.Inject
@@ -17,7 +16,7 @@ class GetIsFirstLaunchUseCase
 
             emit(OperationStatus.Plain.Processing())
 
-            val isFirstLaunch = appPreferencesRepository.getIsFirstLaunch().unwrap()
+            val isFirstLaunch = appPreferencesRepository.getIsFirstLaunch()
 
             emit(OperationStatus.Plain.Completed(isFirstLaunch))
         }

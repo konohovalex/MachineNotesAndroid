@@ -1,6 +1,7 @@
 package ru.konohovalex.core.utils.extension
 
 import ru.konohovalex.core.utils.model.MergedOperationStatus2
+import ru.konohovalex.core.utils.model.OperationResult
 import ru.konohovalex.core.utils.model.OperationStatus
 
 fun <O1, O2> OperationStatus.Plain<O1>.merge(
@@ -41,3 +42,84 @@ fun <I1, O1, I2, O2> OperationStatus.WithInputData<I1, O1>.merge(
     else ->
         MergedOperationStatus2.WithInputData.Both.Pending(this, other)
 }
+
+fun <O1, O2> OperationStatus.Plain<O1>.map(
+    mapper: (O1) -> O2,
+): OperationStatus.Plain<O2> =
+    try {
+        when (this) {
+            is OperationStatus.Plain.Pending ->
+                OperationStatus.Plain.Pending()
+            is OperationStatus.Plain.Processing ->
+                OperationStatus.Plain.Processing()
+            is OperationStatus.Plain.Completed ->
+                OperationStatus.Plain.Completed(mapper.invoke(outputData))
+            is OperationStatus.Plain.Error ->
+                OperationStatus.Plain.Error(throwable)
+        }
+    }
+    catch (throwable: Throwable) {
+        OperationStatus.Plain.Error(throwable)
+    }
+
+fun <O1, O2> OperationStatus.Plain<O1?>.mapNullable(
+    mapper: (O1) -> O2,
+): OperationStatus.Plain<O2?> =
+    try {
+        when (this) {
+            is OperationStatus.Plain.Pending ->
+                OperationStatus.Plain.Pending()
+            is OperationStatus.Plain.Processing ->
+                OperationStatus.Plain.Processing()
+            is OperationStatus.Plain.Completed ->
+                OperationStatus.Plain.Completed(outputData?.let(mapper::invoke))
+            is OperationStatus.Plain.Error ->
+                OperationStatus.Plain.Error(throwable)
+        }
+    }
+    catch (throwable: Throwable) {
+        OperationStatus.Plain.Error(throwable)
+    }
+
+inline fun <reified O1, O2> OperationStatus.Plain<OperationResult<O1>>.mapUnwrapping(
+    mapper: (O1) -> O2,
+): OperationStatus.Plain<O2> =
+    try {
+        when (this) {
+            is OperationStatus.Plain.Pending ->
+                OperationStatus.Plain.Pending()
+            is OperationStatus.Plain.Processing ->
+                OperationStatus.Plain.Processing()
+            is OperationStatus.Plain.Completed -> {
+                val outputData = outputData.unwrap()
+                OperationStatus.Plain.Completed(mapper.invoke(outputData))
+            }
+            is OperationStatus.Plain.Error ->
+                OperationStatus.Plain.Error(throwable)
+        }
+    }
+    catch (throwable: Throwable) {
+        OperationStatus.Plain.Error(throwable)
+    }
+
+fun <I1, O1, I2, O2> OperationStatus.WithInputData<I1, O1>.map(
+    inputDataMapper: (I1) -> I2,
+    outputDataMapper: (O1) -> O2,
+): OperationStatus.WithInputData<I2, O2> =
+    inputDataMapper.invoke(inputData).let {
+        try {
+            when (this) {
+                is OperationStatus.WithInputData.Pending ->
+                    OperationStatus.WithInputData.Pending(it)
+                is OperationStatus.WithInputData.Processing ->
+                    OperationStatus.WithInputData.Processing(it)
+                is OperationStatus.WithInputData.Completed ->
+                    OperationStatus.WithInputData.Completed(it, outputDataMapper.invoke(outputData))
+                is OperationStatus.WithInputData.Error ->
+                    OperationStatus.WithInputData.Error(it, throwable)
+            }
+        }
+        catch (throwable: Throwable) {
+            OperationStatus.WithInputData.Error(it, throwable)
+        }
+    }

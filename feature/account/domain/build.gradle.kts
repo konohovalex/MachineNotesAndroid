@@ -11,5 +11,7 @@ dependencies {
         project(Modules.Core.utils),
 
         project(Modules.Feature.Account.data),
+
+        project(Modules.Feature.Notes.domain),
     )
 }

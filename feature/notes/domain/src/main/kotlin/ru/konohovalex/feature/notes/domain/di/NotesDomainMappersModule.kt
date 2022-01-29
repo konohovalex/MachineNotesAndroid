@@ -21,25 +21,25 @@ import ru.konohovalex.feature.notes.domain.model.NoteUpdateParamsDomainModel
 @InstallIn(SingletonComponent::class)
 internal interface NotesDomainMappersModule {
     @Binds
-    fun bindNoteContentToNoteContentDomainModelMapper(
-        mapper: NoteContentToNoteContentDomainModelMapper,
-    ): Mapper<NoteContent, NoteContentDomainModel>
-
-    @Binds
-    fun bindNoteToNoteDomainModelMapper(
-        mapper: NoteToNoteDomainModelMapper,
-    ): Mapper<Note, NoteDomainModel>
-
-
-    @Binds
     fun bindNoteContentDomainModelToNoteContentMapper(
         mapper: NoteContentDomainModelToNoteContentMapper,
     ): Mapper<NoteContentDomainModel, NoteContent>
 
     @Binds
+    fun bindNoteContentToNoteContentDomainModelMapper(
+        mapper: NoteContentToNoteContentDomainModelMapper,
+    ): Mapper<NoteContent, NoteContentDomainModel>
+
+
+    @Binds
     fun bindNoteDomainModelToNoteMapper(
         mapper: NoteDomainModelToNoteMapper,
     ): Mapper<NoteDomainModel, Note>
+
+    @Binds
+    fun bindNoteToNoteDomainModelMapper(
+        mapper: NoteToNoteDomainModelMapper,
+    ): Mapper<Note, NoteDomainModel>
 
 
     @Binds

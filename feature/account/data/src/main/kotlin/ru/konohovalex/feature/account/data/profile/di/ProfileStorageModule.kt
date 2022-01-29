@@ -7,6 +7,9 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import ru.konohovalex.feature.account.data.profile.source.storage.contract.ProfileStorageContract
 import ru.konohovalex.feature.account.data.profile.source.storage.impl.ProfileStorageImpl
 import ru.konohovalex.feature.account.data.profile.source.storage.provider.ProfileDataStoreProvider
@@ -33,6 +36,7 @@ internal class ProfileStorageModule {
 //        profilePreferencesDataStore: DataStore<Preferences>,
         profileGson: Gson,
     ): ProfileStorageContract = ProfileStorageImpl(
+        coroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.IO),
         preferencesDataStore = ProfileDataStoreProvider().provide(context),
         gson = profileGson,
     )

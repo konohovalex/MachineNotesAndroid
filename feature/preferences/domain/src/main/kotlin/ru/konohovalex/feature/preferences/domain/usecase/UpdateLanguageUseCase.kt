@@ -2,15 +2,14 @@ package ru.konohovalex.feature.preferences.domain.usecase
 
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
-import ru.konohovalex.core.utils.model.OperationStatus
-import ru.konohovalex.core.utils.extension.unwrap
 import ru.konohovalex.core.utils.model.Mapper
+import ru.konohovalex.core.utils.model.OperationStatus
 import ru.konohovalex.feature.preferences.data.model.Language
 import ru.konohovalex.feature.preferences.data.repository.contract.PreferencesRepositoryContract
 import ru.konohovalex.feature.preferences.domain.model.LanguageDomainModel
 import javax.inject.Inject
 
-class UpdateCurrentLanguageUseCase
+class UpdateLanguageUseCase
 @Inject constructor(
     private val preferencesRepository: PreferencesRepositoryContract,
     private val languageDomainModelToLanguageMapper: Mapper<LanguageDomainModel, Language>,
@@ -25,7 +24,7 @@ class UpdateCurrentLanguageUseCase
             emit(OperationStatus.WithInputData.Processing(languageDomainModel))
 
             val language = languageDomainModelToLanguageMapper.invoke(languageDomainModel)
-            val updatedLanguage = preferencesRepository.updateCurrentLanguage(language).unwrap()
+            val updatedLanguage = preferencesRepository.updateLanguage(language)
             val updatedLanguageDomainModel = languageToLanguageDomainModelMapper.invoke(updatedLanguage)
 
             emit(OperationStatus.WithInputData.Completed(languageDomainModel, updatedLanguageDomainModel))

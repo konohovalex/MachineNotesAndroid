@@ -2,15 +2,14 @@ package ru.konohovalex.feature.preferences.domain.usecase
 
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
-import ru.konohovalex.core.utils.model.OperationStatus
-import ru.konohovalex.core.utils.extension.unwrap
 import ru.konohovalex.core.utils.model.Mapper
+import ru.konohovalex.core.utils.model.OperationStatus
 import ru.konohovalex.feature.preferences.data.model.ThemeMode
 import ru.konohovalex.feature.preferences.data.repository.contract.PreferencesRepositoryContract
 import ru.konohovalex.feature.preferences.domain.model.ThemeModeDomainModel
 import javax.inject.Inject
 
-class UpdateCurrentThemeModeUseCase
+class UpdateThemeModeUseCase
 @Inject constructor(
     private val preferencesRepository: PreferencesRepositoryContract,
     private val themeModeDomainModelToThemeModeMapper: Mapper<ThemeModeDomainModel, ThemeMode>,
@@ -25,7 +24,7 @@ class UpdateCurrentThemeModeUseCase
             emit(OperationStatus.WithInputData.Processing(themeModeDomainModel))
 
             val themeMode = themeModeDomainModelToThemeModeMapper.invoke(themeModeDomainModel)
-            val updatedThemeMode = preferencesRepository.updateCurrentThemeMode(themeMode).unwrap()
+            val updatedThemeMode = preferencesRepository.updateThemeMode(themeMode)
             val updatedThemeModeDomainModel = themeModeToThemeModeDomainModelMapper.invoke(updatedThemeMode)
 
             emit(OperationStatus.WithInputData.Completed(themeModeDomainModel, updatedThemeModeDomainModel))

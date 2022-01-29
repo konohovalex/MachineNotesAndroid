@@ -1,5 +1,6 @@
 package ru.konohovalex.machinenotes.app.presentation.home.ui.compose
 
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Scaffold
@@ -23,19 +24,24 @@ internal fun HomeScreen(
     }
 
     Scaffold(
-        bottomBar = {
-            HomeScreenBottomNavigationBar(bottomNavigationNavController)
-        },
         backgroundColor = Theme.palette.backgroundColor,
         content = {
-            NavHost(
-                navController = bottomNavigationNavController,
-                startDestination = bottomNavigationStartDestination,
+            Column(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(it),
             ) {
-                bottomNavigationGraph(navigateToNoteDetails, navigateToAuth)
+                NavHost(
+                    modifier = Modifier.weight(1f),
+                    navController = bottomNavigationNavController,
+                    startDestination = bottomNavigationStartDestination,
+                ) {
+                    bottomNavigationGraph(navigateToNoteDetails, navigateToAuth)
+                }
+
+                /** Bottom navigation bar should've been in [Scaffold]'s topBar attribute,
+                 * but for completely unknown reason it ain't reacting on [Theme.palette] changes */
+                HomeScreenBottomNavigationBar(bottomNavigationNavController)
             }
         }
     )

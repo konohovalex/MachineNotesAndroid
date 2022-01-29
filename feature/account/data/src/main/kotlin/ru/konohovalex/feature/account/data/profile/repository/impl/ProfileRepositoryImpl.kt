@@ -1,7 +1,9 @@
 package ru.konohovalex.feature.account.data.profile.repository.impl
 
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
+import ru.konohovalex.core.utils.extension.withIo
 import ru.konohovalex.core.utils.model.Mapper
-import ru.konohovalex.core.utils.model.OperationResult
 import ru.konohovalex.feature.account.data.auth.model.AuthData
 import ru.konohovalex.feature.account.data.auth.model.remote.AuthDataDto
 import ru.konohovalex.feature.account.data.profile.model.Profile
@@ -20,23 +22,33 @@ internal class ProfileRepositoryImpl
     private val profileDtoToProfileEntityMapper: Mapper<ProfileDto, ProfileEntity>,
     private val authDataToAuthDataDtoMapper: Mapper<AuthData, AuthDataDto>,
 ) : ProfileRepositoryContract {
-    override suspend fun getProfile(): OperationResult<Profile?> {
-        val profileEntity = profileStorage.getProfile()
-        val profile = profileEntity?.let(profileEntityToProfileMapper::invoke)
-        return OperationResult.Success(profile)
-    }
+    // tbd should there be safe update ops?
+    override suspend fun observeProfile(): Flow<Profile?> =
+        profileStorage.observeProfile()
+            .map {
+                it?.let(profileEntityToProfileMapper::invoke)
+                // tbd if null, call logIn(null) before
+            }
 
-    override suspend fun logIn(authData: AuthData?): OperationResult<Profile> {
-        /*val authDataDto = authData?.let(authDataToAuthDataDtoMapper::invoke)
-        val profileDto = profileApi.logIn(authDataDto)*/
+    override suspend fun logIn(authData: AuthData?): Profile = withIo {
+        /*val profileDto = profileApi.logIn(authDataDto)*/
         val profileDto = ProfileDto(
             id = "0",
             name = authData?.userName?.value.orEmpty(),
             authToken = "12345",
             refreshToken = "54321",
         )
-        val profileEntity = profileStorage.updateProfile(profileDtoToProfileEntityMapper.invoke(profileDto))
-        val profile = profileEntityToProfileMapper.invoke(profileEntity)
-        return OperationResult.Success(profile)
+        val profileEntity = profileDtoToProfileEntityMapper.invoke(profileDto)
+        val updatedProfileEntity = profileStorage.updateProfile(profileEntity)
+        profileEntityToProfileMapper.invoke(updatedProfileEntity)
     }
+
+    override suspend fun logOut(): Profile = logIn(null)
+
+    // tbd
+    // val authDataDto = profileApi.deleteAccount(getCurrentProfile.id.orEmpty())
+    override suspend fun deleteAccount() = logIn(null)
+
+    override suspend fun getCurrentProfile(): Profile? =
+        profileStorage.getCurrentProfile()?.let(profileEntityToProfileMapper::invoke)
 }

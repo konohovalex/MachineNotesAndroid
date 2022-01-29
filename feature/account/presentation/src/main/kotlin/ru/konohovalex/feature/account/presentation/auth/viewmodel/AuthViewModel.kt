@@ -3,8 +3,11 @@ package ru.konohovalex.feature.account.presentation.auth.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.take
+import kotlinx.coroutines.launch
 import ru.konohovalex.core.presentation.arch.viewevent.ViewEventHandler
 import ru.konohovalex.core.presentation.arch.viewstate.ViewStateProvider
 import ru.konohovalex.core.presentation.arch.viewstate.ViewStateProviderDelegate
@@ -13,7 +16,7 @@ import ru.konohovalex.core.utils.model.OperationStatus
 import ru.konohovalex.feature.account.domain.auth.model.AuthDataDomainModel
 import ru.konohovalex.feature.account.domain.auth.usecase.LogInUseCase
 import ru.konohovalex.feature.account.domain.profile.model.ProfileDomainModel
-import ru.konohovalex.feature.account.domain.profile.usecase.GetProfileUseCase
+import ru.konohovalex.feature.account.domain.profile.usecase.ObserveProfileUseCase
 import ru.konohovalex.feature.account.presentation.R
 import ru.konohovalex.feature.account.presentation.auth.model.AuthDataUiModel
 import ru.konohovalex.feature.account.presentation.auth.model.AuthViewEvent
@@ -23,7 +26,7 @@ import javax.inject.Inject
 @HiltViewModel
 internal class AuthViewModel
 @Inject constructor(
-    private val getProfileUseCase: GetProfileUseCase,
+    private val observeProfileUseCase: ObserveProfileUseCase,
     private val logInUseCase: LogInUseCase,
     private val authDataUiModelToAuthDataDomainModelMapper: Mapper<AuthDataUiModel, AuthDataDomainModel>,
 ) : ViewModel(),
@@ -40,16 +43,19 @@ internal class AuthViewModel
     }
 
     private fun init() {
-        getProfileUseCase.invoke()
-            .onEach {
-                when (it) {
-                    is OperationStatus.Plain.Pending -> setLoadingState()
-                    is OperationStatus.Plain.Processing -> {}
-                    is OperationStatus.Plain.Completed -> setInitialDataState(it.outputData)
-                    is OperationStatus.Plain.Error -> setInitErrorState(it.throwable)
+        viewModelScope.launch {
+            observeProfileUseCase.invoke()
+                .onEach {
+                    when (it) {
+                        is OperationStatus.Plain.Pending -> setLoadingState()
+                        is OperationStatus.Plain.Processing -> {}
+                        is OperationStatus.Plain.Completed -> setInitialDataState(it.outputData)
+                        is OperationStatus.Plain.Error -> setInitErrorState(it.throwable)
+                    }
                 }
-            }
-            .launchIn(viewModelScope)
+                .take(1)
+                .collect()
+        }
     }
 
     private fun setLoadingState() {

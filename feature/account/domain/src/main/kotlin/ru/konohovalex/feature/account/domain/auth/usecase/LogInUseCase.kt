@@ -2,7 +2,6 @@ package ru.konohovalex.feature.account.domain.auth.usecase
 
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
-import ru.konohovalex.core.utils.extension.unwrap
 import ru.konohovalex.core.utils.model.Mapper
 import ru.konohovalex.core.utils.model.OperationStatus
 import ru.konohovalex.feature.account.data.auth.model.AuthData
@@ -27,7 +26,7 @@ class LogInUseCase
             emit(OperationStatus.WithInputData.Processing(authDataDomainModel))
 
             val authData = authDataDomainModel?.let(authDataDomainModelToAuthDataMapper::invoke)
-            val profile = profileRepository.logIn(authData).unwrap()
+            val profile = profileRepository.logIn(authData)
             val profileDomainModel = profileToProfileDomainModelMapper.invoke(profile)
 
             emit(OperationStatus.WithInputData.Completed(authDataDomainModel, profileDomainModel))

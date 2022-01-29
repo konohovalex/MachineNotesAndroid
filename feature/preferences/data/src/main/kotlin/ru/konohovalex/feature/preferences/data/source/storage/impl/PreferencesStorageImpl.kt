@@ -4,50 +4,63 @@ import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
-import kotlinx.coroutines.flow.firstOrNull
-import ru.konohovalex.feature.preferences.data.model.entity.LanguageEntity
-import ru.konohovalex.feature.preferences.data.model.entity.ThemeModeEntity
+import com.google.gson.Gson
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
+import ru.konohovalex.core.utils.extension.fromJson
+import ru.konohovalex.feature.preferences.data.model.entity.PreferencesEntity
 import ru.konohovalex.feature.preferences.data.source.storage.contract.PreferencesStorageContract
 import javax.inject.Inject
 
 internal class PreferencesStorageImpl
 @Inject constructor(
+    private val coroutineScope: CoroutineScope,
     private val preferencesDataStore: DataStore<Preferences>,
+    private val gson: Gson,
 ) : PreferencesStorageContract {
     companion object {
-        private val KEY_LANGUAGE = stringPreferencesKey(name = "key_language")
-        private val KEY_THEME_MODE = stringPreferencesKey(name = "key_theme_mode")
+        private val KEY_PREFERENCES = stringPreferencesKey(name = "key_preferences")
     }
 
-    override suspend fun getCurrentLanguage(): LanguageEntity =
-        preferencesDataStore
-            .data
-            .firstOrNull()
-            ?.get(KEY_LANGUAGE)
-            ?.let { LanguageEntity.valueOf(it) }
-            ?: LanguageEntity.ENG
+    private var preferencesStateFlow: StateFlow<PreferencesEntity>? = null
 
-    override suspend fun updateCurrentLanguage(language: LanguageEntity): LanguageEntity {
+    override suspend fun observePreferences(): Flow<PreferencesEntity> =
+        getPreferencesStateFlow()
+
+    override suspend fun getCurrentPreferences(): PreferencesEntity =
+        getPreferencesStateFlow().value
+
+    override suspend fun updatePreferences(preferencesEntity: PreferencesEntity): PreferencesEntity =
         preferencesDataStore
             .edit {
-                it[KEY_LANGUAGE] = language.name
+                it[KEY_PREFERENCES] = gson.toJson(preferencesEntity)
             }
-        return language
-    }
+            .let {
+                it[KEY_PREFERENCES]?.let(::mapJsonToPreferencesEntity)
+                    ?: dataStoreUpdateError(preferencesEntity)
+            }
 
-    override suspend fun getCurrentThemeMode(): ThemeModeEntity =
+    private suspend fun getPreferencesStateFlow(): StateFlow<PreferencesEntity> =
+        preferencesStateFlow ?: initPreferencesStateFlow()
+
+    private suspend fun initPreferencesStateFlow(): StateFlow<PreferencesEntity> =
         preferencesDataStore
             .data
-            .firstOrNull()
-            ?.get(KEY_THEME_MODE)
-            ?.let { ThemeModeEntity.valueOf(it) }
-            ?: ThemeModeEntity.SYSTEM
-
-    override suspend fun updateCurrentThemeMode(themeMode: ThemeModeEntity): ThemeModeEntity {
-        preferencesDataStore
-            .edit {
-                it[KEY_THEME_MODE] = themeMode.name
+            .map {
+                it[KEY_PREFERENCES]?.let(::mapJsonToPreferencesEntity)
+                    ?: PreferencesEntity.default()
             }
-        return themeMode
-    }
+            .stateIn(coroutineScope)
+            .also { preferencesStateFlow = it }
+
+    private fun mapJsonToPreferencesEntity(preferencesJson: String) =
+        gson.fromJson<PreferencesEntity>(preferencesJson)
+
+    private fun dataStoreUpdateError(preferencesEntity: PreferencesEntity): Nothing =
+        throw IllegalStateException(
+            "Expecting [${preferencesEntity}], but got null"
+        )
 }
