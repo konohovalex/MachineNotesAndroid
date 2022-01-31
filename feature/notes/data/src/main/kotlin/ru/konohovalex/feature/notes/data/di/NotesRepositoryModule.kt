@@ -2,14 +2,13 @@ package ru.konohovalex.feature.notes.data.di
 
 import dagger.Binds
 import dagger.Module
-import dagger.hilt.InstallIn
-import dagger.hilt.components.SingletonComponent
+import dagger.hilt.migration.DisableInstallInCheck
 import ru.konohovalex.feature.notes.data.repository.contract.NotesRepositoryContract
 import ru.konohovalex.feature.notes.data.repository.impl.NotesRepositoryImpl
 import javax.inject.Singleton
 
 @Module
-@InstallIn(SingletonComponent::class)
+@DisableInstallInCheck
 internal interface NotesRepositoryModule {
     @Binds
     @Singleton

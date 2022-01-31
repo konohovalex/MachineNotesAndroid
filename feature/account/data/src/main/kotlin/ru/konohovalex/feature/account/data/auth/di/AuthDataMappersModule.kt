@@ -2,15 +2,14 @@ package ru.konohovalex.feature.account.data.auth.di
 
 import dagger.Binds
 import dagger.Module
-import dagger.hilt.InstallIn
-import dagger.hilt.components.SingletonComponent
+import dagger.hilt.migration.DisableInstallInCheck
 import ru.konohovalex.core.utils.model.Mapper
 import ru.konohovalex.feature.account.data.auth.mapper.AuthDataToAuthDataDtoMapper
 import ru.konohovalex.feature.account.data.auth.model.AuthData
 import ru.konohovalex.feature.account.data.auth.model.remote.AuthDataDto
 
 @Module
-@InstallIn(SingletonComponent::class)
+@DisableInstallInCheck
 internal interface AuthDataMappersModule {
     @Binds
     fun bindAuthDataToAuthDataDtoMapper(

@@ -2,8 +2,7 @@ package ru.konohovalex.feature.preferences.data.di
 
 import dagger.Binds
 import dagger.Module
-import dagger.hilt.InstallIn
-import dagger.hilt.components.SingletonComponent
+import dagger.hilt.migration.DisableInstallInCheck
 import ru.konohovalex.core.utils.model.Mapper
 import ru.konohovalex.feature.preferences.data.mapper.LanguageEntityToLanguageMapper
 import ru.konohovalex.feature.preferences.data.mapper.LanguageToLanguageEntityMapper
@@ -19,8 +18,8 @@ import ru.konohovalex.feature.preferences.data.model.entity.PreferencesEntity
 import ru.konohovalex.feature.preferences.data.model.entity.ThemeModeEntity
 
 @Module
-@InstallIn(SingletonComponent::class)
-interface PreferencesDataMappersModule {
+@DisableInstallInCheck
+internal interface PreferencesDataMappersModule {
     @Binds
     fun bindPreferencesEntityToPreferencesMapper(
         mapper: PreferencesEntityToPreferencesMapper,

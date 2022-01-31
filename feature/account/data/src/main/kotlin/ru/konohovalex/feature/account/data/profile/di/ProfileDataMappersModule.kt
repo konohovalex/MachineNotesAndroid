@@ -2,8 +2,7 @@ package ru.konohovalex.feature.account.data.profile.di
 
 import dagger.Binds
 import dagger.Module
-import dagger.hilt.InstallIn
-import dagger.hilt.components.SingletonComponent
+import dagger.hilt.migration.DisableInstallInCheck
 import ru.konohovalex.core.utils.model.Mapper
 import ru.konohovalex.feature.account.data.profile.mapper.ProfileDtoToProfileEntityMapper
 import ru.konohovalex.feature.account.data.profile.mapper.ProfileEntityToProfileMapper
@@ -12,7 +11,7 @@ import ru.konohovalex.feature.account.data.profile.model.entity.ProfileEntity
 import ru.konohovalex.feature.account.data.profile.model.remote.ProfileDto
 
 @Module
-@InstallIn(SingletonComponent::class)
+@DisableInstallInCheck
 internal interface ProfileDataMappersModule {
     @Binds
     fun bindProfileEntityToProfileMapper(

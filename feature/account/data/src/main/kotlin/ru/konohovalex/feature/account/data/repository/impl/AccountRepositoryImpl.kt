@@ -1,4 +1,4 @@
-package ru.konohovalex.feature.account.data.profile.repository.impl
+package ru.konohovalex.feature.account.data.repository.impl
 
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
@@ -9,19 +9,19 @@ import ru.konohovalex.feature.account.data.auth.model.remote.AuthDataDto
 import ru.konohovalex.feature.account.data.profile.model.Profile
 import ru.konohovalex.feature.account.data.profile.model.entity.ProfileEntity
 import ru.konohovalex.feature.account.data.profile.model.remote.ProfileDto
-import ru.konohovalex.feature.account.data.profile.repository.contract.ProfileRepositoryContract
-import ru.konohovalex.feature.account.data.profile.source.api.ProfileApi
 import ru.konohovalex.feature.account.data.profile.source.storage.contract.ProfileStorageContract
+import ru.konohovalex.feature.account.data.repository.contract.AccountRepositoryContract
+import ru.konohovalex.feature.account.data.source.api.AccountApi
 import javax.inject.Inject
 
-internal class ProfileRepositoryImpl
+internal class AccountRepositoryImpl
 @Inject constructor(
     private val profileStorage: ProfileStorageContract,
-    private val profileApi: ProfileApi,
+    private val accountApi: AccountApi,
     private val profileEntityToProfileMapper: Mapper<ProfileEntity, Profile>,
     private val profileDtoToProfileEntityMapper: Mapper<ProfileDto, ProfileEntity>,
     private val authDataToAuthDataDtoMapper: Mapper<AuthData, AuthDataDto>,
-) : ProfileRepositoryContract {
+) : AccountRepositoryContract {
     // tbd should there be safe update ops?
     override suspend fun observeProfile(): Flow<Profile?> =
         profileStorage.observeProfile()
@@ -31,7 +31,7 @@ internal class ProfileRepositoryImpl
             }
 
     override suspend fun logIn(authData: AuthData?): Profile = withIo {
-        /*val profileDto = profileApi.logIn(authDataDto)*/
+        /*val profileDto = accountApi.logIn(authDataDto)*/
         val profileDto = ProfileDto(
             id = "0",
             name = authData?.userName?.value.orEmpty(),
@@ -46,9 +46,6 @@ internal class ProfileRepositoryImpl
     override suspend fun logOut(): Profile = logIn(null)
 
     // tbd
-    // val authDataDto = profileApi.deleteAccount(getCurrentProfile.id.orEmpty())
+    // val authDataDto = accountApi.deleteAccount(getCurrentProfile.id.orEmpty())
     override suspend fun deleteAccount() = logIn(null)
-
-    override suspend fun getCurrentProfile(): Profile? =
-        profileStorage.getCurrentProfile()?.let(profileEntityToProfileMapper::invoke)
 }

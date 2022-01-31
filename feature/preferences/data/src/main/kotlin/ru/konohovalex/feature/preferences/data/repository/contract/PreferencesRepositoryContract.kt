@@ -9,8 +9,6 @@ import ru.konohovalex.feature.preferences.data.model.ThemeMode
 interface PreferencesRepositoryContract : Repository {
     suspend fun observePreferences(): Flow<Preferences>
     suspend fun updatePreferences(preferences: Preferences): Preferences
-    suspend fun getCurrentLanguage(): Language
     suspend fun updateLanguage(language: Language): Language
-    suspend fun getCurrentThemeMode(): ThemeMode
     suspend fun updateThemeMode(themeMode: ThemeMode): ThemeMode
 }

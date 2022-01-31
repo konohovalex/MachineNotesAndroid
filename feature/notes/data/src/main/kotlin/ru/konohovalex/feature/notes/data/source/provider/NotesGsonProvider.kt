@@ -1,4 +1,4 @@
-package ru.konohovalex.feature.notes.data.source.api.provider
+package ru.konohovalex.feature.notes.data.source.provider
 
 import com.google.gson.Gson
 import ru.konohovalex.core.data.arch.provider.Provider

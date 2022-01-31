@@ -2,8 +2,7 @@ package ru.konohovalex.feature.preferences.presentation.di
 
 import dagger.Binds
 import dagger.Module
-import dagger.hilt.InstallIn
-import dagger.hilt.components.SingletonComponent
+import dagger.hilt.migration.DisableInstallInCheck
 import ru.konohovalex.core.utils.model.Mapper
 import ru.konohovalex.feature.preferences.domain.model.LanguageDomainModel
 import ru.konohovalex.feature.preferences.domain.model.ThemeModeDomainModel
@@ -15,7 +14,7 @@ import ru.konohovalex.feature.preferences.presentation.model.LanguageUiModel
 import ru.konohovalex.feature.preferences.presentation.model.ThemeModeUiModel
 
 @Module
-@InstallIn(SingletonComponent::class)
+@DisableInstallInCheck
 internal interface PreferencesPresentationMappersModule {
     @Binds
     fun bindLanguageDomainModelToLanguageUiModelMapper(

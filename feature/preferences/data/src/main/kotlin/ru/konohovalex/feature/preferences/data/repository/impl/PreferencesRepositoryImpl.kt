@@ -29,15 +29,11 @@ internal class PreferencesRepositoryImpl
         preferencesEntityToPreferencesMapper.invoke(updatedPreferencesEntity)
     }
 
-    override suspend fun getCurrentLanguage(): Language = getCurrentPreferences().language
-
     override suspend fun updateLanguage(language: Language): Language =
         updatePreferences(
             getCurrentPreferences()
                 .copy(language = language)
         ).language
-
-    override suspend fun getCurrentThemeMode(): ThemeMode = getCurrentPreferences().themeMode
 
     override suspend fun updateThemeMode(themeMode: ThemeMode): ThemeMode =
         updatePreferences(

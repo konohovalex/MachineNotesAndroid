@@ -2,8 +2,7 @@ package ru.konohovalex.feature.notes.domain.di
 
 import dagger.Binds
 import dagger.Module
-import dagger.hilt.InstallIn
-import dagger.hilt.components.SingletonComponent
+import dagger.hilt.migration.DisableInstallInCheck
 import ru.konohovalex.core.utils.model.Mapper
 import ru.konohovalex.feature.notes.data.model.Note
 import ru.konohovalex.feature.notes.data.model.NoteContent
@@ -18,7 +17,7 @@ import ru.konohovalex.feature.notes.domain.model.NoteDomainModel
 import ru.konohovalex.feature.notes.domain.model.NoteUpdateParamsDomainModel
 
 @Module
-@InstallIn(SingletonComponent::class)
+@DisableInstallInCheck
 internal interface NotesDomainMappersModule {
     @Binds
     fun bindNoteContentDomainModelToNoteContentMapper(

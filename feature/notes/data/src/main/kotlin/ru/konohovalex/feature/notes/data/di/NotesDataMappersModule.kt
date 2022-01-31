@@ -2,8 +2,7 @@ package ru.konohovalex.feature.notes.data.di
 
 import dagger.Binds
 import dagger.Module
-import dagger.hilt.InstallIn
-import dagger.hilt.components.SingletonComponent
+import dagger.hilt.migration.DisableInstallInCheck
 import ru.konohovalex.core.utils.model.Mapper
 import ru.konohovalex.feature.notes.data.mapper.NoteContentDtoToNoteContentMapper
 import ru.konohovalex.feature.notes.data.mapper.NoteContentEntityToNoteContentMapper
@@ -24,7 +23,7 @@ import ru.konohovalex.feature.notes.data.model.remote.NoteDto
 import ru.konohovalex.feature.notes.data.model.remote.NoteUpdateParamsDto
 
 @Module
-@InstallIn(SingletonComponent::class)
+@DisableInstallInCheck
 internal interface NotesDataMappersModule {
     @Binds
     fun bindNoteContentDtoToNoteContentMapper(

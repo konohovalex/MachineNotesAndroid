@@ -2,8 +2,7 @@ package ru.konohovalex.feature.preferences.domain.di
 
 import dagger.Binds
 import dagger.Module
-import dagger.hilt.InstallIn
-import dagger.hilt.components.SingletonComponent
+import dagger.hilt.migration.DisableInstallInCheck
 import ru.konohovalex.core.utils.model.Mapper
 import ru.konohovalex.feature.preferences.data.model.Language
 import ru.konohovalex.feature.preferences.data.model.Preferences
@@ -19,7 +18,7 @@ import ru.konohovalex.feature.preferences.domain.model.PreferencesDomainModel
 import ru.konohovalex.feature.preferences.domain.model.ThemeModeDomainModel
 
 @Module
-@InstallIn(SingletonComponent::class)
+@DisableInstallInCheck
 internal interface PreferencesDomainMappersModule {
     @Binds
     fun bindPreferencesToPreferencesDomainModelMapper(

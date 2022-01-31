@@ -1,43 +1,65 @@
 package ru.konohovalex.feature.account.data.profile.di
 
 import android.content.Context
+import androidx.datastore.core.DataStore
+import androidx.datastore.preferences.core.Preferences
 import com.google.gson.Gson
 import dagger.Module
 import dagger.Provides
-import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
-import dagger.hilt.components.SingletonComponent
+import dagger.hilt.migration.DisableInstallInCheck
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
+import ru.konohovalex.core.data.arch.provider.Provider
+import ru.konohovalex.feature.account.data.di.Qualifiers
+import ru.konohovalex.feature.account.data.profile.source.provider.ProfileDataStoreCoroutineScopeProvider
 import ru.konohovalex.feature.account.data.profile.source.storage.contract.ProfileStorageContract
 import ru.konohovalex.feature.account.data.profile.source.storage.impl.ProfileStorageImpl
 import ru.konohovalex.feature.account.data.profile.source.storage.provider.ProfileDataStoreProvider
+import javax.inject.Named
 import javax.inject.Singleton
 
 @Module
-@InstallIn(SingletonComponent::class)
+@DisableInstallInCheck
 internal class ProfileStorageModule {
-    // tbd fix
-    /*@Provides
-    fun provideProfileDataStoreProvider(): Provider<Context, DataStore<Preferences>> = ProfileDataStoreProvider()*/
+    @Provides
+    @Named(Qualifiers.PROFILE_DATA_STORE_COROUTINE_SCOPE_PROVIDER)
+    fun provideProfileDataStoreCoroutineScopeProvider(): Provider<Nothing?, CoroutineScope> =
+        ProfileDataStoreCoroutineScopeProvider()
 
-    /*@Provides
+    @Provides
+    @Named(Qualifiers.PROFILE_DATA_STORE_COROUTINE_SCOPE)
+    fun provideProfileDataStoreCoroutineScope(
+        @Named(Qualifiers.PROFILE_DATA_STORE_COROUTINE_SCOPE_PROVIDER)
+        profileDataStoreCoroutineScopeProvider: Provider<Nothing?, CoroutineScope>,
+    ): CoroutineScope = profileDataStoreCoroutineScopeProvider.provide(null)
+
+    @Provides
+    @Named(Qualifiers.PROFILE_DATA_STORE_PROVIDER)
+    fun provideProfileDataStoreProvider(): Provider<Context, DataStore<Preferences>> =
+        ProfileDataStoreProvider()
+
+    @Provides
     @Singleton
+    @Named(Qualifiers.PROFILE_PREFERENCES_DATA_STORE)
     fun provideProfilePreferencesDataStore(
-        @ApplicationContext context: Context,
+        @ApplicationContext
+        context: Context,
+        @Named(Qualifiers.PROFILE_DATA_STORE_PROVIDER)
         profilePreferencesDataStoreProvider: Provider<Context, DataStore<Preferences>>,
-    ): DataStore<Preferences> = profilePreferencesDataStoreProvider.provide(context)*/
+    ): DataStore<Preferences> = profilePreferencesDataStoreProvider.provide(context)
 
     @Provides
     @Singleton
     fun provideProfileStorage(
-        @ApplicationContext context: Context,
-//        profilePreferencesDataStore: DataStore<Preferences>,
+        @Named(Qualifiers.PROFILE_DATA_STORE_COROUTINE_SCOPE)
+        profileDataStoreCoroutineScope: CoroutineScope,
+        @Named(Qualifiers.PROFILE_PREFERENCES_DATA_STORE)
+        profilePreferencesDataStore: DataStore<Preferences>,
+        @Named(Qualifiers.PROFILE_GSON)
         profileGson: Gson,
     ): ProfileStorageContract = ProfileStorageImpl(
-        coroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.IO),
-        preferencesDataStore = ProfileDataStoreProvider().provide(context),
+        coroutineScope = profileDataStoreCoroutineScope,
+        preferencesDataStore = profilePreferencesDataStore,
         gson = profileGson,
     )
 }
