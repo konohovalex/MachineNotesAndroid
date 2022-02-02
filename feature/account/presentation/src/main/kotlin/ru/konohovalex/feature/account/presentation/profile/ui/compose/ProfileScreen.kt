@@ -5,8 +5,9 @@ import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import ru.konohovalex.core.design.model.Theme
@@ -33,34 +34,28 @@ internal fun ProfileScreen(
     ) {
         Logo()
 
-        val viewState = viewStateProvider.viewState.observeAsState()
+        val viewState by viewStateProvider.viewState.observeAsState()
 
-        val onLogOutButtonClick = remember {
-            {
-                viewEventHandler.handle(ProfileViewEvent.LogOut)
+        when (viewState) {
+            is ProfileViewState.Idle -> LaunchedEffect(true) {
+                viewEventHandler.handle(ProfileViewEvent.GetProfile)
             }
-        }
-        val onDeleteAccountButtonClick = remember {
-            {
-                viewEventHandler.handle(ProfileViewEvent.DeleteAccount)
-            }
-        }
-        val onDeleteAllNotesButtonClick = remember {
-            {
-                viewEventHandler.handle(ProfileViewEvent.DeleteAllNotes)
-            }
-        }
-
-        when (val viewStateValue = viewState.value) {
-            is ProfileViewState.Idle -> viewEventHandler.handle(ProfileViewEvent.GetProfile)
             is ProfileViewState.Loading -> LoadingState()
-            is ProfileViewState.Data -> DataState(
-                profileUiModel = viewStateValue.profileUiModel,
-                onLogOutButtonClick = onLogOutButtonClick,
-                onDeleteAccountButtonClick = onDeleteAccountButtonClick,
-                onDeleteAllNotesButtonClick = onDeleteAllNotesButtonClick,
-                navigateToAuth = navigateToAuth,
-            )
+            is ProfileViewState.Data -> with(viewState as ProfileViewState.Data) {
+                DataState(
+                    profileUiModel = profileUiModel,
+                    onLogOutButtonClick = {
+                        viewEventHandler.handle(ProfileViewEvent.LogOut)
+                    },
+                    onDeleteAccountButtonClick = {
+                        viewEventHandler.handle(ProfileViewEvent.DeleteAccount)
+                    },
+                    onDeleteAllNotesButtonClick = {
+                        viewEventHandler.handle(ProfileViewEvent.DeleteAllNotes)
+                    },
+                    navigateToAuth = navigateToAuth,
+                )
+            }
             is ProfileViewState.Error -> ErrorState()
         }
     }

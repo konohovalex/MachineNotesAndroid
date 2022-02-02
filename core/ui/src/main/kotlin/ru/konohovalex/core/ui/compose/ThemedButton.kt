@@ -10,9 +10,6 @@ import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.OutlinedButton
 import androidx.compose.material.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.State
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -30,179 +27,116 @@ fun ThemedButton(
     buttonData: ButtonData,
     modifier: Modifier = Modifier,
 ) {
-    val onClickState = remember {
-        mutableStateOf(buttonData.onClick)
-    }
-    onClickState.value = buttonData.onClick
-
-    val enabledState = remember {
-        mutableStateOf(buttonData.enabled)
-    }
-    enabledState.value = buttonData.enabled
-
-    val fillEnabledColorState = remember {
-        mutableStateOf(buttonData.fillEnabledColor)
-    }
-    fillEnabledColorState.value = buttonData.fillEnabledColor
-
-    when (buttonData) {
-        is ButtonData.WithContent -> ButtonWithContent(
-            buttonData = buttonData,
-            onClickState = onClickState,
-            enabledState = enabledState,
-            fillEnabledColorState = fillEnabledColorState,
-            modifier = modifier,
-        )
-        is ButtonData.Text -> TextButton(
-            buttonData = buttonData,
-            onClickState = onClickState,
-            enabledState = enabledState,
-            modifier = modifier,
-        )
+    with(buttonData) {
+        when (this) {
+            is ButtonData.WithContent -> ButtonWithContent(
+                buttonData = this,
+                modifier = modifier,
+            )
+            is ButtonData.Text -> TextButton(
+                buttonData = this,
+                modifier = modifier,
+            )
+        }
     }
 }
 
 @Composable
 private fun ButtonWithContent(
     buttonData: ButtonData.WithContent,
-    onClickState: State<() -> Unit>,
-    enabledState: State<Boolean>,
-    fillEnabledColorState: State<Color?>,
     modifier: Modifier,
 ) {
-    with(buttonData) {
-        val contentState = remember {
-            mutableStateOf(content)
+    when (buttonData) {
+        is ButtonData.Regular -> {
+            RegularButton(
+                buttonData = buttonData,
+                modifier = modifier,
+            )
         }
-        contentState.value = content
-
-        val contentArrangementState = remember {
-            mutableStateOf(contentArrangement)
-        }
-        contentArrangementState.value = contentArrangement
-
-        val contentSpacingState = remember {
-            mutableStateOf(contentSpacing)
-        }
-        contentSpacingState.value = contentSpacing
-
-        val backgroundColorState = remember {
-            mutableStateOf(Color.Transparent)
-        }
-
-        when (buttonData) {
-            is ButtonData.Regular -> {
-                backgroundColorState.value = fillEnabledColorState.value ?: Theme.palette.fillEnabledColor
-
-                RegularButton(
-                    onClickState = onClickState,
-                    enabledState = enabledState,
-                    backgroundColorState = backgroundColorState,
-                    contentState = contentState,
-                    contentArrangementState = contentArrangementState,
-                    contentSpacingState = contentSpacingState,
-                    modifier = modifier,
-                )
-            }
-            is ButtonData.Outlined -> {
-                backgroundColorState.value =
-                    if (buttonData.selected) fillEnabledColorState.value ?: Theme.palette.fillEnabledColor
-                    else Theme.palette.backgroundColor
-
-                OutlinedButton(
-                    onClickState = onClickState,
-                    enabledState = enabledState,
-                    backgroundColorState = backgroundColorState,
-                    contentState = contentState,
-                    contentArrangementState = contentArrangementState,
-                    contentSpacingState = contentSpacingState,
-                    modifier = modifier,
-                )
-            }
+        is ButtonData.Outlined -> {
+            OutlinedButton(
+                buttonData = buttonData,
+                modifier = modifier,
+            )
         }
     }
 }
 
 @Composable
 private fun RegularButton(
-    onClickState: State<() -> Unit>,
-    enabledState: State<Boolean>,
-    backgroundColorState: State<Color>,
-    contentState: State<List<ButtonData.Content>>,
-    contentArrangementState: State<ButtonData.ContentArrangement>,
-    contentSpacingState: State<Dp>,
+    buttonData: ButtonData.Regular,
     modifier: Modifier,
 ) {
-    Button(
-        onClick = onClickState.value,
-        modifier = modifier,
-        enabled = enabledState.value,
-        shape = Theme.shapes.large,
-        contentPadding = Theme.paddings.buttonPaddingsAsPaddingValues(),
-        colors = ButtonDefaults.buttonColors(
-            backgroundColor = backgroundColorState.value,
-            disabledBackgroundColor = Theme.palette.fillDisabledColor,
-        ),
-    ) {
-        Content(
-            contentState = contentState,
-            contentArrangementState = contentArrangementState,
-            contentSpacingState = contentSpacingState,
-        )
+    with(buttonData) {
+        Button(
+            onClick = onClick,
+            modifier = modifier,
+            enabled = enabled,
+            shape = Theme.shapes.large,
+            contentPadding = Theme.paddings.buttonPaddingsAsPaddingValues(),
+            colors = ButtonDefaults.buttonColors(
+                backgroundColor = fillEnabledColor ?: Theme.palette.fillEnabledColor,
+                disabledBackgroundColor = Theme.palette.fillDisabledColor,
+            ),
+        ) {
+            Content(
+                content = content,
+                contentArrangement = contentArrangement,
+                contentSpacing = contentSpacing,
+            )
+        }
     }
 }
 
 @Composable
 private fun OutlinedButton(
-    onClickState: State<() -> Unit>,
-    enabledState: State<Boolean>,
-    backgroundColorState: State<Color>,
-    contentState: State<List<ButtonData.Content>>,
-    contentArrangementState: State<ButtonData.ContentArrangement>,
-    contentSpacingState: State<Dp>,
+    buttonData: ButtonData.Outlined,
     modifier: Modifier,
 ) {
-    OutlinedButton(
-        onClick = onClickState.value,
-        modifier = modifier,
-        enabled = enabledState.value,
-        shape = Theme.shapes.large,
-        contentPadding = Theme.paddings.buttonPaddingsAsPaddingValues(),
-        colors = ButtonDefaults.buttonColors(
-            backgroundColor = backgroundColorState.value,
-            disabledBackgroundColor = Theme.palette.fillDisabledColor,
-        ),
-        border = BorderStroke(
-            width = Theme.sizes.border,
-            color = Theme.palette.accentColor,
-        ),
-    ) {
-        Content(
-            contentState = contentState,
-            contentArrangementState = contentArrangementState,
-            contentSpacingState = contentSpacingState,
-        )
+    with(buttonData) {
+        OutlinedButton(
+            onClick = onClick,
+            modifier = modifier,
+            enabled = enabled,
+            shape = Theme.shapes.large,
+            contentPadding = Theme.paddings.buttonPaddingsAsPaddingValues(),
+            colors = ButtonDefaults.buttonColors(
+                backgroundColor = if (selected) fillEnabledColor ?: Theme.palette.fillEnabledColor
+                else Theme.palette.backgroundColor,
+                disabledBackgroundColor = Theme.palette.fillDisabledColor,
+            ),
+            border = BorderStroke(
+                width = Theme.sizes.border,
+                color = Theme.palette.accentColor,
+            ),
+        ) {
+            Content(
+                content = content,
+                contentArrangement = contentArrangement,
+                contentSpacing = contentSpacing,
+            )
+        }
     }
 }
 
 @Composable
 private fun Content(
-    contentState: State<List<ButtonData.Content>>,
-    contentArrangementState: State<ButtonData.ContentArrangement>,
-    contentSpacingState: State<Dp>,
+    content: List<ButtonData.Content>,
+    contentArrangement: ButtonData.ContentArrangement,
+    contentSpacing: Dp,
 ) {
-    when (contentArrangementState.value) {
+    when (contentArrangement) {
         ButtonData.ContentArrangement.HORIZONTAL -> Row(
-            horizontalArrangement = Arrangement.spacedBy(contentSpacingState.value),
+            horizontalArrangement = Arrangement.spacedBy(contentSpacing),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            contentState.value.Compose()
+            content.Compose()
         }
         ButtonData.ContentArrangement.VERTICAL -> Column(
-            verticalArrangement = Arrangement.spacedBy(contentSpacingState.value),
+            verticalArrangement = Arrangement.spacedBy(contentSpacing),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            contentState.value.Compose()
+            content.Compose()
         }
     }
 }
@@ -240,30 +174,18 @@ private fun ImageContent(content: ButtonData.Content.Image) = ThemedImage(
 @Composable
 private fun TextButton(
     buttonData: ButtonData.Text,
-    onClickState: State<() -> Unit>,
-    enabledState: State<Boolean>,
     modifier: Modifier,
 ) {
     with(buttonData) {
-        val contentState = remember {
-            mutableStateOf(content)
-        }
-        contentState.value = content
-
-        val textColorState = remember {
-            mutableStateOf(content.textColor)
-        }
-        textColorState.value = content.textColor
-
         TextButton(
-            onClick = onClickState.value,
+            onClick = onClick,
             modifier = modifier,
             contentPadding = Theme.paddings.buttonPaddingsAsPaddingValues(),
-            enabled = enabledState.value,
+            enabled = enabled,
         ) {
             TextContent(
-                content = contentState.value,
-                textColor = textColorState.value,
+                content = content,
+                textColor = content.textColor,
             )
         }
     }

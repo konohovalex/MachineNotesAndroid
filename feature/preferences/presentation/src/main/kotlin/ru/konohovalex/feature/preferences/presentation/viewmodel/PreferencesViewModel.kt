@@ -3,6 +3,7 @@ package ru.konohovalex.feature.preferences.presentation.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
@@ -11,9 +12,6 @@ import kotlinx.coroutines.launch
 import ru.konohovalex.core.presentation.arch.viewevent.ViewEventHandler
 import ru.konohovalex.core.presentation.arch.viewstate.ViewStateProvider
 import ru.konohovalex.core.presentation.arch.viewstate.ViewStateProviderDelegate
-import ru.konohovalex.core.ui.model.Position
-import ru.konohovalex.core.ui.model.TextWrapper
-import ru.konohovalex.core.ui.model.TumblerData
 import ru.konohovalex.core.utils.model.Mapper
 import ru.konohovalex.core.utils.model.OperationStatus
 import ru.konohovalex.feature.preferences.domain.model.LanguageDomainModel
@@ -22,7 +20,6 @@ import ru.konohovalex.feature.preferences.domain.model.ThemeModeDomainModel
 import ru.konohovalex.feature.preferences.domain.usecase.ObservePreferencesUseCase
 import ru.konohovalex.feature.preferences.domain.usecase.UpdateLanguageUseCase
 import ru.konohovalex.feature.preferences.domain.usecase.UpdateThemeModeUseCase
-import ru.konohovalex.feature.preferences.presentation.R
 import ru.konohovalex.feature.preferences.presentation.model.LanguageUiModel
 import ru.konohovalex.feature.preferences.presentation.model.PreferencesScreenViewEvent
 import ru.konohovalex.feature.preferences.presentation.model.PreferencesUiModel
@@ -43,6 +40,10 @@ internal class PreferencesViewModel
 ) : ViewModel(),
     ViewEventHandler<PreferencesScreenViewEvent>,
     ViewStateProvider<PreferencesViewState> by ViewStateProviderDelegate(PreferencesViewState.Idle) {
+    private var observePreferencesJob: Job? = null
+    private var updateLanguageJob: Job? = null
+    private var updateThemeModeJob: Job? = null
+
     override fun handle(viewEvent: PreferencesScreenViewEvent) = when (viewEvent) {
         is PreferencesScreenViewEvent.GetPreferences -> getPreferences()
         is PreferencesScreenViewEvent.UpdateLanguage -> updateLanguage(viewEvent.languageUiModel)
@@ -50,7 +51,8 @@ internal class PreferencesViewModel
     }
 
     private fun getPreferences() {
-        viewModelScope.launch {
+        observePreferencesJob?.cancel()
+        observePreferencesJob = viewModelScope.launch {
             observePreferencesUseCase.invoke()
                 .onEach {
                     when (it) {
@@ -61,7 +63,7 @@ internal class PreferencesViewModel
                     }
                 }
                 .take(1)
-                .collect { }
+                .collect()
         }
     }
 
@@ -71,27 +73,20 @@ internal class PreferencesViewModel
 
     private fun setDataState(preferencesDomainModel: PreferencesDomainModel) {
         val availableLanguages = LanguageUiModel.values().toList()
-        val currentLanguageUiModel = languageDomainModelToLanguageUiModelMapper.invoke(preferencesDomainModel.languageDomainModel)
-        val languageTumblerData = TumblerData(
-            titleTextWrapper = TextWrapper.StringResource(resourceId = R.string.language_tumbler_title),
-            infoTextWrapper = TextWrapper.StringResource(resourceId = R.string.language_tumbler_info),
-            positions = availableLanguages.mapToTumblerPositions(),
-        )
+        val currentLanguageUiModel =
+            languageDomainModelToLanguageUiModelMapper.invoke(preferencesDomainModel.languageDomainModel)
 
         val availableThemeModes = ThemeModeUiModel.values().toList()
-        val currentThemeModeUiModel = themeModeDomainModelToThemeModeUiModelMapper.invoke(preferencesDomainModel.themeModeDomainModel)
-        val themeModeTumblerData = TumblerData(
-            titleTextWrapper = TextWrapper.StringResource(resourceId = R.string.theme_mode_tumbler_title),
-            positions = availableThemeModes.mapToTumblerPositions(),
-        )
+        val currentThemeModeUiModel =
+            themeModeDomainModelToThemeModeUiModelMapper.invoke(preferencesDomainModel.themeModeDomainModel)
 
         setViewState(
             viewState = PreferencesViewState.Data(
                 PreferencesUiModel(
-                    availableLanguagesTumblerData = languageTumblerData,
+                    availableLanguages = availableLanguages,
                     currentLanguageUiModel = currentLanguageUiModel,
                     languageActionsEnabled = true,
-                    availableThemeModesTumblerData = themeModeTumblerData,
+                    availableThemeModes = availableThemeModes,
                     currentThemeModeUiModel = currentThemeModeUiModel,
                     themeModeActionsEnabled = true,
                 )
@@ -99,25 +94,10 @@ internal class PreferencesViewModel
         )
     }
 
-    @JvmName("mapLanguageUiModelsToTumblerPositions")
-    private fun List<LanguageUiModel>.mapToTumblerPositions() = map {
-        Position.Text(
-            data = it,
-            textWrapper = it.textWrapper,
-        )
-    }
-
-    @JvmName("mapThemeModeUiModelsToTumblerPositions")
-    private fun List<ThemeModeUiModel>.mapToTumblerPositions() = map {
-        Position.Image(
-            data = it,
-            imageWrapper = it.imageWrapper,
-        )
-    }
-
     private fun updateLanguage(languageUiModel: LanguageUiModel) {
+        updateLanguageJob?.cancel()
         val languageDomainModel = languageUiModelToLanguageDomainModelMapper.invoke(languageUiModel)
-        updateLanguageUseCase.invoke(languageDomainModel)
+        updateLanguageJob = updateLanguageUseCase.invoke(languageDomainModel)
             .onEach { operationStatus ->
                 when (operationStatus) {
                     is OperationStatus.WithInputData.Pending -> disableLanguageUpdates()
@@ -169,8 +149,9 @@ internal class PreferencesViewModel
     }
 
     private fun updateThemeMode(themeModeUiModel: ThemeModeUiModel) {
+        updateThemeModeJob?.cancel()
         val themeModeDomainModel = themeModeUiModelToThemeModeDomainModelMapper.invoke(themeModeUiModel)
-        updateThemeModeUseCase.invoke(themeModeDomainModel)
+        updateThemeModeJob = updateThemeModeUseCase.invoke(themeModeDomainModel)
             .onEach { operationStatus ->
                 when (operationStatus) {
                     is OperationStatus.WithInputData.Pending -> disableThemeModeUpdates()

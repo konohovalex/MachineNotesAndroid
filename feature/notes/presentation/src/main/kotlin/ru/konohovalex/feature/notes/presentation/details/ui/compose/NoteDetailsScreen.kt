@@ -6,6 +6,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Modifier
 import ru.konohovalex.core.design.model.Theme
@@ -43,12 +45,16 @@ internal fun NoteDetailsScreen(
                 .fillMaxSize()
                 .padding(Theme.paddings.contentSmall),
         ) {
-            val viewState = viewStateProvider.viewState.observeAsState()
+            val viewState by viewStateProvider.viewState.observeAsState()
 
-            when (val viewStateValue = viewState.value) {
-                is NoteDetailsViewState.Idle -> viewEventHandler.handle(NoteDetailsViewEvent.GetNoteDetails(noteId))
+            when (viewState) {
+                is NoteDetailsViewState.Idle -> LaunchedEffect(true) {
+                    viewEventHandler.handle(NoteDetailsViewEvent.GetNoteDetails(noteId))
+                }
                 is NoteDetailsViewState.Loading -> LoadingState()
-                is NoteDetailsViewState.Data -> DataState(viewStateValue.noteUiModel)
+                is NoteDetailsViewState.Data -> with(viewState as NoteDetailsViewState.Data) {
+                    DataState(noteUiModel)
+                }
                 is NoteDetailsViewState.Error -> ErrorState()
             }
         }
@@ -71,7 +77,7 @@ private fun DataState(noteUiModel: NoteUiModel) {
             .padding(Theme.paddings.contentSmall),
         verticalArrangement = Arrangement.spacedBy(Theme.paddings.contentExtraSmall)
     ) {
-        // tbd this is just a dummy implementation, don't forget about remember calls
+        // tbd don't forget about rememberSaveable
         with(noteUiModel) {
             title.unwrap()
                 .takeIf { it.isNotBlank() }

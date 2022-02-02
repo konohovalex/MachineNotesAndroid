@@ -5,18 +5,16 @@ import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.rememberNavController
-import ru.konohovalex.core.data.Constants
 import ru.konohovalex.core.design.model.Theme
 import ru.konohovalex.core.presentation.arch.viewevent.ViewEventHandler
 import ru.konohovalex.core.presentation.arch.viewstate.ViewStateProvider
-import ru.konohovalex.core.presentation.extension.changeLocale
-import ru.konohovalex.feature.preferences.presentation.model.LanguageUiModel
+import ru.konohovalex.feature.preferences.presentation.extension.localeOrDefault
 import ru.konohovalex.feature.preferences.presentation.model.ThemeModeUiModel
 import ru.konohovalex.machinenotes.app.presentation.main.model.MainViewEvent
 import ru.konohovalex.machinenotes.app.presentation.main.model.MainViewState
@@ -30,39 +28,35 @@ import java.util.Locale
 internal fun MainScreen(
     viewStateProvider: ViewStateProvider<MainViewState>,
     viewEventHandler: ViewEventHandler<MainViewEvent>,
+    onThemeModeChanged: (isDarkTheme: Boolean) -> Unit,
+    onLocaleChanged: (Locale) -> Unit,
+    onBackPressed: () -> Unit,
 ) {
-    val viewState = viewStateProvider.viewState.observeAsState()
+    val viewState by viewStateProvider.viewState.observeAsState()
 
-    // tbd fix
-    LocalContext.current.changeLocale(
-        when (viewState.value?.languageUiModel) {
-            LanguageUiModel.RUS -> Constants.LanguageCodes.RUSSIAN
-            else -> Constants.LanguageCodes.ENGLISH
-        }
-    )
+    val isDarkTheme = when (viewState?.themeModeUiModel) {
+        ThemeModeUiModel.LIGHT -> false
+        ThemeModeUiModel.DARK -> true
+        else -> isSystemInDarkTheme()
+    }
+    onThemeModeChanged.invoke(isDarkTheme)
 
-    Theme(
-        when (viewState.value?.themeModeUiModel) {
-            ThemeModeUiModel.LIGHT -> false
-            ThemeModeUiModel.DARK -> true
-            else -> isSystemInDarkTheme()
-        }
-    ) {
+    onLocaleChanged.invoke(viewState?.languageUiModel.localeOrDefault())
+
+    Theme(isDarkTheme) {
         Box(
             modifier = Modifier
                 .fillMaxSize()
                 .background(Theme.palette.backgroundColor),
         ) {
-            val authorizationSuccessfulAction = remember {
-                {
+            when (viewState) {
+                is MainViewState.Idle -> LaunchedEffect(true) {
+                    viewEventHandler.handle(MainViewEvent.Init)
+                }
+                is MainViewState.FirstLaunch -> FirstLaunchState {
                     viewEventHandler.handle(MainViewEvent.FirstLaunchCompleted)
                 }
-            }
-
-            when (viewState.value) {
-                is MainViewState.Idle -> viewEventHandler.handle(MainViewEvent.Init)
-                is MainViewState.FirstLaunch -> FirstLaunchState(authorizationSuccessfulAction)
-                is MainViewState.NotFirstLaunch -> NotFirstLaunchState()
+                is MainViewState.NotFirstLaunch -> NotFirstLaunchState(onBackPressed)
                 is MainViewState.Error -> ErrorState()
             }
         }
@@ -71,14 +65,9 @@ internal fun MainScreen(
 
 @Composable
 private fun FirstLaunchState(authorizationSuccessfulAction: () -> Unit) {
-    val navController = rememberNavController()
-    val welcomeStartDestination = remember {
-        getWelcomeNavigationRoute()
-    }
-
     NavHost(
-        navController = navController,
-        startDestination = welcomeStartDestination,
+        navController = rememberNavController(),
+        startDestination = getWelcomeNavigationRoute(),
         modifier = Modifier
             .fillMaxSize(),
     ) {
@@ -87,30 +76,22 @@ private fun FirstLaunchState(authorizationSuccessfulAction: () -> Unit) {
 }
 
 @Composable
-fun NotFirstLaunchState() {
+fun NotFirstLaunchState(onBackPressed: () -> Unit) {
     val navController = rememberNavController()
-    val homeStartDestination = remember {
-        getHomeNavigationRoute()
-    }
-
-    val navigateBack = remember {
-        {
-            // tbd this is incorrect with bottom navigation
-            navController.navigateUp()
-            Unit
-        }
-    }
 
     NavHost(
         navController = navController,
-        startDestination = homeStartDestination,
+        startDestination = getHomeNavigationRoute(),
         modifier = Modifier
             .fillMaxSize(),
     ) {
         homeGraph(
             navController = navController,
-            authorizationSuccessfulAction = navigateBack,
-            authorizationDeclinedAction = navigateBack,
+            navigateBack = {
+                navController.navigateUp()
+                Unit
+            },
+            onBackPressed = onBackPressed,
         )
     }
 }

@@ -1,13 +1,10 @@
 package ru.konohovalex.machinenotes.app.presentation.navigation
 
-import androidx.compose.runtime.remember
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import ru.konohovalex.feature.account.presentation.navigation.authScreen
-import ru.konohovalex.feature.account.presentation.navigation.getAuthNavigationRoute
 import ru.konohovalex.feature.account.presentation.navigation.profileScreen
-import ru.konohovalex.feature.notes.presentation.navigation.getNoteDetailsNavigationRoute
 import ru.konohovalex.feature.notes.presentation.navigation.noteDetailsScreen
 import ru.konohovalex.feature.notes.presentation.navigation.noteListScreen
 import ru.konohovalex.feature.preferences.presentation.navigation.preferencesScreen
@@ -26,38 +23,30 @@ internal fun getHomeNavigationRoute() = AppRoute.Home.buildNavigationRoute()
 
 internal fun NavGraphBuilder.homeGraph(
     navController: NavController,
-    authorizationSuccessfulAction: () -> Unit,
-    authorizationDeclinedAction: () -> Unit,
+    navigateBack: () -> Unit,
+    onBackPressed: () -> Unit,
 ) {
-    composable(route = AppRoute.Home.buildGraphRoute()) {
-        val navigateToNoteDetails = remember {
-            { noteId: String? ->
-                navController.navigate(getNoteDetailsNavigationRoute(noteId))
-            }
-        }
+    homeScreen(navController, onBackPressed)
 
-        val navigateToAuth = remember {
-            {
-                navController.navigate(getAuthNavigationRoute())
-            }
-        }
-
-        HomeScreen(navigateToNoteDetails, navigateToAuth)
-    }
-
-    noteDetailsScreen(navController)
+    noteDetailsScreen(navigateBack)
 
     authScreen(
-        authorizationSuccessfulAction = authorizationSuccessfulAction,
-        authorizationDeclinedAction = authorizationDeclinedAction,
+        authorizationSuccessfulAction = navigateBack,
+        authorizationDeclinedAction = navigateBack,
     )
 }
 
-internal fun NavGraphBuilder.bottomNavigationGraph(
-    navigateToNoteDetails: (noteId: String?) -> Unit,
-    navigateToAuth: () -> Unit,
+internal fun NavGraphBuilder.homeScreen(
+    navController: NavController,
+    onBackPressed: () -> Unit,
 ) {
-    noteListScreen(navigateToNoteDetails)
+    composable(route = AppRoute.Home.buildGraphRoute()) {
+        HomeScreen(navController, onBackPressed)
+    }
+}
+
+internal fun NavGraphBuilder.bottomNavigationGraph(navController: NavController) {
+    noteListScreen(navController)
     preferencesScreen()
-    profileScreen(navigateToAuth)
+    profileScreen(navController)
 }

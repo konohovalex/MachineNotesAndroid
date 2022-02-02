@@ -28,6 +28,7 @@ internal class NotesRepositoryImpl
     private val noteEntityToNoteMapper: Mapper<NoteEntity, Note>,
 ) : NotesRepositoryContract {
     // tbd withIo must be only for Api and database calls
+    // tbd should there be safe update ops?
     private val dummyNoteList = createDummyNoteList(25)
 
     override suspend fun createNote(): OperationResult<Note> = withIo {

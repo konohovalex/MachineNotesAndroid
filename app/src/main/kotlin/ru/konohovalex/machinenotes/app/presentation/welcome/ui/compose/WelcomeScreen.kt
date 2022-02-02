@@ -2,7 +2,6 @@ package ru.konohovalex.machinenotes.app.presentation.welcome.ui.compose
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.rememberNavController
 import ru.konohovalex.feature.account.presentation.navigation.authScreen
@@ -13,26 +12,16 @@ import ru.konohovalex.feature.preferences.presentation.navigation.preferencesScr
 @Composable
 internal fun WelcomeScreen(authorizationSuccessfulAction: () -> Unit) {
     Column {
-        val preferencesNavController = rememberNavController()
-        val preferencesStartDestination = remember {
-            getPreferencesNavigationRoute()
-        }
-
         NavHost(
-            navController = preferencesNavController,
-            startDestination = preferencesStartDestination,
+            navController = rememberNavController(),
+            startDestination = getPreferencesNavigationRoute(),
         ) {
             preferencesScreen()
         }
 
-        val authNavController = rememberNavController()
-        val authStartDestination = remember {
-            getAuthNavigationRoute()
-        }
-
         NavHost(
-            navController = authNavController,
-            startDestination = authStartDestination,
+            navController = rememberNavController(),
+            startDestination = getAuthNavigationRoute(),
         ) {
             authScreen(
                 authorizationSuccessfulAction = authorizationSuccessfulAction,

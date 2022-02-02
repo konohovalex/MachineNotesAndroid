@@ -19,9 +19,10 @@ internal class PreferencesRepositoryImpl
     private val preferencesToPreferencesEntityMapper: Mapper<Preferences, PreferencesEntity>,
 ) : PreferencesRepositoryContract {
     // tbd should there be safe update ops?
-    override suspend fun observePreferences(): Flow<Preferences> =
+    override suspend fun observePreferences(): Flow<Preferences> = withIo {
         preferencesStorage.observePreferences()
             .map { preferencesEntityToPreferencesMapper.invoke(it) }
+    }
 
     override suspend fun updatePreferences(preferences: Preferences): Preferences = withIo {
         val preferencesEntity = preferencesToPreferencesEntityMapper.invoke(preferences)
@@ -41,6 +42,7 @@ internal class PreferencesRepositoryImpl
                 .copy(themeMode = themeMode)
         ).themeMode
 
-    private suspend fun getCurrentPreferences(): Preferences =
+    private suspend fun getCurrentPreferences(): Preferences = withIo {
         preferencesEntityToPreferencesMapper.invoke(preferencesStorage.getCurrentPreferences())
+    }
 }

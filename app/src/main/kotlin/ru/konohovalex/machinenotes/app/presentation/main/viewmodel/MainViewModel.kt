@@ -3,6 +3,7 @@ package ru.konohovalex.machinenotes.app.presentation.main.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
@@ -36,6 +37,10 @@ internal class MainViewModel
     ViewStateProvider<MainViewState> by ViewStateProviderDelegate(MainViewState.Idle) {
     private var isFirstLaunch = true
 
+    private var initJob: Job? = null
+    private var observePreferencesJob: Job? = null
+    private var setIsFirstLaunchJob: Job? = null
+
     override fun handle(viewEvent: MainViewEvent) {
         when (viewEvent) {
             is MainViewEvent.Init -> init()
@@ -44,7 +49,8 @@ internal class MainViewModel
     }
 
     private fun init() {
-        getIsFirstLaunchUseCase.invoke()
+        initJob?.cancel()
+        initJob = getIsFirstLaunchUseCase.invoke()
             .onEach { operationStatus ->
                 when (operationStatus) {
                     is OperationStatus.Plain.Pending, is OperationStatus.Plain.Processing -> {}
@@ -59,10 +65,10 @@ internal class MainViewModel
     }
 
     private fun observePreferences() {
-        viewModelScope.launch {
+        observePreferencesJob?.cancel()
+        observePreferencesJob = viewModelScope.launch {
             observePreferencesUseCase.invoke()
                 .onEach {
-                    // tbd comes here twice
                     when (it) {
                         is OperationStatus.Plain.Pending, is OperationStatus.Plain.Processing -> {}
                         is OperationStatus.Plain.Completed -> {
@@ -84,7 +90,8 @@ internal class MainViewModel
 
     private fun firstLaunchCompleted() {
         withViewState(MainViewState.FirstLaunch::class.java) { viewState ->
-            setIsFirstLaunchUseCase.invoke(false)
+            setIsFirstLaunchJob?.cancel()
+            setIsFirstLaunchJob = setIsFirstLaunchUseCase.invoke(false)
                 .onEach {
                     when (it) {
                         is OperationStatus.Plain.Pending -> {}

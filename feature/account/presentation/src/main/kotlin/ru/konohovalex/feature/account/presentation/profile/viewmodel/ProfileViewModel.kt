@@ -3,6 +3,7 @@ package ru.konohovalex.feature.account.presentation.profile.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
@@ -34,6 +35,11 @@ internal class ProfileViewModel
 ) : ViewModel(),
     ViewEventHandler<ProfileViewEvent>,
     ViewStateProvider<ProfileViewState> by ViewStateProviderDelegate(ProfileViewState.Idle) {
+    private var observeProfileJob: Job? = null
+    private var logOutJob: Job? = null
+    private var deleteAccountJob: Job? = null
+    private var deleteAllNotesJob: Job? = null
+
     override fun handle(viewEvent: ProfileViewEvent) {
         when (viewEvent) {
             ProfileViewEvent.GetProfile -> getProfile()
@@ -44,7 +50,8 @@ internal class ProfileViewModel
     }
 
     private fun getProfile() {
-        viewModelScope.launch {
+        observeProfileJob?.cancel()
+        observeProfileJob = viewModelScope.launch {
             observeProfileUseCase.invoke()
                 .onEach {
                     when (it) {
@@ -70,12 +77,15 @@ internal class ProfileViewModel
     }
 
     private fun logOut() {
-        logOutUseCase.invoke()
+        logOutJob?.cancel()
+        logOutJob = logOutUseCase.invoke()
             .onEach {
                 when (it) {
                     is OperationStatus.Plain.Pending -> setLoadingState()
                     is OperationStatus.Plain.Processing,
-                    is OperationStatus.Plain.Completed -> {}
+                    is OperationStatus.Plain.Completed,
+                    -> {
+                    }
                     is OperationStatus.Plain.Error -> setErrorState(it.throwable)
                 }
             }
@@ -83,12 +93,15 @@ internal class ProfileViewModel
     }
 
     private fun deleteAccount() {
-        deleteAccountUseCase.invoke()
+        deleteAccountJob?.cancel()
+        deleteAccountJob = deleteAccountUseCase.invoke()
             .onEach {
                 when (it) {
                     is OperationStatus.Plain.Pending -> setLoadingState()
                     is OperationStatus.Plain.Processing,
-                    is OperationStatus.Plain.Completed -> {}
+                    is OperationStatus.Plain.Completed,
+                    -> {
+                    }
                     is OperationStatus.Plain.Error -> setErrorState(it.throwable)
                 }
             }
@@ -97,7 +110,8 @@ internal class ProfileViewModel
 
     private fun deleteAllNotes() {
         withViewState(ProfileViewState.Data::class.java) { viewState ->
-            deleteAllNotesUseCase.invoke()
+            deleteAllNotesJob?.cancel()
+            deleteAllNotesJob = deleteAllNotesUseCase.invoke()
                 .onEach {
                     when (it) {
                         is OperationStatus.Plain.Pending -> setLoadingState()

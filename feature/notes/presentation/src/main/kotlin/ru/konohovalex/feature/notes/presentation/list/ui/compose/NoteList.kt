@@ -8,8 +8,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import ru.konohovalex.core.design.model.Theme
-import ru.konohovalex.feature.notes.presentation.list.model.NotePreviewUiModel
 import ru.konohovalex.feature.notes.presentation.extension.createNotePreviewDummyModelList
+import ru.konohovalex.feature.notes.presentation.list.model.NotePreviewUiModel
 
 @Composable
 internal fun NoteList(
@@ -20,7 +20,7 @@ internal fun NoteList(
         contentPadding = PaddingValues(Theme.paddings.contentSmall),
         verticalArrangement = Arrangement.spacedBy(Theme.paddings.contentSmall)
     ) {
-        items(items = items) { item ->
+        items(items) { item ->
             NoteListItem(
                 notePreviewUiModel = item,
                 onClick = onNoteClick,

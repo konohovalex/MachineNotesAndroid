@@ -20,8 +20,8 @@ import ru.konohovalex.core.ui.compose.ThemedCard
 import ru.konohovalex.core.ui.compose.ThemedText
 import ru.konohovalex.core.ui.compose.ThemedTextType
 import ru.konohovalex.core.ui.model.TextWrapper
-import ru.konohovalex.feature.notes.presentation.list.model.NotePreviewUiModel
 import ru.konohovalex.feature.notes.presentation.extension.createNotePreviewDummyModel
+import ru.konohovalex.feature.notes.presentation.list.model.NotePreviewUiModel
 
 @Composable
 internal fun NoteListItem(

@@ -7,26 +7,23 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Surface
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.NavController
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.rememberNavController
+import kotlinx.android.parcel.Parcelize
 import ru.konohovalex.core.design.model.Theme
 import ru.konohovalex.core.ui.R
 import ru.konohovalex.core.ui.extension.unwrap
 import ru.konohovalex.core.ui.model.BottomNavigationItem
 import ru.konohovalex.core.ui.model.ButtonData
 import ru.konohovalex.core.ui.model.ImageWrapper
-import ru.konohovalex.core.ui.model.Position
 import ru.konohovalex.core.ui.model.TextWrapper
 
-/** To use [BottomNavigationBarPosition] inheritors, which instances can be unambiguously compared, is a recommended solution.
- * Description for the item can be set as [Position.Image.imageWrapper]'s [ImageWrapper.contentDescription] */
 @Composable
 fun ThemedBottomNavigationBar(
     bottomNavigationItems: List<BottomNavigationItem>,
@@ -45,23 +42,19 @@ fun ThemedBottomNavigationBar(
             horizontalArrangement = Arrangement.SpaceEvenly,
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            val selectedBottomNavigationItemState = remember {
+            val selectedBottomNavigationItemState = rememberSaveable {
                 mutableStateOf(selectedBottomNavigationItem)
             }
 
-            val onBottomNavigationItemSelected = remember {
-                { bottomNavigationItem: BottomNavigationItem ->
-                    val isSelectedPosition = bottomNavigationItem == selectedBottomNavigationItemState.value
-                    selectedBottomNavigationItemState.value = bottomNavigationItem
-                    if (!isSelectedPosition) navController.performBottomNavigation(bottomNavigationItem)
-                }
-            }
-
-            bottomNavigationItems.forEach {
+            bottomNavigationItems.forEach { bottomNavigationItem ->
                 BottomNavigationBarPosition(
-                    bottomNavigationItem = it,
-                    selectedBottomNavigationItemState = selectedBottomNavigationItemState,
-                    onBottomNavigationItemSelected = onBottomNavigationItemSelected,
+                    bottomNavigationItem = bottomNavigationItem,
+                    selectedBottomNavigationItem = selectedBottomNavigationItemState.value,
+                    onBottomNavigationItemSelected = {
+                        val isSelectedPosition = it == selectedBottomNavigationItemState.value
+                        selectedBottomNavigationItemState.value = it
+                        if (!isSelectedPosition) navController.performBottomNavigation(it)
+                    },
                 )
             }
         }
@@ -71,7 +64,7 @@ fun ThemedBottomNavigationBar(
 @Composable
 private fun BottomNavigationBarPosition(
     bottomNavigationItem: BottomNavigationItem,
-    selectedBottomNavigationItemState: State<BottomNavigationItem>,
+    selectedBottomNavigationItem: BottomNavigationItem?,
     onBottomNavigationItemSelected: (BottomNavigationItem) -> Unit,
 ) {
     val content = mutableListOf<ButtonData.Content>(
@@ -85,31 +78,22 @@ private fun BottomNavigationBarPosition(
                 add(ButtonData.Content.Text(textWrapper = contentDescription))
             }
     }
-    val contentState = remember {
-        mutableStateOf(content)
-    }
-    contentState.value = content
-
-    val onClick = remember {
-        {
-            onBottomNavigationItemSelected.invoke(bottomNavigationItem)
-        }
-    }
 
     ThemedButton(
         buttonData = ButtonData.Outlined(
-            onClick = onClick,
-            content = contentState.value,
+            onClick = {
+                onBottomNavigationItemSelected.invoke(bottomNavigationItem)
+            },
+            content = content,
             contentArrangement = ButtonData.ContentArrangement.VERTICAL,
             contentSpacing = Theme.paddings.contentExtraSmall,
-            selected = bottomNavigationItem == selectedBottomNavigationItemState.value,
+            selected = bottomNavigationItem == selectedBottomNavigationItem,
         )
     )
 }
 
 private fun NavController.performBottomNavigation(bottomNavigationItem: BottomNavigationItem) {
     navigate(bottomNavigationItem.navigationRoute) {
-        // tbd something is wrong
         launchSingleTop = true
         popUpTo(graph.findStartDestination().id) {
             saveState = true
@@ -122,10 +106,12 @@ private sealed class PreviewBottomNavigationItem(
     override val navigationRoute: String = "",
     override val imageWrapper: ImageWrapper,
 ) : BottomNavigationItem {
+    @Parcelize
     object NoteList : PreviewBottomNavigationItem(
         imageWrapper = ImageWrapper.ImageResource(resourceId = R.drawable.ic_notes),
     )
 
+    @Parcelize
     object Preferences : PreviewBottomNavigationItem(
         imageWrapper = ImageWrapper.ImageResource(
             resourceId = R.drawable.ic_preferences,
@@ -133,6 +119,7 @@ private sealed class PreviewBottomNavigationItem(
         ),
     )
 
+    @Parcelize
     object Profile : PreviewBottomNavigationItem(
         imageWrapper = ImageWrapper.ImageResource(resourceId = R.drawable.ic_profile),
     )

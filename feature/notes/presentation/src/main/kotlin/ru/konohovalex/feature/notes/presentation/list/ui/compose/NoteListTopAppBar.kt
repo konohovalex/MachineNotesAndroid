@@ -4,9 +4,8 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material.TopAppBar
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import ru.konohovalex.core.design.model.Theme
@@ -17,21 +16,8 @@ import ru.konohovalex.core.ui.model.TextWrapper
 
 @Composable
 internal fun NoteListTopAppBar(onValueChanged: (String) -> Unit) {
-    val leadingIconImageWrapperState = derivedStateOf {
-        ImageWrapper.ImageResource(resourceId = R.drawable.ic_search)
-    }
-
-    val trailingIconImageWrapperState = derivedStateOf {
-        ImageWrapper.ImageResource(resourceId = R.drawable.ic_clear)
-    }
-    val textState = remember {
+    val textState = rememberSaveable {
         mutableStateOf("")
-    }
-    val onTrailingIconClick = remember {
-        {
-            textState.value = ""
-            onValueChanged.invoke("")
-        }
     }
 
     TopAppBar(
@@ -46,9 +32,12 @@ internal fun NoteListTopAppBar(onValueChanged: (String) -> Unit) {
             modifier = Modifier
                 .fillMaxWidth(),
             placeholderTextWrapper = TextWrapper.StringResource(resourceId = R.string.search),
-            leadingIconImageWrapperState = leadingIconImageWrapperState,
-            trailingIconImageWrapperState = trailingIconImageWrapperState,
-            onTrailingIconClick = onTrailingIconClick,
+            leadingIconImageWrapper = ImageWrapper.ImageResource(resourceId = R.drawable.ic_search),
+            trailingIconImageWrapper = ImageWrapper.ImageResource(resourceId = R.drawable.ic_clear),
+            onTrailingIconClick = {
+                textState.value = ""
+                onValueChanged.invoke("")
+            },
         )
     }
 }

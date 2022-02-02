@@ -11,19 +11,16 @@ import androidx.compose.material.Text
 import androidx.compose.material.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.State
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import ru.konohovalex.core.design.model.Theme
 import ru.konohovalex.core.ui.R
-import ru.konohovalex.core.ui.model.ImageWrapper
-import ru.konohovalex.core.ui.model.TextWrapper
 import ru.konohovalex.core.ui.extension.letCompose
 import ru.konohovalex.core.ui.extension.unwrap
+import ru.konohovalex.core.ui.model.ImageWrapper
+import ru.konohovalex.core.ui.model.TextWrapper
 
 @Composable
 fun OutlinedThemedTextField(
@@ -32,19 +29,13 @@ fun OutlinedThemedTextField(
     modifier: Modifier = Modifier,
     labelTextWrapper: TextWrapper? = null,
     placeholderTextWrapper: TextWrapper? = null,
-    leadingIconImageWrapperState: State<ImageWrapper?>? = null,
+    leadingIconImageWrapper: ImageWrapper? = null,
     onLeadingIconClick: (() -> Unit)? = null,
-    trailingIconImageWrapperState: State<ImageWrapper?>? = null,
+    trailingIconImageWrapper: ImageWrapper? = null,
     onTrailingIconClick: (() -> Unit)? = null,
     enabled: Boolean = true,
-    errorState: State<TextWrapper?>? = null,
+    errorTextWrapper: TextWrapper? = null,
 ) {
-    val enabledState = remember {
-        mutableStateOf(enabled)
-    }
-    enabledState.value = enabled
-
-    val errorTextWrapper = errorState?.value
     val isError = errorTextWrapper != null
 
     Column {
@@ -55,18 +46,18 @@ fun OutlinedThemedTextField(
                 onValueChanged.invoke(it)
             },
             modifier = modifier,
-            enabled = enabledState.value,
+            enabled = enabled,
             textStyle = Theme.typography.body,
             label = labelTextWrapper?.unwrapAndCompose(),
             placeholder = placeholderTextWrapper?.unwrapAndCompose(),
-            leadingIcon = leadingIcon(leadingIconImageWrapperState, onLeadingIconClick),
-            trailingIcon = trailingIcon(trailingIconImageWrapperState, onTrailingIconClick),
+            leadingIcon = icon(leadingIconImageWrapper, onLeadingIconClick),
+            trailingIcon = icon(trailingIconImageWrapper, onTrailingIconClick),
             isError = isError,
             singleLine = true,
             shape = Theme.shapes.small,
             colors = colors(isError),
         )
-        errorState?.let {
+        errorTextWrapper?.let {
             ErrorText(errorTextWrapper)
         }
     }
@@ -78,11 +69,11 @@ private fun TextWrapper.unwrapAndCompose() = letCompose {
 }
 
 @Composable
-private fun leadingIcon(
-    imageWrapperState: State<ImageWrapper?>?,
+private fun icon(
+    imageWrapper: ImageWrapper?,
     onClick: (() -> Unit)?,
-) = imageWrapperState?.value?.letCompose {
-    val leadingIconComposable: @Composable () -> Unit = {
+) = imageWrapper?.letCompose {
+    val iconComposable: @Composable () -> Unit = {
         Icon(
             painter = it.unwrap(),
             contentDescription = it.contentDescription?.unwrap(),
@@ -90,27 +81,9 @@ private fun leadingIcon(
     }
     onClick?.let {
         IconButton(onClick = it) {
-            leadingIconComposable.invoke()
+            iconComposable.invoke()
         }
-    } ?: leadingIconComposable.invoke()
-}
-
-@Composable
-private fun trailingIcon(
-    imageWrapperState: State<ImageWrapper?>? = null,
-    onClick: (() -> Unit)?,
-) = imageWrapperState?.value?.letCompose {
-    val trailingIconComposable: @Composable () -> Unit = {
-        Icon(
-            painter = it.unwrap(),
-            contentDescription = it.contentDescription?.unwrap(),
-        )
-    }
-    onClick?.let {
-        IconButton(onClick = it) {
-            trailingIconComposable.invoke()
-        }
-    } ?: trailingIconComposable.invoke()
+    } ?: iconComposable.invoke()
 }
 
 @Composable
@@ -157,13 +130,9 @@ private fun ThemedTextFieldPreview() {
     val labelTextWrapper = TextWrapper.PlainText(value = "Label")
     val placeholderTextWrapper = TextWrapper.StringResource(resourceId = R.string.search)
 
-    val iconImageWrapperState = derivedStateOf {
-        ImageWrapper.ImageResource(resourceId = R.drawable.ic_search)
-    }
+    val iconImageWrapper = ImageWrapper.ImageResource(resourceId = R.drawable.ic_search)
 
-    val errorState = derivedStateOf {
-        TextWrapper.PlainText(value = "ОшибкаОшибкаОшибкаОшибкаОшибкаОшибка")
-    }
+    val errorTextWrapper = TextWrapper.PlainText(value = "ОшибкаОшибкаОшибкаОшибкаОшибкаОшибка")
 
     Theme {
         Column(
@@ -178,8 +147,8 @@ private fun ThemedTextFieldPreview() {
                 onValueChanged = {},
                 labelTextWrapper = labelTextWrapper,
                 placeholderTextWrapper = placeholderTextWrapper,
-                leadingIconImageWrapperState = iconImageWrapperState,
-                errorState = errorState,
+                leadingIconImageWrapper = iconImageWrapper,
+                errorTextWrapper = errorTextWrapper,
             )
 
             OutlinedThemedTextField(
@@ -187,7 +156,7 @@ private fun ThemedTextFieldPreview() {
                 onValueChanged = {},
                 labelTextWrapper = labelTextWrapper,
                 placeholderTextWrapper = placeholderTextWrapper,
-                leadingIconImageWrapperState = iconImageWrapperState,
+                leadingIconImageWrapper = iconImageWrapper,
             )
 
             OutlinedThemedTextField(
@@ -195,7 +164,7 @@ private fun ThemedTextFieldPreview() {
                 onValueChanged = {},
                 labelTextWrapper = labelTextWrapper,
                 placeholderTextWrapper = placeholderTextWrapper,
-                trailingIconImageWrapperState = iconImageWrapperState,
+                trailingIconImageWrapper = iconImageWrapper,
                 enabled = false,
             )
         }

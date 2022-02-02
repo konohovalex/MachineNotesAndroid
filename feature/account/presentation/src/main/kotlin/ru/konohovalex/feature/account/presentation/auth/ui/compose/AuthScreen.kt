@@ -4,8 +4,9 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import ru.konohovalex.core.design.model.Theme
@@ -29,34 +30,34 @@ internal fun AuthScreen(
         modifier = Modifier
             .fillMaxSize()
             .background(Theme.palette.backgroundColor),
-        // tbd either change this, or solve keyboard problem
+        // tbd solve keyboard problem
         contentAlignment = Alignment.BottomCenter,
     ) {
-        val viewState = viewStateProvider.viewState.observeAsState()
+        val viewState by viewStateProvider.viewState.observeAsState()
 
-        val onLogInButtonClick = remember {
-            { authDataUiModel: AuthDataUiModel ->
-                viewEventHandler.handle(AuthViewEvent.LogIn(authDataUiModel))
+        when (viewState) {
+            is AuthViewState.Idle -> LaunchedEffect(true) {
+                viewEventHandler.handle(AuthViewEvent.Init)
             }
-        }
-
-        val onDeclineAuthorizationButtonClick = remember {
-            {
-                viewEventHandler.handle(AuthViewEvent.DeclineAuthorization)
-            }
-        }
-
-        when (val viewStateValue = viewState.value) {
-            is AuthViewState.Idle -> viewEventHandler.handle(AuthViewEvent.Init)
             is AuthViewState.Loading -> LoadingState()
-            is AuthViewState.Data -> DataState(
-                authDataUiModel = viewStateValue.authDataUiModel,
-                throwable = viewStateValue.throwable,
-                onLogInButtonClick = onLogInButtonClick,
-                onDeclineAuthorizationButtonClick = onDeclineAuthorizationButtonClick,
-            )
-            is AuthViewState.AuthorizationSuccessful -> authorizationSuccessfulAction.invoke()
-            is AuthViewState.AuthorizationDeclined -> authorizationDeclinedAction.invoke()
+            is AuthViewState.Data -> with(viewState as AuthViewState.Data) {
+                DataState(
+                    authDataUiModel = authDataUiModel,
+                    onLogInButtonClick = {
+                        viewEventHandler.handle(AuthViewEvent.LogIn(it))
+                    },
+                    onDeclineAuthorizationButtonClick = {
+                        viewEventHandler.handle(AuthViewEvent.DeclineAuthorization)
+                    },
+                    throwable = throwable,
+                )
+            }
+            is AuthViewState.AuthorizationSuccessful -> LaunchedEffect(true) {
+                authorizationSuccessfulAction.invoke()
+            }
+            is AuthViewState.AuthorizationDeclined -> LaunchedEffect(true) {
+                authorizationDeclinedAction.invoke()
+            }
             is AuthViewState.Error -> ErrorState()
         }
     }
@@ -73,28 +74,21 @@ private fun LoadingState() {
 @Composable
 private fun DataState(
     authDataUiModel: AuthDataUiModel,
-    throwable: Throwable?,
     onLogInButtonClick: (AuthDataUiModel) -> Unit,
     onDeclineAuthorizationButtonClick: () -> Unit,
+    throwable: Throwable?,
 ) {
-    val userNameValidator = remember {
-        UserNameValidator()
-    }
-    val passwordValidator = remember {
-        PasswordValidator()
-    }
-
+    // tbd if throwable is not null, show notification
     AuthView(
         authDataUiModel = authDataUiModel,
-        userNameValidator = userNameValidator,
-        passwordValidator = passwordValidator,
+        userNameValidator = UserNameValidator(),
+        passwordValidator = PasswordValidator(),
         onLogInButtonClick = onLogInButtonClick,
         onDeclineAuthorizationButtonClick = onDeclineAuthorizationButtonClick,
-        throwable = throwable,
     )
 }
 
 @Composable
 private fun ErrorState() {
-    // tbd implement error state (for both first and further pages)
+    // tbd implement error state
 }

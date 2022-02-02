@@ -1,6 +1,7 @@
 package ru.konohovalex.feature.account.presentation.navigation
 
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import ru.konohovalex.feature.account.presentation.auth.ui.compose.AuthScreen
@@ -28,14 +29,16 @@ fun NavGraphBuilder.authScreen(
 
 fun getProfileNavigationRoute() = AccountRoute.Profile.buildNavigationRoute()
 
-fun NavGraphBuilder.profileScreen(navigateToAuth: () -> Unit) {
+fun NavGraphBuilder.profileScreen(navController: NavController) {
     composable(route = AccountRoute.Profile.buildGraphRoute()) {
         val viewModel = hiltViewModel<ProfileViewModel>()
 
         ProfileScreen(
             viewStateProvider = viewModel,
             viewEventHandler = viewModel,
-            navigateToAuth = navigateToAuth,
+            navigateToAuth = {
+                navController.navigate(getAuthNavigationRoute())
+            },
         )
     }
 }

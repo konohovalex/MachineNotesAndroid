@@ -1,6 +1,8 @@
 package ru.konohovalex.core.ui.model
 
-interface BottomNavigationItem {
+import android.os.Parcelable
+
+interface BottomNavigationItem : Parcelable {
     val navigationRoute: String
     val imageWrapper: ImageWrapper
 }

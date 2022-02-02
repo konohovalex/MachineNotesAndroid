@@ -3,6 +3,7 @@ package ru.konohovalex.feature.account.presentation.auth.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
@@ -34,6 +35,9 @@ internal class AuthViewModel
     ViewStateProvider<AuthViewState> by ViewStateProviderDelegate(AuthViewState.Idle) {
     private var _initialProfile: ProfileDomainModel? = null
 
+    private var observeProfileJob: Job? = null
+    private var logInJob: Job? = null
+
     override fun handle(viewEvent: AuthViewEvent) {
         when (viewEvent) {
             is AuthViewEvent.Init -> init()
@@ -43,7 +47,8 @@ internal class AuthViewModel
     }
 
     private fun init() {
-        viewModelScope.launch {
+        observeProfileJob?.cancel()
+        observeProfileJob = viewModelScope.launch {
             observeProfileUseCase.invoke()
                 .onEach {
                     when (it) {
@@ -74,8 +79,9 @@ internal class AuthViewModel
     private fun getDeclineAuthorizationButtonTextResId(): Int = _initialProfile?.let { R.string.back } ?: R.string.skip
 
     private fun logIn(authDataUiModel: AuthDataUiModel?) {
+        logInJob?.cancel()
         val authDataDomainModel = authDataUiModel?.let(authDataUiModelToAuthDataDomainModelMapper::invoke)
-        logInUseCase.invoke(authDataDomainModel)
+        logInJob = logInUseCase.invoke(authDataDomainModel)
             .onEach {
                 when (it) {
                     is OperationStatus.WithInputData.Pending -> setLoadingState()
@@ -92,12 +98,8 @@ internal class AuthViewModel
     }
 
     private fun declineAuthorization() {
-        if (_initialProfile != null) setAuthorizationDeclinedState()
+        if (_initialProfile != null) setAuthorizationSuccessfulState()
         else logIn(null)
-    }
-
-    private fun setAuthorizationDeclinedState() {
-        setViewState(AuthViewState.AuthorizationDeclined)
     }
 
     private fun setInitErrorState(throwable: Throwable) {
@@ -108,18 +110,16 @@ internal class AuthViewModel
         authDataUiModel: AuthDataUiModel?,
         throwable: Throwable,
     ) {
-        withViewState(AuthViewState.Data::class.java) { viewState ->
-            setViewState(
-                authDataUiModel?.let {
-                    viewState.copy(
-                        authDataUiModel = authDataUiModel,
-                        throwable = throwable,
-                    )
-                } ?: AuthViewState.Data.empty(
-                    declineAuthorizationButtonTextResId = getDeclineAuthorizationButtonTextResId(),
+        setViewState(
+            authDataUiModel?.let {
+                AuthViewState.Data(
+                    authDataUiModel = authDataUiModel,
                     throwable = throwable,
                 )
+            } ?: AuthViewState.Data.empty(
+                declineAuthorizationButtonTextResId = getDeclineAuthorizationButtonTextResId(),
+                throwable = throwable,
             )
-        }
+        )
     }
 }
