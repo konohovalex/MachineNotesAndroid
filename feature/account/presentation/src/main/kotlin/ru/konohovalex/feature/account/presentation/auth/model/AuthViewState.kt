@@ -1,9 +1,10 @@
 package ru.konohovalex.feature.account.presentation.auth.model
 
 import androidx.annotation.StringRes
+import ru.konohovalex.core.presentation.arch.viewstate.ErrorViewState
 import ru.konohovalex.core.presentation.arch.viewstate.ViewState
 
-sealed class AuthViewState : ViewState {
+internal sealed class AuthViewState : ViewState {
     object Idle : AuthViewState()
 
     object Loading : AuthViewState()
@@ -11,12 +12,14 @@ sealed class AuthViewState : ViewState {
     data class Data(
         val authDataUiModel: AuthDataUiModel,
         val throwable: Throwable?,
+        val onErrorActionButtonClick: (() -> Unit)?,
     ) : AuthViewState() {
         companion object {
             fun empty(
                 @StringRes
                 declineAuthorizationButtonTextResId: Int,
-                throwable: Throwable? = null
+                throwable: Throwable? = null,
+                onErrorActionButtonClick: (() -> Unit)? = null,
             ) = Data(
                 authDataUiModel = AuthDataUiModel(
                     declineAuthorizationButtonTextResId = declineAuthorizationButtonTextResId,
@@ -24,6 +27,7 @@ sealed class AuthViewState : ViewState {
                     passwordUiModel = PasswordUiModel(""),
                 ),
                 throwable = throwable,
+                onErrorActionButtonClick = onErrorActionButtonClick,
             )
         }
     }
@@ -32,5 +36,8 @@ sealed class AuthViewState : ViewState {
 
     object AuthorizationDeclined : AuthViewState()
 
-    data class Error(val throwable: Throwable) : AuthViewState()
+    data class Error(
+        override val throwable: Throwable,
+        override val onActionButtonClick: () -> Unit,
+    ) : AuthViewState(), ErrorViewState
 }

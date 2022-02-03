@@ -1,5 +1,6 @@
 package ru.konohovalex.feature.account.presentation.profile.ui.compose
 
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.fillMaxSize
@@ -13,9 +14,11 @@ import androidx.compose.ui.Modifier
 import ru.konohovalex.core.design.model.Theme
 import ru.konohovalex.core.presentation.arch.viewevent.ViewEventHandler
 import ru.konohovalex.core.presentation.arch.viewstate.ViewStateProvider
+import ru.konohovalex.core.ui.compose.ErrorCard
 import ru.konohovalex.core.ui.compose.Logo
 import ru.konohovalex.core.ui.compose.SizedSpacer
 import ru.konohovalex.core.ui.compose.ThemedCircularProgressBar
+import ru.konohovalex.core.ui.extension.toTextWrapper
 import ru.konohovalex.feature.account.presentation.profile.model.ProfileUiModel
 import ru.konohovalex.feature.account.presentation.profile.model.ProfileViewEvent
 import ru.konohovalex.feature.account.presentation.profile.model.ProfileViewState
@@ -56,16 +59,18 @@ internal fun ProfileScreen(
                     navigateToAuth = navigateToAuth,
                 )
             }
-            is ProfileViewState.Error -> ErrorState()
+            is ProfileViewState.Error -> with(viewState as ProfileViewState.Error) {
+                ErrorState(throwable, onActionButtonClick)
+            }
         }
     }
 }
 
 @Composable
-private fun LoadingState() {
+private fun ColumnScope.LoadingState() {
     ThemedCircularProgressBar(
         modifier = Modifier
-            .fillMaxSize(),
+            .weight(1f),
     )
 }
 
@@ -92,6 +97,18 @@ private fun ColumnScope.DataState(
 }
 
 @Composable
-private fun ErrorState() {
-    // tbd implement error state
+private fun ColumnScope.ErrorState(
+    throwable: Throwable,
+    onActionButtonClick: () -> Unit,
+) {
+    Box(
+        modifier = Modifier
+            .weight(1f),
+        contentAlignment = Alignment.Center,
+    ) {
+        ErrorCard(
+            descriptionTextWrapper = throwable.toTextWrapper(),
+            onActionButtonClick = onActionButtonClick,
+        )
+    }
 }

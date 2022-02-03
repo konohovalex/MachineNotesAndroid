@@ -51,17 +51,30 @@ internal class MainViewModel
     private fun init() {
         initJob?.cancel()
         initJob = getIsFirstLaunchUseCase.invoke()
-            .onEach { operationStatus ->
-                when (operationStatus) {
-                    is OperationStatus.Plain.Pending, is OperationStatus.Plain.Processing -> {}
+            .onEach {
+                when (it) {
+                    is OperationStatus.Plain.Pending -> setLoadingState()
+                    is OperationStatus.Plain.Processing -> {}
                     is OperationStatus.Plain.Completed -> {
-                        isFirstLaunch = operationStatus.outputData
+                        isFirstLaunch = it.outputData
                         observePreferences()
                     }
-                    is OperationStatus.Plain.Error -> setErrorState(operationStatus.throwable)
+                    is OperationStatus.Plain.Error -> setErrorState(it.throwable) {
+                        init()
+                    }
                 }
             }
             .launchIn(viewModelScope)
+    }
+
+    private fun setLoadingState() {
+        val viewStateValue = viewState.value
+        setViewState(
+            MainViewState.Loading(
+                languageUiModel = viewStateValue?.languageUiModel,
+                themeModeUiModel = viewStateValue?.themeModeUiModel,
+            )
+        )
     }
 
     private fun observePreferences() {
@@ -70,7 +83,8 @@ internal class MainViewModel
             observePreferencesUseCase.invoke()
                 .onEach {
                     when (it) {
-                        is OperationStatus.Plain.Pending, is OperationStatus.Plain.Processing -> {}
+                        is OperationStatus.Plain.Pending -> setLoadingState()
+                        is OperationStatus.Plain.Processing -> {}
                         is OperationStatus.Plain.Completed -> {
                             val languageUiModel = languageDomainModelToLanguageUiModelMapper.invoke(
                                 it.outputData.languageDomainModel
@@ -81,7 +95,9 @@ internal class MainViewModel
 
                             setDataState(languageUiModel, themeModeUiModel)
                         }
-                        is OperationStatus.Plain.Error -> setErrorState(it.throwable)
+                        is OperationStatus.Plain.Error -> setErrorState(it.throwable) {
+                            observePreferences()
+                        }
                     }
                 }
                 .collect()
@@ -94,7 +110,7 @@ internal class MainViewModel
             setIsFirstLaunchJob = setIsFirstLaunchUseCase.invoke(false)
                 .onEach {
                     when (it) {
-                        is OperationStatus.Plain.Pending -> {}
+                        is OperationStatus.Plain.Pending -> setLoadingState()
                         is OperationStatus.Plain.Processing -> {}
                         is OperationStatus.Plain.Completed -> {
                             isFirstLaunch = it.outputData
@@ -103,7 +119,9 @@ internal class MainViewModel
                                 themeModeUiModel = viewState.themeModeUiModel,
                             )
                         }
-                        is OperationStatus.Plain.Error -> setErrorState(it.throwable)
+                        is OperationStatus.Plain.Error -> setErrorState(it.throwable) {
+                            firstLaunchCompleted()
+                        }
                     }
                 }
                 .launchIn(viewModelScope)
@@ -120,15 +138,18 @@ internal class MainViewModel
         )
     }
 
-    private fun setErrorState(throwable: Throwable) {
-        viewState.value.let {
-            setViewState(
-                MainViewState.Error(
-                    throwable = throwable,
-                    languageUiModel = it?.languageUiModel,
-                    themeModeUiModel = it?.themeModeUiModel,
-                )
+    private fun setErrorState(
+        throwable: Throwable,
+        onActionButtonClick: () -> Unit,
+    ) {
+        val viewStateValue = viewState.value
+        setViewState(
+            MainViewState.Error(
+                languageUiModel = viewStateValue?.languageUiModel,
+                themeModeUiModel = viewStateValue?.themeModeUiModel,
+                throwable = throwable,
+                onActionButtonClick = onActionButtonClick,
             )
-        }
+        )
     }
 }

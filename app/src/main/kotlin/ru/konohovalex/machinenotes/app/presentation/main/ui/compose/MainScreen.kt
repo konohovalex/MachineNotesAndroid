@@ -8,12 +8,16 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.rememberNavController
 import ru.konohovalex.core.design.model.Theme
 import ru.konohovalex.core.presentation.arch.viewevent.ViewEventHandler
 import ru.konohovalex.core.presentation.arch.viewstate.ViewStateProvider
+import ru.konohovalex.core.ui.compose.ErrorCard
+import ru.konohovalex.core.ui.compose.ThemedCircularProgressBar
+import ru.konohovalex.core.ui.extension.toTextWrapper
 import ru.konohovalex.feature.preferences.presentation.extension.localeOrDefault
 import ru.konohovalex.feature.preferences.presentation.model.ThemeModeUiModel
 import ru.konohovalex.machinenotes.app.presentation.main.model.MainViewEvent
@@ -28,8 +32,8 @@ import java.util.Locale
 internal fun MainScreen(
     viewStateProvider: ViewStateProvider<MainViewState>,
     viewEventHandler: ViewEventHandler<MainViewEvent>,
-    onThemeModeChanged: (isDarkTheme: Boolean) -> Unit,
     onLocaleChanged: (Locale) -> Unit,
+    onThemeModeChanged: (isDarkTheme: Boolean) -> Unit,
     onBackPressed: () -> Unit,
 ) {
     val viewState by viewStateProvider.viewState.observeAsState()
@@ -53,14 +57,25 @@ internal fun MainScreen(
                 is MainViewState.Idle -> LaunchedEffect(true) {
                     viewEventHandler.handle(MainViewEvent.Init)
                 }
+                is MainViewState.Loading -> LoadingState()
                 is MainViewState.FirstLaunch -> FirstLaunchState {
                     viewEventHandler.handle(MainViewEvent.FirstLaunchCompleted)
                 }
                 is MainViewState.NotFirstLaunch -> NotFirstLaunchState(onBackPressed)
-                is MainViewState.Error -> ErrorState()
+                is MainViewState.Error -> with(viewState as MainViewState.Error) {
+                    ErrorState(throwable, onActionButtonClick)
+                }
             }
         }
     }
+}
+
+@Composable
+private fun LoadingState() {
+    ThemedCircularProgressBar(
+        modifier = Modifier
+            .fillMaxSize(),
+    )
 }
 
 @Composable
@@ -97,6 +112,18 @@ fun NotFirstLaunchState(onBackPressed: () -> Unit) {
 }
 
 @Composable
-private fun ErrorState() {
-    // tbd implement error state
+private fun ErrorState(
+    throwable: Throwable,
+    onActionButtonClick: () -> Unit,
+) {
+    Box(
+        modifier = Modifier
+            .fillMaxSize(),
+        contentAlignment = Alignment.Center,
+    ) {
+        ErrorCard(
+            descriptionTextWrapper = throwable.toTextWrapper(),
+            onActionButtonClick = onActionButtonClick,
+        )
+    }
 }

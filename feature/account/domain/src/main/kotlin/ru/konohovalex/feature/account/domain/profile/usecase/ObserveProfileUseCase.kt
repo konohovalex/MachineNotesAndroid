@@ -15,10 +15,10 @@ class ObserveProfileUseCase
     private val accountRepository: AccountRepositoryContract,
     private val profileToProfileDomainModelMapper: Mapper<Profile, ProfileDomainModel>,
 ) {
-    suspend operator fun invoke(): Flow<OperationStatus.Plain<ProfileDomainModel?>> =
+    suspend operator fun invoke(): Flow<OperationStatus.Plain<ProfileDomainModel>> =
         accountRepository.observeProfile()
-            .map<Profile?, OperationStatus.Plain<ProfileDomainModel?>> {
-                val profileDomainModel = it?.let(profileToProfileDomainModelMapper::invoke)
+            .map<Profile, OperationStatus.Plain<ProfileDomainModel>> {
+                val profileDomainModel = profileToProfileDomainModelMapper.invoke(it)
                 OperationStatus.Plain.Completed(profileDomainModel)
             }
             .catch { exception -> emit(OperationStatus.Plain.Error(exception)) }

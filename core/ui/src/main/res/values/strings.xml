@@ -2,4 +2,7 @@
 <resources>
     <string name="search">Search…</string>
     <string name="logo">Logo</string>
+    <string name="retry">Retry</string>
+    <string name="error_title">Error occurred</string>
+    <string name="error_undefined">Undefined error</string>
 </resources>

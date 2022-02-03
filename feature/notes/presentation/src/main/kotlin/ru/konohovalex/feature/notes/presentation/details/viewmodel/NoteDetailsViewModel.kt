@@ -9,6 +9,7 @@ import kotlinx.coroutines.flow.onEach
 import ru.konohovalex.core.presentation.arch.viewevent.ViewEventHandler
 import ru.konohovalex.core.presentation.arch.viewstate.ViewStateProvider
 import ru.konohovalex.core.presentation.arch.viewstate.ViewStateProviderDelegate
+import ru.konohovalex.core.presentation.extension.setErrorViewState
 import ru.konohovalex.core.utils.model.Mapper
 import ru.konohovalex.core.utils.model.OperationStatus
 import ru.konohovalex.feature.notes.domain.model.NoteDomainModel
@@ -45,7 +46,11 @@ internal class NoteDetailsViewModel
                             is OperationStatus.WithInputData.Pending -> setLoadingState()
                             is OperationStatus.WithInputData.Processing -> {}
                             is OperationStatus.WithInputData.Completed -> setDataState(it.outputData)
-                            is OperationStatus.WithInputData.Error -> setErrorState(it.throwable)
+                            is OperationStatus.WithInputData.Error -> setErrorViewState(
+                                NoteDetailsViewState.Error(it.throwable) {
+                                    getNoteDetails(noteId)
+                                }
+                            )
                         }
                     }
                     ?: createNoteUseCase.invoke()
@@ -54,7 +59,11 @@ internal class NoteDetailsViewModel
                                 is OperationStatus.Plain.Pending -> setLoadingState()
                                 is OperationStatus.Plain.Processing -> {}
                                 is OperationStatus.Plain.Completed -> setDataState(it.outputData)
-                                is OperationStatus.Plain.Error -> setErrorState(it.throwable)
+                                is OperationStatus.Plain.Error -> setErrorViewState(
+                                    NoteDetailsViewState.Error(it.throwable) {
+                                        getNoteDetails(noteId)
+                                    }
+                                )
                             }
                         }
                 ).launchIn(viewModelScope)
@@ -67,9 +76,5 @@ internal class NoteDetailsViewModel
     private fun setDataState(noteDomainModel: NoteDomainModel) {
         val noteUiModel = noteDomainModelToNoteUiModelMapper.invoke(noteDomainModel)
         setViewState(NoteDetailsViewState.Data(noteUiModel))
-    }
-
-    private fun setErrorState(throwable: Throwable) {
-        setViewState(NoteDetailsViewState.Error(throwable))
     }
 }

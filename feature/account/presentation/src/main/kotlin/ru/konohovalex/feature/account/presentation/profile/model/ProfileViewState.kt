@@ -1,5 +1,6 @@
 package ru.konohovalex.feature.account.presentation.profile.model
 
+import ru.konohovalex.core.presentation.arch.viewstate.ErrorViewState
 import ru.konohovalex.core.presentation.arch.viewstate.ViewState
 
 internal sealed class ProfileViewState : ViewState {
@@ -9,5 +10,8 @@ internal sealed class ProfileViewState : ViewState {
 
     data class Data(val profileUiModel: ProfileUiModel) : ProfileViewState()
 
-    data class Error(val throwable: Throwable) : ProfileViewState()
+    data class Error(
+        override val throwable: Throwable,
+        override val onActionButtonClick: () -> Unit,
+    ) : ProfileViewState(), ErrorViewState
 }

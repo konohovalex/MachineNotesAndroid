@@ -29,9 +29,10 @@ fun ThemedBottomNavigationBar(
     bottomNavigationItems: List<BottomNavigationItem>,
     selectedBottomNavigationItem: BottomNavigationItem,
     navController: NavController,
+    modifier: Modifier = Modifier,
 ) {
     Surface(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth(),
         color = Theme.palette.backgroundColor,
         elevation = Theme.materialElevations.bottomNavigationBar,

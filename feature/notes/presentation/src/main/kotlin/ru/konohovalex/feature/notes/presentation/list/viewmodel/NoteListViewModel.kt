@@ -11,12 +11,13 @@ import kotlinx.coroutines.launch
 import ru.konohovalex.core.presentation.arch.viewevent.ViewEventHandler
 import ru.konohovalex.core.presentation.arch.viewstate.ViewStateProvider
 import ru.konohovalex.core.presentation.arch.viewstate.ViewStateProviderDelegate
+import ru.konohovalex.core.presentation.extension.setErrorViewState
 import ru.konohovalex.core.utils.model.Mapper
 import ru.konohovalex.core.utils.model.OperationStatus
 import ru.konohovalex.core.utils.model.PaginationData
+import ru.konohovalex.feature.notes.domain.extension.isValidNotesFilterValue
 import ru.konohovalex.feature.notes.domain.model.NoteDomainModel
 import ru.konohovalex.feature.notes.domain.usecase.GetNotesUseCase
-import ru.konohovalex.feature.notes.domain.extension.isValidNotesFilterValue
 import ru.konohovalex.feature.notes.presentation.list.model.NoteListViewEvent
 import ru.konohovalex.feature.notes.presentation.list.model.NoteListViewState
 import ru.konohovalex.feature.notes.presentation.list.model.NotePreviewUiModel
@@ -68,7 +69,11 @@ internal class NoteListViewModel
                 is OperationStatus.WithInputData.Pending -> setLoadingState()
                 is OperationStatus.WithInputData.Processing -> {}
                 is OperationStatus.WithInputData.Completed -> setDataState(it.outputData)
-                is OperationStatus.WithInputData.Error -> setErrorState(it.throwable)
+                is OperationStatus.WithInputData.Error -> setErrorViewState(
+                    NoteListViewState.Error(it.throwable) {
+                        getNextNotes(filter)
+                    }
+                )
             }
         }
 
@@ -79,9 +84,5 @@ internal class NoteListViewModel
     private fun setDataState(noteDomainModelList: List<NoteDomainModel>) {
         val notesUiModelList = noteDomainModelList.map(noteDomainModelToNotePreviewUiModelMapper)
         setViewState(NoteListViewState.Data(notesUiModelList))
-    }
-
-    private fun setErrorState(throwable: Throwable) {
-        setViewState(NoteListViewState.Error(throwable))
     }
 }

@@ -8,4 +8,6 @@ sealed class AuthViewEvent : ViewEvent {
     data class LogIn(val authDataUiModel: AuthDataUiModel) : AuthViewEvent()
 
     object DeclineAuthorization : AuthViewEvent()
+
+    object ErrorProcessed : AuthViewEvent()
 }

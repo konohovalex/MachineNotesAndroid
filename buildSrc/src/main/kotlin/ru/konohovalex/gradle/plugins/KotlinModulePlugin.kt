@@ -18,6 +18,21 @@ open class KotlinModulePlugin : ModulePlugin() {
         target.tasks.withType<KotlinCompile>().configureEach {
             kotlinOptions {
                 jvmTarget = JavaVersion.VERSION_1_8.toString()
+
+                // Avoid having to stutter experimental annotations all over the codebase
+                // Only currently useful should stay uncommented
+                freeCompilerArgs = freeCompilerArgs + listOf(
+//                    "-Xopt-in=androidx.compose.animation.ExperimentalAnimationApi",
+                    "-Xopt-in=androidx.compose.material.ExperimentalMaterialApi",
+//                    "-Xopt-in=androidx.compose.runtime.ExperimentalComposeApi",
+//                    "-Xopt-in=androidx.compose.ui.ExperimentalComposeUiApi",
+//                    "-Xopt-in=com.google.accompanist.navigation.material.ExperimentalMaterialNavigationApi",
+//                    "-Xopt-in=com.google.accompanist.pager.ExperimentalPagerApi",
+//                    "-Xopt-in=com.google.accompanist.permissions.ExperimentalPermissionsApi",
+//                    "-Xopt-in=kotlin.ExperimentalUnsignedTypes",
+//                    "-Xopt-in=kotlinx.coroutines.ExperimentalCoroutinesApi",
+//                    "-Xopt-in=kotlinx.coroutines.InternalCoroutinesApi",
+                )
             }
         }
     }

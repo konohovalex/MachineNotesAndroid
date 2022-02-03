@@ -5,7 +5,7 @@ import ru.konohovalex.feature.account.data.auth.model.AuthData
 import ru.konohovalex.feature.account.data.profile.model.Profile
 
 interface AccountRepositoryContract {
-    suspend fun observeProfile(): Flow<Profile?>
+    suspend fun observeProfile(): Flow<Profile>
     suspend fun logIn(authData: AuthData?): Profile
     suspend fun logOut(): Profile
     suspend fun deleteAccount(): Profile

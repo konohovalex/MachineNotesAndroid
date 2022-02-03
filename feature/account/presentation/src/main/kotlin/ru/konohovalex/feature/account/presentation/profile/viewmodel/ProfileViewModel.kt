@@ -11,13 +11,13 @@ import kotlinx.coroutines.launch
 import ru.konohovalex.core.presentation.arch.viewevent.ViewEventHandler
 import ru.konohovalex.core.presentation.arch.viewstate.ViewStateProvider
 import ru.konohovalex.core.presentation.arch.viewstate.ViewStateProviderDelegate
+import ru.konohovalex.core.presentation.extension.setErrorViewState
 import ru.konohovalex.core.utils.model.Mapper
 import ru.konohovalex.core.utils.model.OperationStatus
 import ru.konohovalex.feature.account.domain.auth.usecase.DeleteAccountUseCase
 import ru.konohovalex.feature.account.domain.auth.usecase.LogOutUseCase
 import ru.konohovalex.feature.account.domain.profile.model.ProfileDomainModel
 import ru.konohovalex.feature.account.domain.profile.usecase.ObserveProfileUseCase
-import ru.konohovalex.feature.account.presentation.profile.model.ProfileIsNullError
 import ru.konohovalex.feature.account.presentation.profile.model.ProfileUiModel
 import ru.konohovalex.feature.account.presentation.profile.model.ProfileViewEvent
 import ru.konohovalex.feature.account.presentation.profile.model.ProfileViewState
@@ -58,7 +58,11 @@ internal class ProfileViewModel
                         is OperationStatus.Plain.Pending -> setLoadingState()
                         is OperationStatus.Plain.Processing -> {}
                         is OperationStatus.Plain.Completed -> setDataState(it.outputData)
-                        is OperationStatus.Plain.Error -> setErrorState(it.throwable)
+                        is OperationStatus.Plain.Error -> setErrorViewState(
+                            ProfileViewState.Error(it.throwable) {
+                                getProfile()
+                            }
+                        )
                     }
                 }
                 .collect()
@@ -69,11 +73,9 @@ internal class ProfileViewModel
         setViewState(ProfileViewState.Loading)
     }
 
-    private fun setDataState(profileDomainModel: ProfileDomainModel?) {
-        val profileUiModel = profileDomainModel?.let(profileDomainModelToProfileUiModelMapper::invoke)
-        profileUiModel?.let {
-            setViewState(ProfileViewState.Data(profileUiModel))
-        } ?: setErrorState(ProfileIsNullError())
+    private fun setDataState(profileDomainModel: ProfileDomainModel) {
+        val profileUiModel = profileDomainModelToProfileUiModelMapper.invoke(profileDomainModel)
+        setViewState(ProfileViewState.Data(profileUiModel))
     }
 
     private fun logOut() {
@@ -82,11 +84,12 @@ internal class ProfileViewModel
             .onEach {
                 when (it) {
                     is OperationStatus.Plain.Pending -> setLoadingState()
-                    is OperationStatus.Plain.Processing,
-                    is OperationStatus.Plain.Completed,
-                    -> {
-                    }
-                    is OperationStatus.Plain.Error -> setErrorState(it.throwable)
+                    is OperationStatus.Plain.Processing, is OperationStatus.Plain.Completed -> {}
+                    is OperationStatus.Plain.Error -> setErrorViewState(
+                        ProfileViewState.Error(it.throwable) {
+                            logOut()
+                        }
+                    )
                 }
             }
             .launchIn(viewModelScope)
@@ -98,11 +101,12 @@ internal class ProfileViewModel
             .onEach {
                 when (it) {
                     is OperationStatus.Plain.Pending -> setLoadingState()
-                    is OperationStatus.Plain.Processing,
-                    is OperationStatus.Plain.Completed,
-                    -> {
-                    }
-                    is OperationStatus.Plain.Error -> setErrorState(it.throwable)
+                    is OperationStatus.Plain.Processing, is OperationStatus.Plain.Completed -> {}
+                    is OperationStatus.Plain.Error -> setErrorViewState(
+                        ProfileViewState.Error(it.throwable) {
+                            deleteAccount()
+                        }
+                    )
                 }
             }
             .launchIn(viewModelScope)
@@ -118,14 +122,14 @@ internal class ProfileViewModel
                         is OperationStatus.Plain.Processing -> {}
                         // tbd - there must be ObserveNotesUseCase
                         is OperationStatus.Plain.Completed -> setViewState(viewState)
-                        is OperationStatus.Plain.Error -> setErrorState(it.throwable)
+                        is OperationStatus.Plain.Error -> setErrorViewState(
+                            ProfileViewState.Error(it.throwable) {
+                                deleteAllNotes()
+                            }
+                        )
                     }
                 }
                 .launchIn(viewModelScope)
         }
-    }
-
-    private fun setErrorState(throwable: Throwable) {
-        setViewState(ProfileViewState.Error(throwable))
     }
 }

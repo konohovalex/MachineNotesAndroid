@@ -1,22 +1,27 @@
 package ru.konohovalex.feature.notes.presentation.details.ui.compose
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Scaffold
+import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import ru.konohovalex.core.design.model.Theme
 import ru.konohovalex.core.presentation.arch.viewevent.ViewEventHandler
 import ru.konohovalex.core.presentation.arch.viewstate.ViewStateProvider
+import ru.konohovalex.core.ui.compose.ErrorCard
 import ru.konohovalex.core.ui.compose.ThemedCard
 import ru.konohovalex.core.ui.compose.ThemedCircularProgressBar
 import ru.konohovalex.core.ui.compose.ThemedText
 import ru.konohovalex.core.ui.compose.ThemedTextType
+import ru.konohovalex.core.ui.extension.toTextWrapper
 import ru.konohovalex.core.ui.extension.unwrap
 import ru.konohovalex.core.ui.model.TextWrapper
 import ru.konohovalex.feature.notes.presentation.details.model.NoteContentUiModel
@@ -31,7 +36,10 @@ internal fun NoteDetailsScreen(
     viewStateProvider: ViewStateProvider<NoteDetailsViewState>,
     navigateBack: () -> Unit,
 ) {
+    val scaffoldState = rememberScaffoldState()
+
     Scaffold(
+        scaffoldState = scaffoldState,
         topBar = {
             NoteDetailsTopAppBar(navigateBack)
         },
@@ -55,7 +63,9 @@ internal fun NoteDetailsScreen(
                 is NoteDetailsViewState.Data -> with(viewState as NoteDetailsViewState.Data) {
                     DataState(noteUiModel)
                 }
-                is NoteDetailsViewState.Error -> ErrorState()
+                is NoteDetailsViewState.Error -> with(viewState as NoteDetailsViewState.Error) {
+                    ErrorState(throwable, onActionButtonClick)
+                }
             }
         }
     }
@@ -105,6 +115,18 @@ private fun DataState(noteUiModel: NoteUiModel) {
 }
 
 @Composable
-private fun ErrorState() {
-    // tbd implement error state
+private fun ErrorState(
+    throwable: Throwable,
+    onActionButtonClick: () -> Unit,
+) {
+    Box(
+        modifier = Modifier
+            .fillMaxSize(),
+        contentAlignment = Alignment.Center,
+    ) {
+        ErrorCard(
+            descriptionTextWrapper = throwable.toTextWrapper(),
+            onActionButtonClick = onActionButtonClick,
+        )
+    }
 }

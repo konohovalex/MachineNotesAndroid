@@ -23,11 +23,11 @@ internal class AccountRepositoryImpl
     private val authDataToAuthDataDtoMapper: Mapper<AuthData, AuthDataDto>,
 ) : AccountRepositoryContract {
     // tbd should there be safe update ops?
-    override suspend fun observeProfile(): Flow<Profile?> = withIo {
+    override suspend fun observeProfile(): Flow<Profile> = withIo {
         profileStorage.observeProfile()
             .map {
                 it?.let(profileEntityToProfileMapper::invoke)
-                // tbd if null, call logIn(null) before
+                    ?: logIn(null)
             }
     }
 

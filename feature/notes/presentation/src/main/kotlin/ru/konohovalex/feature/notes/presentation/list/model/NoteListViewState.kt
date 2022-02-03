@@ -1,5 +1,6 @@
 package ru.konohovalex.feature.notes.presentation.list.model
 
+import ru.konohovalex.core.presentation.arch.viewstate.ErrorViewState
 import ru.konohovalex.core.presentation.arch.viewstate.ViewState
 
 internal sealed class NoteListViewState : ViewState {
@@ -7,7 +8,13 @@ internal sealed class NoteListViewState : ViewState {
 
     object Loading : NoteListViewState()
 
-    data class Data(val notes: List<NotePreviewUiModel>) : NoteListViewState()
+    data class Data(
+        val notes: List<NotePreviewUiModel>,
+        val throwable: Throwable? = null,
+    ) : NoteListViewState()
 
-    data class Error(val throwable: Throwable) : NoteListViewState()
+    data class Error(
+        override val throwable: Throwable,
+        override val onActionButtonClick: () -> Unit,
+    ) : NoteListViewState(), ErrorViewState
 }

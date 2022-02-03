@@ -4,6 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import ru.konohovalex.core.ui.R
 import ru.konohovalex.core.ui.model.TextWrapper
 
 @Composable
@@ -25,3 +26,7 @@ fun TextWrapper.unwrap(): String = when (this) {
         }
     }
 }
+
+fun Throwable.toTextWrapper(): TextWrapper =
+    message?.let(TextWrapper::PlainText)
+        ?: TextWrapper.StringResource(R.string.error_undefined)

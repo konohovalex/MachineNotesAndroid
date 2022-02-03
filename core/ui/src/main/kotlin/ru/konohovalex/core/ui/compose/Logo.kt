@@ -10,11 +10,13 @@ import ru.konohovalex.core.design.model.Theme
 import ru.konohovalex.core.ui.R
 
 @Composable
-fun Logo() {
+fun Logo(
+    modifier: Modifier = Modifier,
+) {
     Image(
         painter = painterResource(id = R.drawable.ic_logo),
         contentDescription = stringResource(id = R.string.logo),
-        modifier = Modifier
+        modifier = modifier
             .padding(Theme.paddings.contentMedium),
     )
 }

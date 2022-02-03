@@ -9,5 +9,7 @@
     <color name="black">#FF000000</color>
 
     <color name="accent">#FF689F38</color>
-    <color name="fill_enabled_color">#FF689F38</color>
+    <color name="fill_enabled">#FF689F38</color>
+
+    <color name="error">#FFD32F2F</color>
 </resources>

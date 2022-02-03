@@ -12,6 +12,7 @@ import kotlinx.coroutines.launch
 import ru.konohovalex.core.presentation.arch.viewevent.ViewEventHandler
 import ru.konohovalex.core.presentation.arch.viewstate.ViewStateProvider
 import ru.konohovalex.core.presentation.arch.viewstate.ViewStateProviderDelegate
+import ru.konohovalex.core.presentation.extension.setErrorViewState
 import ru.konohovalex.core.utils.model.Mapper
 import ru.konohovalex.core.utils.model.OperationStatus
 import ru.konohovalex.feature.preferences.domain.model.LanguageDomainModel
@@ -21,8 +22,8 @@ import ru.konohovalex.feature.preferences.domain.usecase.ObservePreferencesUseCa
 import ru.konohovalex.feature.preferences.domain.usecase.UpdateLanguageUseCase
 import ru.konohovalex.feature.preferences.domain.usecase.UpdateThemeModeUseCase
 import ru.konohovalex.feature.preferences.presentation.model.LanguageUiModel
-import ru.konohovalex.feature.preferences.presentation.model.PreferencesScreenViewEvent
 import ru.konohovalex.feature.preferences.presentation.model.PreferencesUiModel
+import ru.konohovalex.feature.preferences.presentation.model.PreferencesViewEvent
 import ru.konohovalex.feature.preferences.presentation.model.PreferencesViewState
 import ru.konohovalex.feature.preferences.presentation.model.ThemeModeUiModel
 import javax.inject.Inject
@@ -38,16 +39,17 @@ internal class PreferencesViewModel
     private val themeModeDomainModelToThemeModeUiModelMapper: Mapper<ThemeModeDomainModel, ThemeModeUiModel>,
     private val themeModeUiModelToThemeModeDomainModelMapper: Mapper<ThemeModeUiModel, ThemeModeDomainModel>,
 ) : ViewModel(),
-    ViewEventHandler<PreferencesScreenViewEvent>,
+    ViewEventHandler<PreferencesViewEvent>,
     ViewStateProvider<PreferencesViewState> by ViewStateProviderDelegate(PreferencesViewState.Idle) {
     private var observePreferencesJob: Job? = null
     private var updateLanguageJob: Job? = null
     private var updateThemeModeJob: Job? = null
 
-    override fun handle(viewEvent: PreferencesScreenViewEvent) = when (viewEvent) {
-        is PreferencesScreenViewEvent.GetPreferences -> getPreferences()
-        is PreferencesScreenViewEvent.UpdateLanguage -> updateLanguage(viewEvent.languageUiModel)
-        is PreferencesScreenViewEvent.UpdateThemeMode -> updateThemeMode(viewEvent.themeModeUiModel)
+    override fun handle(viewEvent: PreferencesViewEvent) = when (viewEvent) {
+        is PreferencesViewEvent.GetPreferences -> getPreferences()
+        is PreferencesViewEvent.UpdateLanguage -> updateLanguage(viewEvent.languageUiModel)
+        is PreferencesViewEvent.UpdateThemeMode -> updateThemeMode(viewEvent.themeModeUiModel)
+        is PreferencesViewEvent.ErrorProcessed -> errorProcessed()
     }
 
     private fun getPreferences() {
@@ -59,7 +61,11 @@ internal class PreferencesViewModel
                         is OperationStatus.Plain.Pending -> setLoadingState()
                         is OperationStatus.Plain.Processing -> {}
                         is OperationStatus.Plain.Completed -> setDataState(it.outputData)
-                        is OperationStatus.Plain.Error -> setErrorState(it.throwable)
+                        is OperationStatus.Plain.Error -> setErrorViewState(
+                            PreferencesViewState.Error(it.throwable) {
+                                getPreferences()
+                            }
+                        )
                     }
                 }
                 .take(1)
@@ -89,7 +95,7 @@ internal class PreferencesViewModel
                     availableThemeModes = availableThemeModes,
                     currentThemeModeUiModel = currentThemeModeUiModel,
                     themeModeActionsEnabled = true,
-                )
+                ),
             ),
         )
     }
@@ -129,7 +135,8 @@ internal class PreferencesViewModel
                     preferencesUiModel = it.preferencesUiModel.copy(
                         currentLanguageUiModel = updatedLanguageDomainModel,
                         languageActionsEnabled = true,
-                    )
+                    ),
+                    throwable = null,
                 )
             )
         }
@@ -183,7 +190,8 @@ internal class PreferencesViewModel
                     preferencesUiModel = it.preferencesUiModel.copy(
                         currentThemeModeUiModel = updatedThemeModeDomainModel,
                         themeModeActionsEnabled = true,
-                    )
+                    ),
+                    throwable = null,
                 )
             )
         }
@@ -202,7 +210,13 @@ internal class PreferencesViewModel
         }
     }
 
-    private fun setErrorState(throwable: Throwable) {
-        setViewState(PreferencesViewState.Error(throwable))
+    private fun errorProcessed() {
+        withViewState(PreferencesViewState.Data::class.java) {
+            setViewState(
+                it.copy(
+                    throwable = null,
+                )
+            )
+        }
     }
 }

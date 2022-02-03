@@ -1,5 +1,6 @@
 package ru.konohovalex.machinenotes.app.presentation.main.model
 
+import ru.konohovalex.core.presentation.arch.viewstate.ErrorViewState
 import ru.konohovalex.core.presentation.arch.viewstate.ViewState
 import ru.konohovalex.feature.preferences.presentation.model.LanguageUiModel
 import ru.konohovalex.feature.preferences.presentation.model.ThemeModeUiModel
@@ -13,6 +14,11 @@ sealed class MainViewState : ViewState {
         override val themeModeUiModel: ThemeModeUiModel? = null
     }
 
+    data class Loading(
+        override val languageUiModel: LanguageUiModel?,
+        override val themeModeUiModel: ThemeModeUiModel?,
+    ) : MainViewState()
+
     data class FirstLaunch(
         override val languageUiModel: LanguageUiModel?,
         override val themeModeUiModel: ThemeModeUiModel?,
@@ -24,8 +30,9 @@ sealed class MainViewState : ViewState {
     ) : MainViewState()
 
     data class Error(
-        val throwable: Throwable,
         override val languageUiModel: LanguageUiModel?,
         override val themeModeUiModel: ThemeModeUiModel?,
-    ) : MainViewState()
+        override val throwable: Throwable,
+        override val onActionButtonClick: () -> Unit,
+    ) : MainViewState(), ErrorViewState
 }
