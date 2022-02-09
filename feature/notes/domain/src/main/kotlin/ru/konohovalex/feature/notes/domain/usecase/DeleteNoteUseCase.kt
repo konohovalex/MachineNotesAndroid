@@ -3,7 +3,6 @@ package ru.konohovalex.feature.notes.domain.usecase
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import ru.konohovalex.core.utils.model.OperationStatus
-import ru.konohovalex.core.utils.extension.unwrap
 import ru.konohovalex.feature.notes.data.repository.contract.NotesRepositoryContract
 import javax.inject.Inject
 
@@ -17,7 +16,7 @@ class DeleteNoteUseCase
 
             emit(OperationStatus.WithInputData.Processing(noteId))
 
-            val outputData = notesRepository.deleteNote(noteId).unwrap()
+            val outputData = notesRepository.deleteNote(noteId)
 
             emit(OperationStatus.WithInputData.Completed(noteId, outputData))
         }

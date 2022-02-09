@@ -1,83 +1,80 @@
 package ru.konohovalex.feature.notes.data.repository.impl
 
-import ru.konohovalex.core.utils.model.OperationResult
-import ru.konohovalex.core.utils.model.PaginationData
-import ru.konohovalex.core.utils.model.Mapper
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 import ru.konohovalex.core.utils.extension.withIo
+import ru.konohovalex.core.utils.model.DateTime
+import ru.konohovalex.core.utils.model.Mapper
 import ru.konohovalex.feature.notes.data.model.Note
-import ru.konohovalex.feature.notes.data.model.NoteContent
-import ru.konohovalex.feature.notes.data.model.NoteUpdateParams
-import ru.konohovalex.feature.notes.data.model.entity.NoteEntity
+import ru.konohovalex.feature.notes.data.model.entity.NoteWithContentEntity
 import ru.konohovalex.feature.notes.data.model.remote.NoteDto
 import ru.konohovalex.feature.notes.data.model.remote.NoteUpdateParamsDto
 import ru.konohovalex.feature.notes.data.repository.contract.NotesRepositoryContract
 import ru.konohovalex.feature.notes.data.source.api.NotesApi
-import ru.konohovalex.feature.notes.data.source.storage.NotesDao
-import ru.konohovalex.feature.notes.data.extension.createDummyNote
-import ru.konohovalex.feature.notes.data.extension.createDummyNoteList
+import ru.konohovalex.feature.notes.data.source.storage.contract.NotesStorageContract
 import javax.inject.Inject
+import kotlin.random.Random
 
 internal class NotesRepositoryImpl
 @Inject constructor(
     private val notesApi: NotesApi,
-    private val notesDao: NotesDao,
+    private val notesStorage: NotesStorageContract,
     private val noteDtoToNoteMapper: Mapper<NoteDto, Note>,
     private val noteToNoteDtoMapper: Mapper<Note, NoteDto>,
-    private val noteUpdateParamsToNoteUpdateParamsDtoMapper: Mapper<NoteUpdateParams, NoteUpdateParamsDto>,
-    private val noteToNoteEntityMapper: Mapper<Note, NoteEntity>,
-    private val noteEntityToNoteMapper: Mapper<NoteEntity, Note>,
+    private val noteWithContentEntityToNoteMapper: Mapper<NoteWithContentEntity, Note>,
+    private val noteToNoteWithContentEntityMapper: Mapper<Note, NoteWithContentEntity>,
+    private val noteToNoteUpdateParamsDtoMapper: Mapper<Note, NoteUpdateParamsDto>,
 ) : NotesRepositoryContract {
-    // tbd should there be safe update ops?
-    private val dummyNoteList = createDummyNoteList(25)
-
-    override suspend fun createNote(): OperationResult<Note> = withIo {
-        val dummyNote = createDummyNote("${dummyNoteList.size}", 0)
-        OperationResult.Success(dummyNote)
+    override suspend fun synchronizeNotes() {
+//        val localNotes = notesStorage.observeNotes()
+//            .value
+//            .map(noteWithContentEntityToNoteMapper)
+//        val localNotesDtoList = localNotes.map(noteToNoteDtoMapper)
+//        val synchronizedNotes = notesApi.synchronizeNotes(localNotesDtoList).map(noteDtoToNoteMapper)
+//        notesStorage.insertNotes(synchronizedNotes.map(noteToNoteWithContentEntityMapper))
     }
 
-    override suspend fun getNoteDetails(noteId: String): OperationResult<Note> = withIo {
-        OperationResult.Success(dummyNoteList.find { it.id == noteId }!!)
+    override suspend fun observeNotes(): Flow<List<Note>> = withIo {
+        notesStorage.observeNotes()
+            .map { it.map(noteWithContentEntityToNoteMapper) }
     }
 
-    override suspend fun updateNote(noteUpdateParams: NoteUpdateParams): OperationResult<Note> = withIo {
-        val indexOfNoteToUpdate = dummyNoteList.indexOfFirst { it.id == noteUpdateParams.id }
-        val noteToUpdate = dummyNoteList[indexOfNoteToUpdate]
-        val updatedNote = noteToUpdate.copy(
-            dateTimeLastEdited = noteUpdateParams.dateTimeLastEdited,
-            noteContent = noteUpdateParams.noteContent,
-        )
-        dummyNoteList[indexOfNoteToUpdate] = updatedNote
-        OperationResult.Success(updatedNote)
+    override suspend fun createNote(): Note = withIo {
+//        val noteDto = notesApi.createNote()
+//        val note = noteDtoToNoteMapper.invoke(noteDto)
+        val note = dummyNote(notesStorage.observeNotes().value.size)
+        val noteWithContentEntity = noteToNoteWithContentEntityMapper.invoke(note)
+        notesStorage.insertNotes(listOf(noteWithContentEntity))
+        note
+    }
+
+    override suspend fun getNoteDetails(noteId: String): Note = withIo {
+        notesStorage.getNote(noteId).let(noteWithContentEntityToNoteMapper::invoke)
+    }
+
+    override suspend fun updateNote(note: Note): Note = withIo {
+//        val noteUpdateParamsDto = noteToNoteUpdateParamsDtoMapper.invoke(note)
+//        val noteDto = notesApi.updateNote(note.id, noteUpdateParamsDto)
+//        val updatedNote = noteDtoToNoteMapper.invoke(noteDto)
+//        val noteWithContentEntity = noteToNoteWithContentEntityMapper.invoke(updatedNote)
+//        notesStorage.updateNotes(listOf(noteWithContentEntity))
+//        updatedNote
+        val noteWithContentEntity = noteToNoteWithContentEntityMapper.invoke(note)
+        notesStorage.updateNotes(listOf(noteWithContentEntity))
+        note
     }
 
     override suspend fun deleteNote(noteId: String) = withIo {
-        dummyNoteList.removeAll { it.id == noteId }
-        OperationResult.Success(Unit)
+//        notesApi.deleteNote(note.id)
+        notesStorage.deleteNotes(listOf(noteId))
     }
 
-    override suspend fun getNotes(
-        filter: String?,
-        paginationData: PaginationData,
-    ): OperationResult<List<Note>> = withIo {
-        val outputList = filter?.takeIf { it.isNotBlank() }?.let { filterValue ->
-            mutableListOf<Note>().apply {
-                dummyNoteList.forEach { note ->
-                    val containsFilterValue = note.noteContent.any {
-                        it is NoteContent.Text && it.content.contains(filterValue, ignoreCase = true)
-                    }
-                    if (containsFilterValue) add(note)
-                }
-            }
-        } ?: dummyNoteList
-        OperationResult.Success(outputList)
+    override suspend fun deleteAllNotes(onlyLocally: Boolean) = withIo {
+//        if (!onlyLocally) notesApi.deleteAllNotes()
+        notesStorage.deleteAllNotes()
     }
 
-    override suspend fun synchronizeNotes(notes: List<Note>): OperationResult<List<Note>> = withIo {
-        OperationResult.Success(dummyNoteList)
-    }
-
-    override suspend fun deleteAllNotes() = withIo {
-        dummyNoteList.clear()
-        OperationResult.Success(Unit)
+    private fun dummyNote(notesSize: Int) = DateTime().let {
+        Note("${notesSize}_${Random.nextInt(100000)}", it, it, listOf())
     }
 }

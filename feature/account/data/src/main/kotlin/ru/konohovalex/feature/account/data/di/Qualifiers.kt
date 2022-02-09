@@ -1,6 +1,8 @@
 package ru.konohovalex.feature.account.data.di
 
 internal object Qualifiers {
+    const val ACCOUNT_DATA_COROUTINE_SCOPE = "AccountDataCoroutineScope"
+
     const val ACCOUNT_GSON_PROVIDER = "AccountGsonProvider"
     const val ACCOUNT_GSON = "AccountGson"
     const val ACCOUNT_GSON_CONVERTER_FACTORY = "AccountGsonConverterFactory"
@@ -9,6 +11,4 @@ internal object Qualifiers {
     const val PROFILE_GSON = "ProfileGson"
     const val PROFILE_DATA_STORE_PROVIDER = "ProfileDataStoreProvider"
     const val PROFILE_PREFERENCES_DATA_STORE = "ProfilePreferencesDataStore"
-    const val PROFILE_DATA_STORE_COROUTINE_SCOPE_PROVIDER = "ProfileDataStoreCoroutineScopeProvider"
-    const val PROFILE_DATA_STORE_COROUTINE_SCOPE = "ProfileDataStoreCoroutineScope"
 }

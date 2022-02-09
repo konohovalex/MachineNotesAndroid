@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.Scaffold
 import androidx.compose.material.SnackbarHostState
-import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -46,21 +45,18 @@ internal fun PreferencesScreen(
 ) {
     val viewState by viewStateProvider.viewState.observeAsState()
 
-    val scaffoldState = rememberScaffoldState()
+    val coroutineScope = rememberCoroutineScope()
 
     Scaffold(
         modifier = Modifier
             .fillMaxSize(),
-        scaffoldState = scaffoldState,
-        snackbarHost = {
+        snackbarHost = { snackbarHostState ->
             viewState.safeCast<PreferencesViewState.Data>()?.let {
                 SnackbarHost(
-                    throwable = it.throwable,
-                    snackbarHostState = scaffoldState.snackbarHostState,
-                    coroutineScope = rememberCoroutineScope(),
-                    onDismissed = {
-                        viewEventHandler.handle(PreferencesViewEvent.ErrorProcessed)
-                    },
+                    viewState = it,
+                    viewEventHandler = viewEventHandler,
+                    snackbarHostState = snackbarHostState,
+                    coroutineScope = coroutineScope,
                 )
             }
         }
@@ -74,44 +70,57 @@ internal fun PreferencesScreen(
         ) {
             Logo()
 
-            when (viewState) {
-                is PreferencesViewState.Idle -> LaunchedEffect(true) {
-                    viewEventHandler.handle(PreferencesViewEvent.GetPreferences)
-                }
-                is PreferencesViewState.Loading -> LoadingState()
-                is PreferencesViewState.Data -> with((viewState as PreferencesViewState.Data)) {
-                    DataState(
-                        preferencesUiModel = preferencesUiModel,
-                        onSelectedLanguageChanged = {
-                            viewEventHandler.handle(PreferencesViewEvent.UpdateLanguage(it))
-                        },
-                        onSelectedThemeModeChanged = {
-                            viewEventHandler.handle(PreferencesViewEvent.UpdateThemeMode(it))
-                        },
-                    )
-                }
-                is PreferencesViewState.Error -> with(viewState as PreferencesViewState.Error) {
-                    ErrorState(throwable, onActionButtonClick)
-                }
-            }
+            processViewState(
+                viewState = viewState,
+                viewEventHandler = viewEventHandler,
+            )
         }
     }
 }
 
 @Composable
 private fun SnackbarHost(
-    throwable: Throwable?,
+    viewState: PreferencesViewState.Data,
+    viewEventHandler: ViewEventHandler<PreferencesViewEvent>,
     snackbarHostState: SnackbarHostState,
     coroutineScope: CoroutineScope,
-    onDismissed: () -> Unit,
 ) {
-    throwable?.let {
+    viewState.throwable?.let {
         ThemedSnackbarHost(
             messageTextWrapper = it.toTextWrapper(),
             snackbarHostState = snackbarHostState,
             coroutineScope = coroutineScope,
-            onDismissed = onDismissed,
+            onDismissed = {
+                viewEventHandler.handle(PreferencesViewEvent.ErrorProcessed)
+            },
         )
+    }
+}
+
+@Composable
+private fun ColumnScope.processViewState(
+    viewState: PreferencesViewState?,
+    viewEventHandler: ViewEventHandler<PreferencesViewEvent>,
+) = viewState?.let {
+    when (it) {
+        is PreferencesViewState.Idle -> LaunchedEffect(true) {
+            viewEventHandler.handle(PreferencesViewEvent.GetPreferences)
+        }
+        is PreferencesViewState.Loading -> LoadingState()
+        is PreferencesViewState.Data -> with((it)) {
+            DataState(
+                preferencesUiModel = preferencesUiModel,
+                onSelectedLanguageChanged = { languageUiModel ->
+                    viewEventHandler.handle(PreferencesViewEvent.UpdateLanguage(languageUiModel))
+                },
+                onSelectedThemeModeChanged = { themeModeUiModel ->
+                    viewEventHandler.handle(PreferencesViewEvent.UpdateThemeMode(themeModeUiModel))
+                },
+            )
+        }
+        is PreferencesViewState.Error -> with(it) {
+            ErrorState(throwable, onActionButtonClick)
+        }
     }
 }
 

@@ -6,10 +6,12 @@ import dagger.hilt.components.SingletonComponent
 
 @Module(
     includes = [
+        NotesDataCoroutinesModule::class,
         NotesApiModule::class,
         NotesDataMappersModule::class,
         NotesGsonModule::class,
         NotesRepositoryModule::class,
+        NotesDatabaseModule::class,
         NotesStorageModule::class,
     ],
 )

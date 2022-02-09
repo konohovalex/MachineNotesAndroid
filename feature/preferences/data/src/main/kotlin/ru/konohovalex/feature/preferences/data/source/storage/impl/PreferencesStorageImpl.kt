@@ -6,7 +6,6 @@ import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import com.google.gson.Gson
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
@@ -27,11 +26,8 @@ internal class PreferencesStorageImpl
 
     private var preferencesStateFlow: StateFlow<PreferencesEntity>? = null
 
-    override suspend fun observePreferences(): Flow<PreferencesEntity> =
+    override suspend fun observePreferences(): StateFlow<PreferencesEntity> =
         getPreferencesStateFlow()
-
-    override suspend fun getCurrentPreferences(): PreferencesEntity =
-        getPreferencesStateFlow().value
 
     override suspend fun updatePreferences(preferencesEntity: PreferencesEntity): PreferencesEntity =
         preferencesDataStore

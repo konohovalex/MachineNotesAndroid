@@ -12,6 +12,7 @@ import ru.konohovalex.feature.preferences.presentation.navigation.preferencesScr
 
 @Composable
 internal fun WelcomeScreen(authorizationSuccessfulAction: () -> Unit) {
+    // tbd fix collapsing preferences, if auth fields focused
     Column {
         NavHost(
             modifier = Modifier

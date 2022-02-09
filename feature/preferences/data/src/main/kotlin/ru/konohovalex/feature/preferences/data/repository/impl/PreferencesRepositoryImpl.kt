@@ -43,6 +43,8 @@ internal class PreferencesRepositoryImpl
         ).themeMode
 
     private suspend fun getCurrentPreferences(): Preferences = withIo {
-        preferencesEntityToPreferencesMapper.invoke(preferencesStorage.getCurrentPreferences())
+        preferencesStorage.observePreferences()
+            .value
+            .let(preferencesEntityToPreferencesMapper::invoke)
     }
 }

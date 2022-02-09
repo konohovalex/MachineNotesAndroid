@@ -7,7 +7,9 @@ import ru.konohovalex.core.utils.model.Mapper
 import ru.konohovalex.feature.notes.domain.model.NoteContentDomainModel
 import ru.konohovalex.feature.notes.domain.model.NoteDomainModel
 import ru.konohovalex.feature.notes.presentation.details.mapper.NoteContentDomainModelToNoteContentUiModelMapper
+import ru.konohovalex.feature.notes.presentation.details.mapper.NoteContentUiModelToNoteContentDomainModelMapper
 import ru.konohovalex.feature.notes.presentation.details.mapper.NoteDomainModelToNoteUiModelMapper
+import ru.konohovalex.feature.notes.presentation.details.mapper.NoteUiModelToNoteDomainModelMapper
 import ru.konohovalex.feature.notes.presentation.details.model.NoteContentUiModel
 import ru.konohovalex.feature.notes.presentation.details.model.NoteUiModel
 
@@ -23,4 +25,15 @@ internal interface NoteDetailsPresentationMappersModule {
     fun bindNoteDomainModelToNoteUiModelMapper(
         mapper: NoteDomainModelToNoteUiModelMapper,
     ): Mapper<NoteDomainModel, NoteUiModel>
+
+
+    @Binds
+    fun bindNoteContentUiModelToNoteContentDomainModelMapper(
+        mapper: NoteContentUiModelToNoteContentDomainModelMapper,
+    ): Mapper<NoteContentUiModel, NoteContentDomainModel>
+
+    @Binds
+    fun bindNoteUiModelToNoteDomainModelMapper(
+        mapper: NoteUiModelToNoteDomainModelMapper,
+    ): Mapper<NoteUiModel, NoteDomainModel>
 }

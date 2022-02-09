@@ -7,7 +7,6 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.flow.take
 import kotlinx.coroutines.launch
 import ru.konohovalex.core.presentation.arch.viewevent.ViewEventHandler
 import ru.konohovalex.core.presentation.arch.viewstate.ViewStateProvider
@@ -68,7 +67,6 @@ internal class PreferencesViewModel
                         )
                     }
                 }
-                .take(1)
                 .collect()
         }
     }
@@ -78,6 +76,8 @@ internal class PreferencesViewModel
     }
 
     private fun setDataState(preferencesDomainModel: PreferencesDomainModel) {
+        observePreferencesJob?.cancel()
+
         val availableLanguages = LanguageUiModel.values().toList()
         val currentLanguageUiModel =
             languageDomainModelToLanguageUiModelMapper.invoke(preferencesDomainModel.languageDomainModel)

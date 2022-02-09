@@ -18,7 +18,7 @@ internal fun NoteDetailsFloatingActionButton() {
             // tbd show popping-up fabs for image/audio addition
         },
         modifier = Modifier
-            .padding(PaddingValues(Theme.paddings.floatingActionButtonCompensation)),
+            .padding(PaddingValues(Theme.sizes.border)),
         backgroundColor = Theme.palette.fillEnabledColor,
         shape = Theme.shapes.medium,
     ) {

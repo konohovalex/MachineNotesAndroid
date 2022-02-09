@@ -3,6 +3,7 @@ package ru.konohovalex.feature.account.domain.profile.usecase
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onStart
 import ru.konohovalex.core.utils.model.Mapper
 import ru.konohovalex.core.utils.model.OperationStatus
 import ru.konohovalex.feature.account.data.profile.model.Profile
@@ -21,5 +22,6 @@ class ObserveProfileUseCase
                 val profileDomainModel = profileToProfileDomainModelMapper.invoke(it)
                 OperationStatus.Plain.Completed(profileDomainModel)
             }
+            .onStart { emit(OperationStatus.Plain.Pending()) }
             .catch { exception -> emit(OperationStatus.Plain.Error(exception)) }
 }

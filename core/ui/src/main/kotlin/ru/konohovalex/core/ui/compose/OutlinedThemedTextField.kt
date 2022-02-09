@@ -35,6 +35,7 @@ fun OutlinedThemedTextField(
     onTrailingIconClick: (() -> Unit)? = null,
     enabled: Boolean = true,
     errorTextWrapper: TextWrapper? = null,
+    singleLine: Boolean = true,
 ) {
     val isError = errorTextWrapper != null
 
@@ -53,7 +54,7 @@ fun OutlinedThemedTextField(
             leadingIcon = icon(leadingIconImageWrapper, onLeadingIconClick),
             trailingIcon = icon(trailingIconImageWrapper, onTrailingIconClick),
             isError = isError,
-            singleLine = true,
+            singleLine = singleLine,
             shape = Theme.shapes.small,
             colors = colors(isError),
         )

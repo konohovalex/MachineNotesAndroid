@@ -1,5 +1,6 @@
 package ru.konohovalex.feature.notes.data.mapper
 
+import ru.konohovalex.core.utils.model.DateTime
 import ru.konohovalex.core.utils.model.Mapper
 import ru.konohovalex.feature.notes.data.model.Note
 import ru.konohovalex.feature.notes.data.model.NoteContent
@@ -14,8 +15,8 @@ internal class NoteDtoToNoteMapper
     override fun invoke(input: NoteDto) = with(input) {
         Note(
             id,
-            dateTimeCreated,
-            dateTimeLastEdited,
+            DateTime(dateTimeCreated),
+            DateTime(dateTimeLastEdited),
             noteContent.map(noteContentDtoToNoteContentMapper),
         )
     }

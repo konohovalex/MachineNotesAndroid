@@ -1,8 +1,9 @@
 package ru.konohovalex.core.utils.extension
 
 import ru.konohovalex.core.utils.model.MergedOperationStatus2
-import ru.konohovalex.core.utils.model.OperationResult
 import ru.konohovalex.core.utils.model.OperationStatus
+
+fun <O> OperationStatus<O>.asError() = safeCast<OperationStatus.Error<O>>()
 
 fun <O1, O2> OperationStatus.Plain<O1>.merge(
     other: OperationStatus.Plain<O2>,
@@ -73,27 +74,6 @@ fun <O1, O2> OperationStatus.Plain<O1?>.mapNullable(
                 OperationStatus.Plain.Processing()
             is OperationStatus.Plain.Completed ->
                 OperationStatus.Plain.Completed(outputData?.let(mapper::invoke))
-            is OperationStatus.Plain.Error ->
-                OperationStatus.Plain.Error(throwable)
-        }
-    }
-    catch (throwable: Throwable) {
-        OperationStatus.Plain.Error(throwable)
-    }
-
-inline fun <reified O1, O2> OperationStatus.Plain<OperationResult<O1>>.mapUnwrapping(
-    mapper: (O1) -> O2,
-): OperationStatus.Plain<O2> =
-    try {
-        when (this) {
-            is OperationStatus.Plain.Pending ->
-                OperationStatus.Plain.Pending()
-            is OperationStatus.Plain.Processing ->
-                OperationStatus.Plain.Processing()
-            is OperationStatus.Plain.Completed -> {
-                val outputData = outputData.unwrap()
-                OperationStatus.Plain.Completed(mapper.invoke(outputData))
-            }
             is OperationStatus.Plain.Error ->
                 OperationStatus.Plain.Error(throwable)
         }

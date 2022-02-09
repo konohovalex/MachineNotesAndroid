@@ -14,8 +14,8 @@ internal class NoteToNoteDtoMapper
     override fun invoke(input: Note) = with(input) {
         NoteDto(
             id,
-            dateTimeCreated,
-            dateTimeLastEdited,
+            dateTimeCreated.raw,
+            dateTimeLastEdited.raw,
             noteContent.map(noteContentToNoteContentDtoMapper),
         )
     }

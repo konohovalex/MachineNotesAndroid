@@ -1,6 +1,5 @@
 package ru.konohovalex.core.ui.compose
 
-import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
@@ -8,14 +7,12 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.FractionalThreshold
 import androidx.compose.material.SnackbarData
 import androidx.compose.material.SnackbarDuration
 import androidx.compose.material.SnackbarHost
 import androidx.compose.material.SnackbarHostState
 import androidx.compose.material.SnackbarResult
 import androidx.compose.material.rememberSwipeableState
-import androidx.compose.material.swipeable
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -34,14 +31,10 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import ru.konohovalex.core.design.model.Theme
 import ru.konohovalex.core.ui.R
+import ru.konohovalex.core.ui.extension.simpleSwipeable
 import ru.konohovalex.core.ui.model.ButtonData
+import ru.konohovalex.core.ui.model.SwipeDirection
 import ru.konohovalex.core.ui.model.TextWrapper
-
-private enum class SwipeDirection {
-    Left,
-    Initial,
-    Right,
-}
 
 @ExperimentalMaterialApi
 @Composable
@@ -54,8 +47,11 @@ fun ThemedSnackbarHost(
     onActionButtonClick: (() -> Unit)? = null,
     onDismissed: () -> Unit,
 ) {
-    var size by remember { mutableStateOf(Size.Zero) }
-    val swipeableState = rememberSwipeableState(SwipeDirection.Initial)
+    // tbd can there be more optimal implementation?
+    var size by remember {
+        mutableStateOf(Size.Zero)
+    }
+    val swipeableState = rememberSwipeableState(SwipeDirection.INITIAL)
     val width = remember(size) {
         if (size.width == 0f) 1f
         else size.width
@@ -64,7 +60,7 @@ fun ThemedSnackbarHost(
         DisposableEffect(Unit) {
             onDispose {
                 when (swipeableState.currentValue) {
-                    SwipeDirection.Right, SwipeDirection.Left -> snackbarHostState.currentSnackbarData?.dismiss()
+                    SwipeDirection.RIGHT, SwipeDirection.LEFT -> snackbarHostState.currentSnackbarData?.dismiss()
                     else -> return@onDispose
                 }
             }
@@ -93,15 +89,13 @@ fun ThemedSnackbarHost(
                     height = it.height.toFloat(),
                 )
             }
-            .swipeable(
+            .simpleSwipeable(
                 state = swipeableState,
                 anchors = mapOf(
-                    -width to SwipeDirection.Left,
-                    0f to SwipeDirection.Initial,
-                    width to SwipeDirection.Right,
+                    -width to SwipeDirection.LEFT,
+                    0f to SwipeDirection.INITIAL,
+                    width to SwipeDirection.RIGHT,
                 ),
-                thresholds = { _, _ -> FractionalThreshold(0.3f) },
-                orientation = Orientation.Horizontal
             )
     )
 

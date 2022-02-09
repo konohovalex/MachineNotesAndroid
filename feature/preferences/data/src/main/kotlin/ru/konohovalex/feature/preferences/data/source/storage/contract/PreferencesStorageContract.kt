@@ -1,6 +1,6 @@
 package ru.konohovalex.feature.preferences.data.source.storage.contract
 
-import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.StateFlow
 import ru.konohovalex.core.data.arch.source.storage.Storage
 import ru.konohovalex.feature.preferences.data.model.entity.PreferencesEntity
 
@@ -9,7 +9,6 @@ internal interface PreferencesStorageContract : Storage {
         const val PREFERENCES_FILE_NAME = "preferences_storage"
     }
 
-    suspend fun observePreferences(): Flow<PreferencesEntity>
-    suspend fun getCurrentPreferences(): PreferencesEntity
+    suspend fun observePreferences(): StateFlow<PreferencesEntity>
     suspend fun updatePreferences(preferencesEntity: PreferencesEntity): PreferencesEntity
 }

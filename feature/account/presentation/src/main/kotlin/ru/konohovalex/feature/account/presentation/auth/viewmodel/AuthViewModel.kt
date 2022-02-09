@@ -7,7 +7,6 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.flow.take
 import kotlinx.coroutines.launch
 import ru.konohovalex.core.presentation.arch.viewevent.ViewEventHandler
 import ru.konohovalex.core.presentation.arch.viewstate.ViewStateProvider
@@ -64,7 +63,6 @@ internal class AuthViewModel
                         )
                     }
                 }
-                .take(1)
                 .collect()
         }
     }
@@ -74,6 +72,8 @@ internal class AuthViewModel
     }
 
     private fun setInitialDataState(profileDomainModel: ProfileDomainModel?) {
+        observeProfileJob?.cancel()
+
         _initialProfile = profileDomainModel
         setViewState(
             AuthViewState.Data.empty(

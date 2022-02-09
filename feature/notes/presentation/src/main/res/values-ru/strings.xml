@@ -5,4 +5,6 @@
     <string name="image">Изображение</string>
     <string name="audio">Аудиофайл</string>
     <string name="back">Назад</string>
+    <string name="no_notes_title">У Вас пока что нет заметок</string>
+    <string name="no_notes_body">Чтобы добавить заметку, нажмите кнопку +</string>
 </resources>

@@ -39,29 +39,42 @@ internal fun ProfileScreen(
 
         val viewState by viewStateProvider.viewState.observeAsState()
 
-        when (viewState) {
-            is ProfileViewState.Idle -> LaunchedEffect(true) {
-                viewEventHandler.handle(ProfileViewEvent.GetProfile)
-            }
-            is ProfileViewState.Loading -> LoadingState()
-            is ProfileViewState.Data -> with(viewState as ProfileViewState.Data) {
-                DataState(
-                    profileUiModel = profileUiModel,
-                    onLogOutButtonClick = {
-                        viewEventHandler.handle(ProfileViewEvent.LogOut)
-                    },
-                    onDeleteAccountButtonClick = {
-                        viewEventHandler.handle(ProfileViewEvent.DeleteAccount)
-                    },
-                    onDeleteAllNotesButtonClick = {
-                        viewEventHandler.handle(ProfileViewEvent.DeleteAllNotes)
-                    },
-                    navigateToAuth = navigateToAuth,
-                )
-            }
-            is ProfileViewState.Error -> with(viewState as ProfileViewState.Error) {
-                ErrorState(throwable, onActionButtonClick)
-            }
+        processViewState(
+            viewState = viewState,
+            viewEventHandler = viewEventHandler,
+            navigateToAuth = navigateToAuth,
+        )
+    }
+}
+
+@Composable
+private fun ColumnScope.processViewState(
+    viewState: ProfileViewState?,
+    viewEventHandler: ViewEventHandler<ProfileViewEvent>,
+    navigateToAuth: () -> Unit,
+) = viewState?.let {
+    when (it) {
+        is ProfileViewState.Idle -> LaunchedEffect(true) {
+            viewEventHandler.handle(ProfileViewEvent.GetProfile)
+        }
+        is ProfileViewState.Loading -> LoadingState()
+        is ProfileViewState.Data -> with(it) {
+            DataState(
+                profileUiModel = profileUiModel,
+                onLogOutButtonClick = {
+                    viewEventHandler.handle(ProfileViewEvent.LogOut)
+                },
+                onDeleteAccountButtonClick = {
+                    viewEventHandler.handle(ProfileViewEvent.DeleteAccount)
+                },
+                onDeleteAllNotesButtonClick = {
+                    viewEventHandler.handle(ProfileViewEvent.DeleteAllNotes)
+                },
+                navigateToAuth = navigateToAuth,
+            )
+        }
+        is ProfileViewState.Error -> with(it) {
+            ErrorState(throwable, onActionButtonClick)
         }
     }
 }

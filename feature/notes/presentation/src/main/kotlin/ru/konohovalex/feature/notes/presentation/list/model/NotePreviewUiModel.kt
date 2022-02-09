@@ -8,4 +8,5 @@ internal data class NotePreviewUiModel(
     val dateTimeLastEdited: DateTime,
     val titleTextWrapper: TextWrapper,
     val subtitleTextWrapper: TextWrapper,
+    val throwable: Throwable? = null,
 )

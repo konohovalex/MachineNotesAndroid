@@ -8,18 +8,25 @@ import javax.inject.Inject
 internal class NoteContentEntityToNoteContentMapper
 @Inject constructor() : Mapper<NoteContentEntity, NoteContent> {
     override fun invoke(input: NoteContentEntity) = with(input) {
-        when (this) {
-            is NoteContentEntity.Text -> NoteContent.Text(
+        when {
+            content != null -> NoteContent.Text(
                 id = id,
                 content = content,
             )
-            is NoteContentEntity.Image -> NoteContent.Image(
+            imageContentUrl != null -> NoteContent.Image(
                 id = id,
-                contentUrl = contentUrl,
+                contentUrl = imageContentUrl,
             )
-            is NoteContentEntity.Audio -> NoteContent.Audio(
+            audioContentUrl != null -> NoteContent.Audio(
                 id = id,
-                contentUrl = contentUrl,
+                contentUrl = audioContentUrl,
+            )
+            else -> throw IllegalStateException(
+                "Unable to map ${NoteContentEntity::class.simpleName} to ${NoteContent::class.simpleName}, " +
+                        "since all of ${NoteContentEntity.TEXT_CONTENT_COLUMN_NAME}, " +
+                        "${NoteContentEntity.IMAGE_CONTENT_URL_COLUMN_NAME} " +
+                        "and ${NoteContentEntity.AUDIO_CONTENT_URL_COLUMN_NAME} " +
+                        "are null"
             )
         }
     }

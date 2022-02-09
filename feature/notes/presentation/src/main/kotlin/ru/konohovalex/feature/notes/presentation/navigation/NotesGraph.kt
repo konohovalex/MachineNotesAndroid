@@ -40,15 +40,13 @@ fun NavGraphBuilder.noteDetailsScreen(navigateBack: () -> Unit) {
             }
         ),
     ) { navBackStackEntry ->
-        navBackStackEntry.arguments?.getString(noteIdParameter)?.let {
-            val viewModel = hiltViewModel<NoteDetailsViewModel>()
+        val viewModel = hiltViewModel<NoteDetailsViewModel>()
 
-            NoteDetailsScreen(
-                noteId = it,
-                viewEventHandler = viewModel,
-                viewStateProvider = viewModel,
-                navigateBack = navigateBack,
-            )
-        }
+        NoteDetailsScreen(
+            noteId = navBackStackEntry.arguments?.getString(noteIdParameter),
+            viewEventHandler = viewModel,
+            viewStateProvider = viewModel,
+            navigateBack = navigateBack,
+        )
     }
 }

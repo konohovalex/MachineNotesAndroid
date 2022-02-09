@@ -1,32 +1,23 @@
 package ru.konohovalex.feature.notes.data.di
 
-import android.content.Context
 import dagger.Module
 import dagger.Provides
-import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.migration.DisableInstallInCheck
-import ru.konohovalex.core.data.arch.provider.Provider
-import ru.konohovalex.feature.notes.data.source.storage.NotesDao
-import ru.konohovalex.feature.notes.data.source.storage.NotesStorage
-import ru.konohovalex.feature.notes.data.source.storage.provider.NotesStorageProvider
+import kotlinx.coroutines.CoroutineScope
+import ru.konohovalex.feature.notes.data.source.storage.contract.NotesStorageContract
+import ru.konohovalex.feature.notes.data.source.storage.database.NotesDao
+import ru.konohovalex.feature.notes.data.source.storage.impl.NotesStorageImpl
+import javax.inject.Named
 import javax.inject.Singleton
 
 @Module
 @DisableInstallInCheck
 internal class NotesStorageModule {
     @Provides
-    fun provideNotesStorageProvider(): Provider<Context, NotesStorage> =
-        NotesStorageProvider()
-
-    @Provides
     @Singleton
     fun provideNotesStorage(
-        @ApplicationContext
-        context: Context,
-        notesStorageProvider: Provider<Context, NotesStorage>,
-    ): NotesStorage = notesStorageProvider.provide(context)
-
-    @Provides
-    @Singleton
-    fun provideNotesDao(notesStorage: NotesStorage): NotesDao = notesStorage.getNotesDao()
+        @Named(Qualifiers.NOTES_DATA_COROUTINES_SCOPE)
+        notesDataCoroutineScope: CoroutineScope,
+        notesDao: NotesDao,
+    ): NotesStorageContract = NotesStorageImpl(notesDataCoroutineScope, notesDao)
 }

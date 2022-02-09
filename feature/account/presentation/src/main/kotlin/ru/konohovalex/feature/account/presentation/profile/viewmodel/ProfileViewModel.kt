@@ -21,6 +21,7 @@ import ru.konohovalex.feature.account.domain.profile.usecase.ObserveProfileUseCa
 import ru.konohovalex.feature.account.presentation.profile.model.ProfileUiModel
 import ru.konohovalex.feature.account.presentation.profile.model.ProfileViewEvent
 import ru.konohovalex.feature.account.presentation.profile.model.ProfileViewState
+import ru.konohovalex.feature.notes.domain.model.NotesDeletionMode
 import ru.konohovalex.feature.notes.domain.usecase.DeleteAllNotesUseCase
 import javax.inject.Inject
 
@@ -115,12 +116,11 @@ internal class ProfileViewModel
     private fun deleteAllNotes() {
         withViewState(ProfileViewState.Data::class.java) { viewState ->
             deleteAllNotesJob?.cancel()
-            deleteAllNotesJob = deleteAllNotesUseCase.invoke()
+            deleteAllNotesJob = deleteAllNotesUseCase.invoke(NotesDeletionMode.LOCALLY_AND_REMOTE)
                 .onEach {
                     when (it) {
                         is OperationStatus.Plain.Pending -> setLoadingState()
                         is OperationStatus.Plain.Processing -> {}
-                        // tbd - there must be ObserveNotesUseCase
                         is OperationStatus.Plain.Completed -> setViewState(viewState)
                         is OperationStatus.Plain.Error -> setErrorViewState(
                             ProfileViewState.Error(it.throwable) {

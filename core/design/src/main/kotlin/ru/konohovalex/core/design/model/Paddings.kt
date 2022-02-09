@@ -15,7 +15,5 @@ data class Paddings(
     val buttonHorizontal: Dp = 24.dp,
     val buttonVertical: Dp = 10.dp,
 
-    val floatingActionButtonCompensation: Dp = 2.dp,
-
     val bottomNavigationBarVertical: Dp = 6.dp,
 )

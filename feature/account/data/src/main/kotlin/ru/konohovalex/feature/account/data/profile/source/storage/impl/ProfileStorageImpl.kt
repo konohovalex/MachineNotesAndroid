@@ -6,7 +6,6 @@ import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import com.google.gson.Gson
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
@@ -27,11 +26,8 @@ internal class ProfileStorageImpl
 
     private var profileStateFlow: StateFlow<ProfileEntity?>? = null
 
-    override suspend fun observeProfile(): Flow<ProfileEntity?> =
+    override suspend fun observeProfile(): StateFlow<ProfileEntity?> =
         getProfileStateFlow()
-
-    override suspend fun getCurrentProfile(): ProfileEntity? =
-        getProfileStateFlow().value
 
     override suspend fun updateProfile(profileEntity: ProfileEntity): ProfileEntity =
         preferencesDataStore

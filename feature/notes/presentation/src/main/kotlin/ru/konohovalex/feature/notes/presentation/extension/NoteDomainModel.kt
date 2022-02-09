@@ -1,11 +1,11 @@
 package ru.konohovalex.feature.notes.presentation.extension
 
+import ru.konohovalex.core.ui.model.TextWrapper
 import ru.konohovalex.core.utils.extension.firstOfClassOrNull
 import ru.konohovalex.core.utils.extension.safeSubstring
 import ru.konohovalex.feature.notes.domain.model.NoteContentDomainModel
 import ru.konohovalex.feature.notes.domain.model.NoteDomainModel
 import ru.konohovalex.feature.notes.presentation.R
-import ru.konohovalex.core.ui.model.TextWrapper
 
 internal fun NoteDomainModel.getTitleTextWrapper(emptyIfAbsent: Boolean = false): TextWrapper = noteContent
     .firstOfClassOrNull<NoteContentDomainModel.Text>()

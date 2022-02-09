@@ -2,6 +2,7 @@ package ru.konohovalex.feature.account.presentation.profile.extension
 
 import ru.konohovalex.feature.account.presentation.profile.model.NotesStatistics
 
+// tbd remove
 internal fun createDummyNotesStatistics() =
     NotesStatistics(
         notesAmount = 128,

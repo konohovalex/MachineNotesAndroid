@@ -53,19 +53,32 @@ internal fun MainScreen(
                 .fillMaxSize()
                 .background(Theme.palette.backgroundColor),
         ) {
-            when (viewState) {
-                is MainViewState.Idle -> LaunchedEffect(true) {
-                    viewEventHandler.handle(MainViewEvent.Init)
-                }
-                is MainViewState.Loading -> LoadingState()
-                is MainViewState.FirstLaunch -> FirstLaunchState {
-                    viewEventHandler.handle(MainViewEvent.FirstLaunchCompleted)
-                }
-                is MainViewState.NotFirstLaunch -> NotFirstLaunchState(onBackPressed)
-                is MainViewState.Error -> with(viewState as MainViewState.Error) {
-                    ErrorState(throwable, onActionButtonClick)
-                }
-            }
+            processViewState(
+                viewState = viewState,
+                viewEventHandler = viewEventHandler,
+                onBackPressed = onBackPressed,
+            )
+        }
+    }
+}
+
+@Composable
+private fun processViewState(
+    viewState: MainViewState?,
+    viewEventHandler: ViewEventHandler<MainViewEvent>,
+    onBackPressed: () -> Unit,
+) = viewState?.let {
+    when (it) {
+        is MainViewState.Idle -> LaunchedEffect(true) {
+            viewEventHandler.handle(MainViewEvent.Init)
+        }
+        is MainViewState.Loading -> LoadingState()
+        is MainViewState.FirstLaunch -> FirstLaunchState {
+            viewEventHandler.handle(MainViewEvent.FirstLaunchCompleted)
+        }
+        is MainViewState.NotFirstLaunch -> NotFirstLaunchState(onBackPressed)
+        is MainViewState.Error -> with(it) {
+            ErrorState(throwable, onActionButtonClick)
         }
     }
 }

@@ -6,15 +6,12 @@ import dagger.hilt.migration.DisableInstallInCheck
 import ru.konohovalex.core.utils.model.Mapper
 import ru.konohovalex.feature.notes.data.model.Note
 import ru.konohovalex.feature.notes.data.model.NoteContent
-import ru.konohovalex.feature.notes.data.model.NoteUpdateParams
 import ru.konohovalex.feature.notes.domain.mapper.NoteContentDomainModelToNoteContentMapper
 import ru.konohovalex.feature.notes.domain.mapper.NoteContentToNoteContentDomainModelMapper
 import ru.konohovalex.feature.notes.domain.mapper.NoteDomainModelToNoteMapper
 import ru.konohovalex.feature.notes.domain.mapper.NoteToNoteDomainModelMapper
-import ru.konohovalex.feature.notes.domain.mapper.NoteUpdateParamsDomainModelToNoteUpdateParamsMapper
 import ru.konohovalex.feature.notes.domain.model.NoteContentDomainModel
 import ru.konohovalex.feature.notes.domain.model.NoteDomainModel
-import ru.konohovalex.feature.notes.domain.model.NoteUpdateParamsDomainModel
 
 @Module
 @DisableInstallInCheck
@@ -39,10 +36,4 @@ internal interface NotesDomainMappersModule {
     fun bindNoteToNoteDomainModelMapper(
         mapper: NoteToNoteDomainModelMapper,
     ): Mapper<Note, NoteDomainModel>
-
-
-    @Binds
-    fun bindNoteUpdateParamsDomainModelToNoteUpdateParamsMapper(
-        mapper: NoteUpdateParamsDomainModelToNoteUpdateParamsMapper,
-    ): Mapper<NoteUpdateParamsDomainModel, NoteUpdateParams>
 }

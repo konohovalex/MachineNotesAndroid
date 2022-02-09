@@ -4,7 +4,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.Scaffold
 import androidx.compose.material.SnackbarHostState
-import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -13,8 +12,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.launch
 import ru.konohovalex.core.design.model.Theme
 import ru.konohovalex.core.presentation.arch.viewevent.ViewEventHandler
 import ru.konohovalex.core.presentation.arch.viewstate.ViewStateProvider
@@ -36,28 +33,20 @@ internal fun AuthScreen(
     authorizationSuccessfulAction: () -> Unit,
     authorizationDeclinedAction: () -> Unit,
 ) {
-    // tbd solve keyboard problem
     val viewState by viewStateProvider.viewState.observeAsState()
 
-    val scaffoldState = rememberScaffoldState()
+    val coroutineScope = rememberCoroutineScope()
 
     Scaffold(
         modifier = Modifier
             .fillMaxSize(),
-        scaffoldState = scaffoldState,
-        snackbarHost = {
+        snackbarHost = { snackbarHostState ->
             viewState.safeCast<AuthViewState.Data>()?.let {
                 SnackbarHost(
-                    throwable = it.throwable,
-                    errorAction = {
-                        viewEventHandler.handle(AuthViewEvent.ErrorProcessed)
-                        it.onErrorActionButtonClick?.invoke()
-                    },
-                    snackbarHostState = scaffoldState.snackbarHostState,
-                    coroutineScope = rememberCoroutineScope(),
-                    onDismissed = {
-                        viewEventHandler.handle(AuthViewEvent.ErrorProcessed)
-                    },
+                    viewState = it,
+                    viewEventHandler = viewEventHandler,
+                    snackbarHostState = snackbarHostState,
+                    coroutineScope = coroutineScope,
                 )
             }
         },
@@ -67,52 +56,71 @@ internal fun AuthScreen(
             modifier = Modifier.fillMaxSize(),
             contentAlignment = Alignment.Center,
         ) {
-            when (viewState) {
-                is AuthViewState.Idle -> LaunchedEffect(true) {
-                    viewEventHandler.handle(AuthViewEvent.Init)
-                }
-                is AuthViewState.Loading -> LoadingState()
-                is AuthViewState.Data -> with(viewState as AuthViewState.Data) {
-                    DataState(
-                        authDataUiModel = authDataUiModel,
-                        onLogInButtonClick = {
-                            viewEventHandler.handle(AuthViewEvent.LogIn(it))
-                        },
-                        onDeclineAuthorizationButtonClick = {
-                            viewEventHandler.handle(AuthViewEvent.DeclineAuthorization)
-                        },
-                    )
-                }
-                is AuthViewState.AuthorizationSuccessful -> LaunchedEffect(true) {
-                    authorizationSuccessfulAction.invoke()
-                }
-                is AuthViewState.AuthorizationDeclined -> LaunchedEffect(true) {
-                    authorizationDeclinedAction.invoke()
-                }
-                is AuthViewState.Error -> with(viewState as AuthViewState.Error) {
-                    ErrorState(throwable, onActionButtonClick)
-                }
-            }
+            processViewState(
+                viewState = viewState,
+                viewEventHandler = viewEventHandler,
+                authorizationSuccessfulAction = authorizationSuccessfulAction,
+                authorizationDeclinedAction = authorizationDeclinedAction,
+            )
         }
     }
 }
 
 @Composable
 private fun SnackbarHost(
-    throwable: Throwable?,
-    errorAction: (() -> Unit)?,
+    viewState: AuthViewState.Data,
+    viewEventHandler: ViewEventHandler<AuthViewEvent>,
     snackbarHostState: SnackbarHostState,
     coroutineScope: CoroutineScope,
-    onDismissed: () -> Unit,
 ) {
-    throwable?.let {
+    viewState.throwable?.let {
         ThemedSnackbarHost(
             messageTextWrapper = it.toTextWrapper(),
             snackbarHostState = snackbarHostState,
-            onActionButtonClick = errorAction,
+            onActionButtonClick = {
+                viewEventHandler.handle(AuthViewEvent.ErrorProcessed)
+                viewState.onErrorActionButtonClick?.invoke()
+            },
             coroutineScope = coroutineScope,
-            onDismissed = onDismissed,
+            onDismissed = {
+                viewEventHandler.handle(AuthViewEvent.ErrorProcessed)
+            },
         )
+    }
+}
+
+@Composable
+private fun processViewState(
+    viewState: AuthViewState?,
+    viewEventHandler: ViewEventHandler<AuthViewEvent>,
+    authorizationSuccessfulAction: () -> Unit,
+    authorizationDeclinedAction: () -> Unit,
+) = viewState?.let {
+    when (it) {
+        is AuthViewState.Idle -> LaunchedEffect(true) {
+            viewEventHandler.handle(AuthViewEvent.Init)
+        }
+        is AuthViewState.Loading -> LoadingState()
+        is AuthViewState.Data -> with(it) {
+            DataState(
+                authDataUiModel = authDataUiModel,
+                onLogInButtonClick = {
+                    viewEventHandler.handle(AuthViewEvent.LogIn(it))
+                },
+                onDeclineAuthorizationButtonClick = {
+                    viewEventHandler.handle(AuthViewEvent.DeclineAuthorization)
+                },
+            )
+        }
+        is AuthViewState.AuthorizationSuccessful -> LaunchedEffect(true) {
+            authorizationSuccessfulAction.invoke()
+        }
+        is AuthViewState.AuthorizationDeclined -> LaunchedEffect(true) {
+            authorizationDeclinedAction.invoke()
+        }
+        is AuthViewState.Error -> with(it) {
+            ErrorState(throwable, onActionButtonClick)
+        }
     }
 }
 
