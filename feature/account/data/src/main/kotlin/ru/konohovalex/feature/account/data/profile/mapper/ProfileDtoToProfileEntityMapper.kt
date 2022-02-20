@@ -9,10 +9,7 @@ internal class ProfileDtoToProfileEntityMapper
 @Inject constructor() : Mapper<ProfileDto, ProfileEntity> {
     override fun invoke(input: ProfileDto) = with(input) {
         ProfileEntity(
-            id = id,
-            name = name,
-            authToken = authToken,
-            refreshToken = refreshToken,
+            userName = userName,
         )
     }
 }

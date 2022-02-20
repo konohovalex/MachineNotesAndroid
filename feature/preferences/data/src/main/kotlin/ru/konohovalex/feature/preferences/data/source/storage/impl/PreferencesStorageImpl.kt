@@ -36,7 +36,7 @@ internal class PreferencesStorageImpl
             }
             .let {
                 it[KEY_PREFERENCES]?.let(::mapJsonToPreferencesEntity)
-                    ?: dataStoreUpdateError(preferencesEntity)
+                    ?: preferencesUpdateError(preferencesEntity)
             }
 
     private suspend fun getPreferencesStateFlow(): StateFlow<PreferencesEntity> =
@@ -52,11 +52,11 @@ internal class PreferencesStorageImpl
             .stateIn(coroutineScope)
             .also { preferencesStateFlow = it }
 
-    private fun mapJsonToPreferencesEntity(preferencesJson: String) =
-        gson.fromJson<PreferencesEntity>(preferencesJson)
+    private fun mapJsonToPreferencesEntity(preferencesEntityJson: String) =
+        gson.fromJson<PreferencesEntity>(preferencesEntityJson)
 
-    private fun dataStoreUpdateError(preferencesEntity: PreferencesEntity): Nothing =
+    private fun preferencesUpdateError(preferencesEntity: PreferencesEntity): Nothing =
         throw IllegalStateException(
-            "Expecting [${preferencesEntity}], but got null"
+            "Expecting [${preferencesEntity}], but got null",
         )
 }

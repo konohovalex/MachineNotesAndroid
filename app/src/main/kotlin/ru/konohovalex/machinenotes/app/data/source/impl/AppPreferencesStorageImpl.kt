@@ -30,11 +30,11 @@ class AppPreferencesStorageImpl
             }
             .let {
                 it[KEY_IS_FIRST_LAUNCH]
-                    ?: dataStoreUpdateError(isFirstLaunch)
+                    ?: isFirstLaunchUpdateError(isFirstLaunch)
             }
 
-    private fun dataStoreUpdateError(isFirstLaunch: Boolean): Nothing =
+    private fun isFirstLaunchUpdateError(isFirstLaunch: Boolean): Nothing =
         throw IllegalStateException(
-            "Expecting $isFirstLaunch, but got null"
+            "Expecting $isFirstLaunch, but got null",
         )
 }

@@ -20,7 +20,7 @@ import ru.konohovalex.core.ui.compose.ThemedCircularProgressBar
 import ru.konohovalex.core.ui.compose.ThemedSnackbarHost
 import ru.konohovalex.core.ui.extension.toTextWrapper
 import ru.konohovalex.core.utils.extension.safeCast
-import ru.konohovalex.feature.account.presentation.auth.model.AuthDataUiModel
+import ru.konohovalex.feature.account.presentation.auth.model.CredentialsUiModel
 import ru.konohovalex.feature.account.presentation.auth.model.AuthViewEvent
 import ru.konohovalex.feature.account.presentation.auth.model.AuthViewState
 import ru.konohovalex.feature.account.presentation.auth.validator.PasswordValidator
@@ -28,6 +28,7 @@ import ru.konohovalex.feature.account.presentation.auth.validator.UserNameValida
 
 @Composable
 internal fun AuthScreen(
+    isFirstLaunch: Boolean,
     viewStateProvider: ViewStateProvider<AuthViewState>,
     viewEventHandler: ViewEventHandler<AuthViewEvent>,
     authorizationSuccessfulAction: () -> Unit,
@@ -53,10 +54,12 @@ internal fun AuthScreen(
         backgroundColor = Theme.palette.backgroundColor,
     ) {
         Box(
-            modifier = Modifier.fillMaxSize(),
+            modifier = Modifier
+                .fillMaxSize(),
             contentAlignment = Alignment.Center,
         ) {
             processViewState(
+                isFirstLaunch = isFirstLaunch,
                 viewState = viewState,
                 viewEventHandler = viewEventHandler,
                 authorizationSuccessfulAction = authorizationSuccessfulAction,
@@ -91,6 +94,7 @@ private fun SnackbarHost(
 
 @Composable
 private fun processViewState(
+    isFirstLaunch: Boolean,
     viewState: AuthViewState?,
     viewEventHandler: ViewEventHandler<AuthViewEvent>,
     authorizationSuccessfulAction: () -> Unit,
@@ -98,14 +102,17 @@ private fun processViewState(
 ) = viewState?.let {
     when (it) {
         is AuthViewState.Idle -> LaunchedEffect(true) {
-            viewEventHandler.handle(AuthViewEvent.Init)
+            viewEventHandler.handle(AuthViewEvent.Init(isFirstLaunch))
         }
         is AuthViewState.Loading -> LoadingState()
         is AuthViewState.Data -> with(it) {
             DataState(
-                authDataUiModel = authDataUiModel,
-                onLogInButtonClick = {
-                    viewEventHandler.handle(AuthViewEvent.LogIn(it))
+                credentialsUiModel = credentialsUiModel,
+                onSignUpButtonClick = { credentialsUiModel ->
+                    viewEventHandler.handle(AuthViewEvent.SignUp(credentialsUiModel))
+                },
+                onSignInButtonClick = { credentialsUiModel ->
+                    viewEventHandler.handle(AuthViewEvent.SignIn(credentialsUiModel))
                 },
                 onDeclineAuthorizationButtonClick = {
                     viewEventHandler.handle(AuthViewEvent.DeclineAuthorization)
@@ -131,15 +138,17 @@ private fun LoadingState() {
 
 @Composable
 private fun DataState(
-    authDataUiModel: AuthDataUiModel,
-    onLogInButtonClick: (AuthDataUiModel) -> Unit,
+    credentialsUiModel: CredentialsUiModel,
+    onSignUpButtonClick: (CredentialsUiModel) -> Unit,
+    onSignInButtonClick: (CredentialsUiModel) -> Unit,
     onDeclineAuthorizationButtonClick: () -> Unit,
 ) {
     AuthView(
-        authDataUiModel = authDataUiModel,
+        credentialsUiModel = credentialsUiModel,
         userNameValidator = UserNameValidator(),
         passwordValidator = PasswordValidator(),
-        onLogInButtonClick = onLogInButtonClick,
+        onSignUpButtonClick = onSignUpButtonClick,
+        onSignInButtonClick = onSignInButtonClick,
         onDeclineAuthorizationButtonClick = onDeclineAuthorizationButtonClick,
     )
 }

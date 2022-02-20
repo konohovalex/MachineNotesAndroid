@@ -9,6 +9,6 @@ internal interface ProfileStorageContract : Storage {
         const val PREFERENCES_FILE_NAME = "profile_preferences_storage"
     }
 
-    suspend fun observeProfile(): StateFlow<ProfileEntity?>
+    suspend fun observeProfile(): StateFlow<ProfileEntity>
     suspend fun updateProfile(profileEntity: ProfileEntity): ProfileEntity
 }

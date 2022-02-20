@@ -31,6 +31,7 @@ internal fun NavGraphBuilder.homeGraph(
     noteDetailsScreen(navigateBack)
 
     authScreen(
+        isFirstLaunch = false,
         authorizationSuccessfulAction = navigateBack,
         authorizationDeclinedAction = navigateBack,
     )

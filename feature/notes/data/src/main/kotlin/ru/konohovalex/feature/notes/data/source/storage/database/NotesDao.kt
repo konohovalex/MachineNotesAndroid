@@ -46,7 +46,7 @@ internal abstract class NotesDao {
     open suspend fun updateNotes(notes: List<NoteWithContentEntity>) {
         notes.forEach {
             updateNote(it.note)
-            // tbd complete logic
+            // TODO("complete logic")
             insertNoteContent(it.noteContent)
         }
     }

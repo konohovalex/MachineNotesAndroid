@@ -14,17 +14,23 @@
         <item quantity="other">%d images (%d - with object recognition)</item>
     </plurals>
 
-    <string name="log_out">Log out</string>
+    <string name="sign_up">Sign up</string>
+    <string name="sign_in">Sign in</string>
+    <string name="sign_out">Sign out</string>
     <string name="delete_account">Delete account</string>
+    <string name="skip">Skip</string>
+    <string name="back">Back</string>
 
     <string name="delete_all_notes">Delete all notes</string>
 
     <string name="user_name">User name</string>
     <string name="password">Password</string>
-    <string name="log_in">Log in</string>
-    <string name="skip">Skip</string>
-    <string name="back">Back</string>
+    <string name="whitespace_limitation">Whitespaces are not allowed</string>
     <string name="min_length_limitation">At least %d symbols</string>
     <string name="max_length_limitation">At most %d symbols</string>
-    <string name="password_unique_symbols_limitation">Should contain at least %d unique symbol for each %d</string>
+    <string name="uppercase_letter_limitation">At least one uppercase letter</string>
+    <string name="lowercase_letter_limitation">At least one lowercase letter</string>
+    <string name="digit_limitation">At least one digit</string>
+    <string name="symbol_limitation">At least one symbol: !, /, :, @, etc.</string>
+    <string name="unique_symbols_limitation">At least %d unique symbol for each %d</string>
 </resources>

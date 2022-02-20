@@ -10,7 +10,7 @@ internal sealed class AuthViewState : ViewState {
     object Loading : AuthViewState()
 
     data class Data(
-        val authDataUiModel: AuthDataUiModel,
+        val credentialsUiModel: CredentialsUiModel,
         val throwable: Throwable?,
         val onErrorActionButtonClick: (() -> Unit)?,
     ) : AuthViewState() {
@@ -21,7 +21,7 @@ internal sealed class AuthViewState : ViewState {
                 throwable: Throwable? = null,
                 onErrorActionButtonClick: (() -> Unit)? = null,
             ) = Data(
-                authDataUiModel = AuthDataUiModel(
+                credentialsUiModel = CredentialsUiModel(
                     declineAuthorizationButtonTextResId = declineAuthorizationButtonTextResId,
                     userNameUiModel = UserNameUiModel(""),
                     passwordUiModel = PasswordUiModel(""),

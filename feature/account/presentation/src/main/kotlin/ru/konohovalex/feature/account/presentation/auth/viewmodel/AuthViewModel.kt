@@ -14,12 +14,15 @@ import ru.konohovalex.core.presentation.arch.viewstate.ViewStateProviderDelegate
 import ru.konohovalex.core.presentation.extension.setErrorViewState
 import ru.konohovalex.core.utils.model.Mapper
 import ru.konohovalex.core.utils.model.OperationStatus
-import ru.konohovalex.feature.account.domain.auth.model.AuthDataDomainModel
-import ru.konohovalex.feature.account.domain.auth.usecase.LogInUseCase
-import ru.konohovalex.feature.account.domain.profile.model.ProfileDomainModel
+import ru.konohovalex.feature.account.domain.auth.model.SignUpDataDomainModel
+import ru.konohovalex.feature.account.domain.auth.model.CredentialsDomainModel
+import ru.konohovalex.feature.account.domain.auth.model.PasswordDomainModel
+import ru.konohovalex.feature.account.domain.auth.model.UserNameDomainModel
+import ru.konohovalex.feature.account.domain.auth.usecase.SingInUseCase
+import ru.konohovalex.feature.account.domain.auth.usecase.SignUpUseCase
 import ru.konohovalex.feature.account.domain.profile.usecase.ObserveProfileUseCase
 import ru.konohovalex.feature.account.presentation.R
-import ru.konohovalex.feature.account.presentation.auth.model.AuthDataUiModel
+import ru.konohovalex.feature.account.presentation.auth.model.CredentialsUiModel
 import ru.konohovalex.feature.account.presentation.auth.model.AuthViewEvent
 import ru.konohovalex.feature.account.presentation.auth.model.AuthViewState
 import javax.inject.Inject
@@ -28,26 +31,30 @@ import javax.inject.Inject
 internal class AuthViewModel
 @Inject constructor(
     private val observeProfileUseCase: ObserveProfileUseCase,
-    private val logInUseCase: LogInUseCase,
-    private val authDataUiModelToAuthDataDomainModelMapper: Mapper<AuthDataUiModel, AuthDataDomainModel>,
+    private val signUpUseCase: SignUpUseCase,
+    private val singInUseCase: SingInUseCase,
+    private val credentialsUiModelToSignUpDataDomainModelMapper: Mapper<CredentialsUiModel, SignUpDataDomainModel>,
 ) : ViewModel(),
     ViewEventHandler<AuthViewEvent>,
     ViewStateProvider<AuthViewState> by ViewStateProviderDelegate(AuthViewState.Idle) {
-    private var _initialProfile: ProfileDomainModel? = null
+    private var _isFirstLaunch = true
 
     private var observeProfileJob: Job? = null
-    private var logInJob: Job? = null
+    private var signUpJob: Job? = null
+    private var signInJob: Job? = null
 
     override fun handle(viewEvent: AuthViewEvent) {
         when (viewEvent) {
-            is AuthViewEvent.Init -> init()
-            is AuthViewEvent.LogIn -> logIn(viewEvent.authDataUiModel)
+            is AuthViewEvent.Init -> init(viewEvent.isFirstLaunch)
+            is AuthViewEvent.SignUp -> signUp(viewEvent.credentialsUiModel)
+            is AuthViewEvent.SignIn -> signIn(viewEvent.credentialsUiModel)
             is AuthViewEvent.DeclineAuthorization -> declineAuthorization()
             is AuthViewEvent.ErrorProcessed -> errorProcessed()
         }
     }
 
-    private fun init() {
+    private fun init(isFirstLaunch: Boolean) {
+        _isFirstLaunch = isFirstLaunch
         observeProfileJob?.cancel()
         observeProfileJob = viewModelScope.launch {
             observeProfileUseCase.invoke()
@@ -55,10 +62,10 @@ internal class AuthViewModel
                     when (it) {
                         is OperationStatus.Plain.Pending -> setLoadingState()
                         is OperationStatus.Plain.Processing -> {}
-                        is OperationStatus.Plain.Completed -> setInitialDataState(it.outputData)
+                        is OperationStatus.Plain.Completed -> setInitialDataState()
                         is OperationStatus.Plain.Error -> setErrorViewState(
                             AuthViewState.Error(it.throwable) {
-                                init()
+                                init(isFirstLaunch)
                             }
                         )
                     }
@@ -71,10 +78,9 @@ internal class AuthViewModel
         setViewState(AuthViewState.Loading)
     }
 
-    private fun setInitialDataState(profileDomainModel: ProfileDomainModel?) {
+    private fun setInitialDataState() {
         observeProfileJob?.cancel()
 
-        _initialProfile = profileDomainModel
         setViewState(
             AuthViewState.Data.empty(
                 declineAuthorizationButtonTextResId = getDeclineAuthorizationButtonTextResId(),
@@ -82,20 +88,40 @@ internal class AuthViewModel
         )
     }
 
-    // tbd will always be "Back", fix profile observation
-    private fun getDeclineAuthorizationButtonTextResId(): Int = _initialProfile?.let { R.string.back } ?: R.string.skip
+    private fun getDeclineAuthorizationButtonTextResId(): Int = if (!_isFirstLaunch) R.string.back else R.string.skip
 
-    private fun logIn(authDataUiModel: AuthDataUiModel?) {
-        logInJob?.cancel()
-        val authDataDomainModel = authDataUiModel?.let(authDataUiModelToAuthDataDomainModelMapper::invoke)
-        logInJob = logInUseCase.invoke(authDataDomainModel)
+    private fun signUp(credentialsUiModel: CredentialsUiModel?) {
+        signUpJob?.cancel()
+        val signUpDataDomainModel = credentialsUiModel?.let(credentialsUiModelToSignUpDataDomainModelMapper::invoke)
+            ?: SignUpDataDomainModel(null)
+        signUpJob = signUpUseCase.invoke(signUpDataDomainModel)
             .onEach {
                 when (it) {
                     is OperationStatus.WithInputData.Pending -> setLoadingState()
                     is OperationStatus.WithInputData.Processing -> {}
                     is OperationStatus.WithInputData.Completed -> setAuthorizationSuccessfulState()
-                    is OperationStatus.WithInputData.Error -> setLogInErrorState(authDataUiModel, it.throwable) {
-                        logIn(authDataUiModel)
+                    is OperationStatus.WithInputData.Error -> setDataWithErrorState(credentialsUiModel, it.throwable) {
+                        signUp(credentialsUiModel)
+                    }
+                }
+            }
+            .launchIn(viewModelScope)
+    }
+
+    private fun signIn(credentialsUiModel: CredentialsUiModel) {
+        signInJob?.cancel()
+        val credentialsDomainModel = CredentialsDomainModel(
+            userNameDomainModel = UserNameDomainModel(credentialsUiModel.userNameUiModel.value),
+            passwordDomainModel = PasswordDomainModel(credentialsUiModel.passwordUiModel.value),
+        )
+        signInJob = singInUseCase.invoke(credentialsDomainModel)
+            .onEach {
+                when (it) {
+                    is OperationStatus.WithInputData.Pending -> setLoadingState()
+                    is OperationStatus.WithInputData.Processing -> {}
+                    is OperationStatus.WithInputData.Completed -> setAuthorizationSuccessfulState()
+                    is OperationStatus.WithInputData.Error -> setDataWithErrorState(credentialsUiModel, it.throwable) {
+                        signIn(credentialsUiModel)
                     }
                 }
             }
@@ -107,8 +133,8 @@ internal class AuthViewModel
     }
 
     private fun declineAuthorization() {
-        if (_initialProfile != null) setAuthorizationSuccessfulState()
-        else logIn(null)
+        if (!_isFirstLaunch) setAuthorizationSuccessfulState()
+        else signUp(null)
     }
 
     private fun errorProcessed() {
@@ -122,15 +148,15 @@ internal class AuthViewModel
         }
     }
 
-    private fun setLogInErrorState(
-        authDataUiModel: AuthDataUiModel?,
+    private fun setDataWithErrorState(
+        credentialsUiModel: CredentialsUiModel?,
         throwable: Throwable,
         onErrorActionButtonClick: () -> Unit,
     ) {
         setViewState(
-            authDataUiModel?.let {
+            credentialsUiModel?.let {
                 AuthViewState.Data(
-                    authDataUiModel = authDataUiModel,
+                    credentialsUiModel = credentialsUiModel,
                     throwable = throwable,
                     onErrorActionButtonClick = onErrorActionButtonClick,
                 )

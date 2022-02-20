@@ -9,6 +9,6 @@ data class DateTime(val raw: String = SimpleDateFormat(FORMAT, Locale.getDefault
         const val FORMAT = "dd-MM-yyyy HH:mm"
     }
 
-    // tbd parse raw + add today/yesterday
+    // TODO("parse raw + add today/yesterday")
     fun getDateTimeString(): String = raw
 }

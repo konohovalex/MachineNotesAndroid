@@ -9,7 +9,7 @@ class AppPreferencesRepositoryImpl
 @Inject constructor(
     private val appPreferencesStorage: AppPreferencesStorageContract,
 ) : AppPreferencesRepositoryContract {
-    // tbd should there be safe update ops?
+    // TODO("should there be safe update ops?")
     override suspend fun getIsFirstLaunch(): Boolean = withIo {
         appPreferencesStorage.getIsFirstLaunch()
     }

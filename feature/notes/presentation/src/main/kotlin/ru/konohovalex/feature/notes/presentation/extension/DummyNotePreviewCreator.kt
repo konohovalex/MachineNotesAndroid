@@ -6,7 +6,7 @@ import ru.konohovalex.feature.notes.presentation.list.model.NotePreviewUiModel
 import ru.konohovalex.core.ui.model.TextWrapper
 import kotlin.random.Random
 
-// tbd remove or move in tests folder
+// TODO("remove or move in tests folder")
 internal fun createNotePreviewDummyModelList(itemsAmount: Int): List<NotePreviewUiModel> {
     return mutableListOf<NotePreviewUiModel>().apply {
         repeat(itemsAmount) {

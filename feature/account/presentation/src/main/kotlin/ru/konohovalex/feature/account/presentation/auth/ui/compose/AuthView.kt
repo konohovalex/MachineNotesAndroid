@@ -4,6 +4,7 @@ import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -24,11 +25,11 @@ import ru.konohovalex.core.ui.model.ImageWrapper
 import ru.konohovalex.core.ui.model.TextWrapper
 import ru.konohovalex.core.utils.model.Validator
 import ru.konohovalex.feature.account.presentation.R
-import ru.konohovalex.feature.account.presentation.auth.model.AuthDataUiModel
+import ru.konohovalex.feature.account.presentation.auth.model.CredentialsUiModel
 import ru.konohovalex.feature.account.presentation.auth.model.PasswordUiModel
 import ru.konohovalex.feature.account.presentation.auth.model.UserNameUiModel
 
-private data class AuthDataValidationResult(
+private data class CredentialsValidationResult(
     val isUserNameCorrect: Boolean,
     val isPasswordCorrect: Boolean,
 ) {
@@ -37,32 +38,33 @@ private data class AuthDataValidationResult(
 
 @Composable
 internal fun AuthView(
-    authDataUiModel: AuthDataUiModel,
+    credentialsUiModel: CredentialsUiModel,
     userNameValidator: Validator<UserNameUiModel, TextWrapper?>,
     passwordValidator: Validator<PasswordUiModel, TextWrapper?>,
-    onLogInButtonClick: (AuthDataUiModel) -> Unit,
+    onSignUpButtonClick: (CredentialsUiModel) -> Unit,
+    onSignInButtonClick: (CredentialsUiModel) -> Unit,
     onDeclineAuthorizationButtonClick: () -> Unit,
 ) {
     Column {
-        val authDataState = rememberSaveable {
-            mutableStateOf(authDataUiModel)
+        val credentialsState = rememberSaveable {
+            mutableStateOf(credentialsUiModel)
         }
 
-        val userNameErrorTextWrapper = userNameValidator.validate(authDataState.value.userNameUiModel)
+        val userNameErrorTextWrapper = userNameValidator.validate(credentialsState.value.userNameUiModel)
         val userNameErrorTextWrapperState = remember {
             mutableStateOf(userNameErrorTextWrapper)
         }
         userNameErrorTextWrapperState.value = userNameErrorTextWrapper
 
-        val passwordErrorTextWrapper = passwordValidator.validate(authDataState.value.passwordUiModel)
+        val passwordErrorTextWrapper = passwordValidator.validate(credentialsState.value.passwordUiModel)
         val passwordErrorTextWrapperState = remember {
             mutableStateOf(passwordErrorTextWrapper)
         }
         passwordErrorTextWrapperState.value = passwordErrorTextWrapper
 
-        val authDataValidationResultState = remember {
+        val credentialsValidationResultState = remember {
             derivedStateOf {
-                AuthDataValidationResult(
+                CredentialsValidationResult(
                     isUserNameCorrect = userNameErrorTextWrapperState.value == null,
                     isPasswordCorrect = passwordErrorTextWrapperState.value == null,
                 )
@@ -70,30 +72,31 @@ internal fun AuthView(
         }
 
         InputTextFieldsColumn(
-            authDataUiModel = authDataState.value,
+            credentialsUiModel = credentialsState.value,
             userNameErrorTextWrapper = userNameErrorTextWrapperState.value,
             onUserNameChanged = getOnUserNameValueChangedCallback(
                 userNameValidator = userNameValidator,
-                authDataState = authDataState,
+                credentialsState = credentialsState,
                 userNameErrorState = userNameErrorTextWrapperState,
             ),
             passwordErrorTextWrapper = passwordErrorTextWrapperState.value,
             onPasswordChanged = getOnPasswordValueChangedCallback(
                 passwordValidator = passwordValidator,
-                authDataState = authDataState,
+                credentialsState = credentialsState,
                 passwordErrorState = passwordErrorTextWrapperState,
             ),
-            isPasswordVisible = authDataState.value.isPasswordVisible,
+            isPasswordVisible = credentialsState.value.isPasswordVisible,
             onPasswordVisibilityStateChanged = {
-                authDataState.value = authDataState.value.copy(isPasswordVisible = it)
+                credentialsState.value = credentialsState.value.copy(isPasswordVisible = it)
             },
         )
 
         ButtonsColumn(
-            authData = authDataState.value,
-            authDataValidationResult = authDataValidationResultState.value,
-            onLogInButtonClick = onLogInButtonClick,
-            declineAuthorizationButtonTextResId = authDataState.value.declineAuthorizationButtonTextResId,
+            credentialsUiModel = credentialsState.value,
+            credentialsValidationResult = credentialsValidationResultState.value,
+            onSignUpButtonClick = onSignUpButtonClick,
+            onSignInButtonClick = onSignInButtonClick,
+            declineAuthorizationButtonTextResId = credentialsState.value.declineAuthorizationButtonTextResId,
             onDeclineAuthorizationButtonClick = onDeclineAuthorizationButtonClick,
         )
     }
@@ -101,33 +104,33 @@ internal fun AuthView(
 
 private fun getOnUserNameValueChangedCallback(
     userNameValidator: Validator<UserNameUiModel, TextWrapper?>,
-    authDataState: MutableState<AuthDataUiModel>,
+    credentialsState: MutableState<CredentialsUiModel>,
     userNameErrorState: MutableState<TextWrapper?>,
 ) = { userNameInput: String ->
     UserNameUiModel(userNameInput).let {
-        authDataState.value = authDataState.value.copy(userNameUiModel = it)
+        credentialsState.value = credentialsState.value.copy(userNameUiModel = it)
         userNameErrorState.value = userNameValidator.validate(it)
     }
 }
 
 private fun getOnPasswordValueChangedCallback(
     passwordValidator: Validator<PasswordUiModel, TextWrapper?>,
-    authDataState: MutableState<AuthDataUiModel>,
+    credentialsState: MutableState<CredentialsUiModel>,
     passwordErrorState: MutableState<TextWrapper?>,
 ) = { passwordInput: String ->
     PasswordUiModel(passwordInput).let {
-        authDataState.value = authDataState.value.copy(passwordUiModel = it)
+        credentialsState.value = credentialsState.value.copy(passwordUiModel = it)
         passwordErrorState.value = passwordValidator.validate(it)
     }
 }
 
 @Composable
 private fun InputTextFieldsColumn(
-    authDataUiModel: AuthDataUiModel,
+    credentialsUiModel: CredentialsUiModel,
     userNameErrorTextWrapper: TextWrapper?,
-    onUserNameChanged: (String) -> Unit,
+    onUserNameChanged: (userName: String) -> Unit,
     passwordErrorTextWrapper: TextWrapper?,
-    onPasswordChanged: (String) -> Unit,
+    onPasswordChanged: (password: String) -> Unit,
     isPasswordVisible: Boolean,
     onPasswordVisibilityStateChanged: (isPasswordVisible: Boolean) -> Unit,
 ) {
@@ -147,7 +150,7 @@ private fun InputTextFieldsColumn(
             contentAlignment = Alignment.TopCenter,
         ) {
             UserNameInputText(
-                userNameUiModel = authDataUiModel.userNameUiModel,
+                userNameUiModel = credentialsUiModel.userNameUiModel,
                 errorTextWrapper = userNameErrorTextWrapper,
                 onUserNameChanged = onUserNameChanged,
             )
@@ -159,7 +162,7 @@ private fun InputTextFieldsColumn(
             contentAlignment = Alignment.TopCenter,
         ) {
             PasswordInputText(
-                passwordUiModel = authDataUiModel.passwordUiModel,
+                passwordUiModel = credentialsUiModel.passwordUiModel,
                 errorTextWrapper = passwordErrorTextWrapper,
                 onPasswordChanged = onPasswordChanged,
                 isPasswordVisible = isPasswordVisible,
@@ -173,7 +176,7 @@ private fun InputTextFieldsColumn(
 private fun UserNameInputText(
     userNameUiModel: UserNameUiModel,
     errorTextWrapper: TextWrapper?,
-    onUserNameChanged: (String) -> Unit,
+    onUserNameChanged: (userName: String) -> Unit,
 ) {
     val textState = rememberSaveable {
         mutableStateOf(userNameUiModel.value)
@@ -193,7 +196,7 @@ private fun UserNameInputText(
 private fun PasswordInputText(
     passwordUiModel: PasswordUiModel,
     errorTextWrapper: TextWrapper?,
-    onPasswordChanged: (String) -> Unit,
+    onPasswordChanged: (password: String) -> Unit,
     isPasswordVisible: Boolean,
     onPasswordVisibilityStateChanged: (isPasswordVisible: Boolean) -> Unit,
 ) {
@@ -212,7 +215,7 @@ private fun PasswordInputText(
             else R.drawable.ic_invisible
         ),
         onTrailingIconClick = {
-            // tbd show or hide real password symbols
+            // TODO("show or hide real password symbols")
             onPasswordVisibilityStateChanged.invoke(!isPasswordVisible)
         },
         errorTextWrapper = errorTextWrapper,
@@ -221,9 +224,10 @@ private fun PasswordInputText(
 
 @Composable
 private fun ButtonsColumn(
-    authData: AuthDataUiModel,
-    authDataValidationResult: AuthDataValidationResult,
-    onLogInButtonClick: (authDataUiModel: AuthDataUiModel) -> Unit,
+    credentialsUiModel: CredentialsUiModel,
+    credentialsValidationResult: CredentialsValidationResult,
+    onSignUpButtonClick: (CredentialsUiModel) -> Unit,
+    onSignInButtonClick: (CredentialsUiModel) -> Unit,
     @StringRes
     declineAuthorizationButtonTextResId: Int,
     onDeclineAuthorizationButtonClick: () -> Unit,
@@ -232,17 +236,29 @@ private fun ButtonsColumn(
         modifier = Modifier
             .fillMaxWidth()
             .padding(
-                top = Theme.paddings.contentLarge * 2,
+                top = Theme.paddings.contentLarge,
                 bottom = Theme.paddings.contentLarge,
             ),
         verticalArrangement = Arrangement.spacedBy(Theme.paddings.contentLarge),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        LogInButton(
-            authData = authData,
-            authDataValidationResult = authDataValidationResult,
-            onClick = onLogInButtonClick
-        )
+        Row(
+            modifier = Modifier
+                .fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceEvenly,
+        ) {
+            SignUpButton(
+                credentialsUiModel = credentialsUiModel,
+                credentialsValidationResult = credentialsValidationResult,
+                onClick = onSignUpButtonClick
+            )
+
+            SignInButton(
+                credentialsUiModel = credentialsUiModel,
+                credentialsValidationResult = credentialsValidationResult,
+                onClick = onSignInButtonClick
+            )
+        }
 
         DeclineAuthorizationButton(
             declineAuthorizationButtonTextResId = declineAuthorizationButtonTextResId,
@@ -252,20 +268,42 @@ private fun ButtonsColumn(
 }
 
 @Composable
-private fun LogInButton(
-    authData: AuthDataUiModel,
-    authDataValidationResult: AuthDataValidationResult,
-    onClick: (authDataUiModel: AuthDataUiModel) -> Unit,
+private fun SignInButton(
+    credentialsUiModel: CredentialsUiModel,
+    credentialsValidationResult: CredentialsValidationResult,
+    onClick: (CredentialsUiModel) -> Unit,
 ) {
     ThemedButton(
         buttonData = ButtonData.Outlined(
-            enabled = authDataValidationResult.isValid(),
+            enabled = credentialsValidationResult.isValid(),
             onClick = {
-                onClick.invoke(authData)
+                onClick.invoke(credentialsUiModel)
             },
             content = listOf(
                 ButtonData.Content.Text(
-                    textWrapper = TextWrapper.StringResource(resourceId = R.string.log_in),
+                    textWrapper = TextWrapper.StringResource(resourceId = R.string.sign_in),
+                ),
+            ),
+        )
+    )
+}
+
+@Composable
+private fun SignUpButton(
+    credentialsUiModel: CredentialsUiModel,
+    credentialsValidationResult: CredentialsValidationResult,
+    onClick: (CredentialsUiModel) -> Unit,
+) {
+    ThemedButton(
+        buttonData = ButtonData.Outlined(
+            enabled = credentialsValidationResult.isValid(),
+            onClick = {
+                onClick.invoke(credentialsUiModel)
+            },
+            fillEnabledColor = Theme.palette.backgroundColor,
+            content = listOf(
+                ButtonData.Content.Text(
+                    textWrapper = TextWrapper.StringResource(resourceId = R.string.sign_up),
                 ),
             ),
         )

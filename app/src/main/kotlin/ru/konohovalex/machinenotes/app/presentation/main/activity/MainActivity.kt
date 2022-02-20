@@ -24,7 +24,7 @@ internal class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
 
         setContent {
-            // tbd implement dependency injection?
+            // TODO("implement dependency injection?")
             val viewModel = hiltViewModel<MainViewModel>()
 
             val localeState = rememberSaveable {

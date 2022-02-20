@@ -25,9 +25,9 @@ import ru.konohovalex.feature.account.presentation.profile.model.ProfileUiModel
 internal fun ProfileView(
     profileUiModel: ProfileUiModel,
     modifier: Modifier,
-    onLogOutButtonClick: () -> Unit,
+    onSignInButtonClick: () -> Unit,
+    onSignOutButtonClick: () -> Unit,
     onDeleteAccountButtonClick: () -> Unit,
-    onLogInButtonClick: () -> Unit,
 ) {
     ThemedCard(
         modifier = modifier
@@ -47,9 +47,9 @@ internal fun ProfileView(
 
             Buttons(
                 isAuthorized = profileUiModel.isAuthorized(),
-                onLogOutButtonClick = onLogOutButtonClick,
+                onSignInButtonClick = onSignInButtonClick,
+                onSignOutButtonClick = onSignOutButtonClick,
                 onDeleteAccountButtonClick = onDeleteAccountButtonClick,
-                onLogInButtonClick = onLogInButtonClick,
             )
         }
     }
@@ -65,7 +65,7 @@ private fun Texts(profileUiModel: ProfileUiModel) {
 @Composable
 private fun UserNameText(profileUiModel: ProfileUiModel) {
     val userNameTextWrapper =
-        if (profileUiModel.isAuthorized()) TextWrapper.PlainText(value = profileUiModel.name)
+        if (profileUiModel.isAuthorized()) TextWrapper.PlainText(value = profileUiModel.userName)
         else TextWrapper.StringResource(resourceId = R.string.guest)
 
     ThemedText(
@@ -128,29 +128,29 @@ private fun ImageAndAudioStatistics(notesStatistics: NotesStatistics) {
 @Composable
 private fun Buttons(
     isAuthorized: Boolean,
-    onLogOutButtonClick: () -> Unit,
+    onSignInButtonClick: () -> Unit,
+    onSignOutButtonClick: () -> Unit,
     onDeleteAccountButtonClick: () -> Unit,
-    onLogInButtonClick: () -> Unit,
 ) {
     if (isAuthorized) {
-        LogOutButton(onLogOutButtonClick)
+        SignOutButton(onSignOutButtonClick)
 
         DeleteAccountButton(onDeleteAccountButtonClick)
     }
     else {
         SizedSpacer(size = Theme.paddings.contentExtraLarge)
 
-        LogInButton(onLogInButtonClick)
+        SignInButton(onSignInButtonClick)
     }
 }
 
 @Composable
-private fun LogOutButton(onClick: () -> Unit) {
+private fun SignOutButton(onClick: () -> Unit) {
     ThemedButton(
         buttonData = ButtonData.Text(
             onClick = onClick,
             content = ButtonData.Content.Text(
-                textWrapper = TextWrapper.StringResource(resourceId = R.string.log_out),
+                textWrapper = TextWrapper.StringResource(resourceId = R.string.sign_out),
             ),
         ),
     )
@@ -170,13 +170,13 @@ private fun DeleteAccountButton(onClick: () -> Unit) {
 }
 
 @Composable
-private fun LogInButton(onClick: () -> Unit) {
+private fun SignInButton(onClick: () -> Unit) {
     ThemedButton(
         buttonData = ButtonData.Outlined(
             onClick = onClick,
             content = listOf(
                 ButtonData.Content.Text(
-                    textWrapper = TextWrapper.StringResource(resourceId = R.string.log_in),
+                    textWrapper = TextWrapper.StringResource(resourceId = R.string.sign_in),
                 )
             ),
         ),

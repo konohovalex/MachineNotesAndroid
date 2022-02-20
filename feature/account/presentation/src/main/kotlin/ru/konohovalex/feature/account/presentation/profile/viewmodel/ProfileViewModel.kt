@@ -15,7 +15,7 @@ import ru.konohovalex.core.presentation.extension.setErrorViewState
 import ru.konohovalex.core.utils.model.Mapper
 import ru.konohovalex.core.utils.model.OperationStatus
 import ru.konohovalex.feature.account.domain.auth.usecase.DeleteAccountUseCase
-import ru.konohovalex.feature.account.domain.auth.usecase.LogOutUseCase
+import ru.konohovalex.feature.account.domain.auth.usecase.SignOutUseCase
 import ru.konohovalex.feature.account.domain.profile.model.ProfileDomainModel
 import ru.konohovalex.feature.account.domain.profile.usecase.ObserveProfileUseCase
 import ru.konohovalex.feature.account.presentation.profile.model.ProfileUiModel
@@ -29,7 +29,7 @@ import javax.inject.Inject
 internal class ProfileViewModel
 @Inject constructor(
     private val observeProfileUseCase: ObserveProfileUseCase,
-    private val logOutUseCase: LogOutUseCase,
+    private val signOutUseCase: SignOutUseCase,
     private val deleteAccountUseCase: DeleteAccountUseCase,
     private val deleteAllNotesUseCase: DeleteAllNotesUseCase,
     private val profileDomainModelToProfileUiModelMapper: Mapper<ProfileDomainModel, ProfileUiModel>,
@@ -37,14 +37,14 @@ internal class ProfileViewModel
     ViewEventHandler<ProfileViewEvent>,
     ViewStateProvider<ProfileViewState> by ViewStateProviderDelegate(ProfileViewState.Idle) {
     private var observeProfileJob: Job? = null
-    private var logOutJob: Job? = null
+    private var signOutJob: Job? = null
     private var deleteAccountJob: Job? = null
     private var deleteAllNotesJob: Job? = null
 
     override fun handle(viewEvent: ProfileViewEvent) {
         when (viewEvent) {
             ProfileViewEvent.GetProfile -> getProfile()
-            ProfileViewEvent.LogOut -> logOut()
+            ProfileViewEvent.SignOut -> signOut()
             ProfileViewEvent.DeleteAccount -> deleteAccount()
             ProfileViewEvent.DeleteAllNotes -> deleteAllNotes()
         }
@@ -79,16 +79,16 @@ internal class ProfileViewModel
         setViewState(ProfileViewState.Data(profileUiModel))
     }
 
-    private fun logOut() {
-        logOutJob?.cancel()
-        logOutJob = logOutUseCase.invoke()
+    private fun signOut() {
+        signOutJob?.cancel()
+        signOutJob = signOutUseCase.invoke()
             .onEach {
                 when (it) {
                     is OperationStatus.Plain.Pending -> setLoadingState()
                     is OperationStatus.Plain.Processing, is OperationStatus.Plain.Completed -> {}
                     is OperationStatus.Plain.Error -> setErrorViewState(
                         ProfileViewState.Error(it.throwable) {
-                            logOut()
+                            signOut()
                         }
                     )
                 }

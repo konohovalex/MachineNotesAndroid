@@ -22,7 +22,7 @@ internal class PreferencesStorageModule {
         preferencesDataCoroutinesScope: CoroutineScope,
         @Named(Qualifiers.PREFERENCES_DATA_STORE)
         preferencesDataStore: DataStore<Preferences>,
-        @Named(Qualifiers.PREFERENCES_GSON)
+        @Named(Qualifiers.PREFERENCES_DATA_GSON)
         preferencesGson: Gson,
     ): PreferencesStorageContract = PreferencesStorageImpl(
         coroutineScope = preferencesDataCoroutinesScope,

@@ -16,7 +16,7 @@ internal data class NoteEntity(
     val dateTimeLastEdited: DateTime,
 ) {
     companion object {
-        const val TABLE_NAME = "notes"
+        const val TABLE_NAME = "note"
         const val NOTE_ID_COLUMN_NAME = "id"
     }
 }

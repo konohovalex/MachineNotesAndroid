@@ -18,7 +18,7 @@ internal class PreferencesRepositoryImpl
     private val preferencesEntityToPreferencesMapper: Mapper<PreferencesEntity, Preferences>,
     private val preferencesToPreferencesEntityMapper: Mapper<Preferences, PreferencesEntity>,
 ) : PreferencesRepositoryContract {
-    // tbd should there be safe update ops?
+    // TODO("should there be safe update ops?")
     override suspend fun observePreferences(): Flow<Preferences> = withIo {
         preferencesStorage.observePreferences()
             .map { preferencesEntityToPreferencesMapper.invoke(it) }

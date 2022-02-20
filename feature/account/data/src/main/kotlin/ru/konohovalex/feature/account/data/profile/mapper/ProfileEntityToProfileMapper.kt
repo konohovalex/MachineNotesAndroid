@@ -9,8 +9,7 @@ internal class ProfileEntityToProfileMapper
 @Inject constructor() : Mapper<ProfileEntity, Profile> {
     override fun invoke(input: ProfileEntity) = with(input) {
         Profile(
-            id = id,
-            name = name,
+            userName = userName,
         )
     }
 }

@@ -1,15 +1,13 @@
 package ru.konohovalex.feature.account.data.profile.model.remote
 
 import com.google.gson.annotations.SerializedName
+import ru.konohovalex.feature.account.data.auth.model.remote.AuthTokenDto
 
-// tbd this is dirty implementation
 internal data class ProfileDto(
-    @SerializedName("id")
-    val id: String,
-    @SerializedName("name")
-    val name: String,
+    @SerializedName("userId")
+    val userId: String,
+    @SerializedName("userName")
+    val userName: String?,
     @SerializedName("authToken")
-    val authToken: String,
-    @SerializedName("refreshToken")
-    val refreshToken: String,
+    val authTokenDto: AuthTokenDto,
 )

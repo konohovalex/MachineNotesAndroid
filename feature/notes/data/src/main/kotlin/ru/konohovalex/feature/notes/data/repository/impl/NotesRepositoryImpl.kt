@@ -10,7 +10,7 @@ import ru.konohovalex.feature.notes.data.model.entity.NoteWithContentEntity
 import ru.konohovalex.feature.notes.data.model.remote.NoteDto
 import ru.konohovalex.feature.notes.data.model.remote.NoteUpdateParamsDto
 import ru.konohovalex.feature.notes.data.repository.contract.NotesRepositoryContract
-import ru.konohovalex.feature.notes.data.source.api.NotesApi
+import ru.konohovalex.feature.notes.data.source.network.api.NotesApi
 import ru.konohovalex.feature.notes.data.source.storage.contract.NotesStorageContract
 import javax.inject.Inject
 import kotlin.random.Random
@@ -70,7 +70,7 @@ internal class NotesRepositoryImpl
     }
 
     override suspend fun deleteAllNotes(onlyLocally: Boolean) = withIo {
-//        if (!onlyLocally) notesApi.deleteAllNotes()
+        if (!onlyLocally) notesApi.deleteAllNotes()
         notesStorage.deleteAllNotes()
     }
 

@@ -47,7 +47,7 @@ fun ThemedSnackbarHost(
     onActionButtonClick: (() -> Unit)? = null,
     onDismissed: () -> Unit,
 ) {
-    // tbd can there be more optimal implementation?
+    // TODO("can there be more optimal implementation?")
     var size by remember {
         mutableStateOf(Size.Zero)
     }

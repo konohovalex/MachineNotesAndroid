@@ -61,8 +61,8 @@ private fun ColumnScope.processViewState(
         is ProfileViewState.Data -> with(it) {
             DataState(
                 profileUiModel = profileUiModel,
-                onLogOutButtonClick = {
-                    viewEventHandler.handle(ProfileViewEvent.LogOut)
+                onSignOutButtonClick = {
+                    viewEventHandler.handle(ProfileViewEvent.SignOut)
                 },
                 onDeleteAccountButtonClick = {
                     viewEventHandler.handle(ProfileViewEvent.DeleteAccount)
@@ -90,7 +90,7 @@ private fun ColumnScope.LoadingState() {
 @Composable
 private fun ColumnScope.DataState(
     profileUiModel: ProfileUiModel,
-    onLogOutButtonClick: () -> Unit,
+    onSignOutButtonClick: () -> Unit,
     onDeleteAccountButtonClick: () -> Unit,
     onDeleteAllNotesButtonClick: () -> Unit,
     navigateToAuth: () -> Unit,
@@ -99,9 +99,9 @@ private fun ColumnScope.DataState(
         profileUiModel = profileUiModel,
         modifier = Modifier
             .weight(1f),
-        onLogOutButtonClick = onLogOutButtonClick,
+        onSignInButtonClick = navigateToAuth,
+        onSignOutButtonClick = onSignOutButtonClick,
         onDeleteAccountButtonClick = onDeleteAccountButtonClick,
-        onLogInButtonClick = navigateToAuth,
     )
 
     SizedSpacer(size = Theme.paddings.contentExtraLarge)

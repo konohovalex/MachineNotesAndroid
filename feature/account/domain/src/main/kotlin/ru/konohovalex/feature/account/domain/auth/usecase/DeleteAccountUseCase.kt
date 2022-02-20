@@ -36,7 +36,7 @@ class DeleteAccountUseCase
                         -> {
                         }
                         is OperationStatus.Plain.Error -> {
-                            // tbd log to Crashlytics and?
+                            // TODO("log to Crashlytics and?")
                         }
                     }
                 }

@@ -20,17 +20,23 @@
         <item quantity="other">%d изображений (%d - с распознаванием образов)</item>
     </plurals>
 
-    <string name="log_out">Выйти из аккаунта</string>
+    <string name="sign_up">Зарегистрироваться</string>
+    <string name="sign_in">Войти в аккаунт</string>
+    <string name="sign_out">Выйти из аккаунта</string>
     <string name="delete_account">Удалить аккаунт</string>
+    <string name="skip">Пропустить</string>
+    <string name="back">Назад</string>
 
     <string name="delete_all_notes">Удалить все заметки</string>
 
     <string name="user_name">Имя пользователя</string>
     <string name="password">Пароль</string>
-    <string name="log_in">Войти в аккаунт</string>
-    <string name="skip">Пропустить</string>
-    <string name="back">Назад</string>
+    <string name="whitespace_limitation">Не должен содержать пробелов</string>
     <string name="min_length_limitation">Не менее %d символов</string>
     <string name="max_length_limitation">Не более %d символов</string>
-    <string name="password_unique_symbols_limitation">Должен содержать не менее %d уникального символа на каждые %d</string>
+    <string name="uppercase_letter_limitation">Не менее одной заглавной буквы</string>
+    <string name="lowercase_letter_limitation">Не менее одной прописной буквы</string>
+    <string name="digit_limitation">Не менее одной цифры</string>
+    <string name="symbol_limitation">Не менее одного символа: !, /, :, @, и т.д.</string>
+    <string name="unique_symbols_limitation">Не менее %d уникального символа на каждые %d</string>
 </resources>

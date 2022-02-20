@@ -51,7 +51,7 @@ internal fun NoteListItem(
         modifier = Modifier
             .height(IntrinsicSize.Max),
     ) {
-        // tbd can there be more optimal implementation?
+        // TODO("can there be more optimal implementation?")
         val deleteButtonSizeState = remember {
             mutableStateOf(Size.Zero)
         }

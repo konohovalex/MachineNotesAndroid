@@ -24,9 +24,9 @@ internal class ProfileStorageImpl
         private val KEY_PROFILE = stringPreferencesKey(name = "key_profile")
     }
 
-    private var profileStateFlow: StateFlow<ProfileEntity?>? = null
+    private var profileStateFlow: StateFlow<ProfileEntity>? = null
 
-    override suspend fun observeProfile(): StateFlow<ProfileEntity?> =
+    override suspend fun observeProfile(): StateFlow<ProfileEntity> =
         getProfileStateFlow()
 
     override suspend fun updateProfile(profileEntity: ProfileEntity): ProfileEntity =
@@ -36,26 +36,27 @@ internal class ProfileStorageImpl
             }
             .let {
                 it[KEY_PROFILE]?.let(::mapJsonToProfileEntity)
-                    ?: dataStoreUpdateError(profileEntity)
+                    ?: profileUpdateError(profileEntity)
             }
 
-    private suspend fun getProfileStateFlow(): StateFlow<ProfileEntity?> =
+    private suspend fun getProfileStateFlow(): StateFlow<ProfileEntity> =
         profileStateFlow ?: initProfileStateFlow()
 
-    private suspend fun initProfileStateFlow(): StateFlow<ProfileEntity?> =
+    private suspend fun initProfileStateFlow(): StateFlow<ProfileEntity> =
         preferencesDataStore
             .data
             .map {
                 it[KEY_PROFILE]?.let(::mapJsonToProfileEntity)
+                    ?: ProfileEntity.empty()
             }
             .stateIn(coroutineScope)
             .also { profileStateFlow = it }
 
-    private fun mapJsonToProfileEntity(profileJson: String): ProfileEntity =
-        gson.fromJson<ProfileEntity>(profileJson)
+    private fun mapJsonToProfileEntity(profileEntityJson: String): ProfileEntity =
+        gson.fromJson<ProfileEntity>(profileEntityJson)
 
-    private fun dataStoreUpdateError(profileEntity: ProfileEntity): Nothing =
+    private fun profileUpdateError(profileEntity: ProfileEntity): Nothing =
         throw IllegalStateException(
-            "Expecting ${profileEntity.javaClass.simpleName} with name: [${profileEntity.name}], but got null"
+            "Expecting ${profileEntity.javaClass.simpleName} with userName: [${profileEntity.userName}], but got null",
         )
 }

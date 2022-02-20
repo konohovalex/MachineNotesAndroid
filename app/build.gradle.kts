@@ -16,9 +16,9 @@ dependencies {
 
         project(Modules.Feature.Preferences.domain),
 
+        project(Modules.Feature.Account.presentation),
         project(Modules.Feature.Notes.presentation),
         project(Modules.Feature.Preferences.presentation),
-        project(Modules.Feature.Account.presentation),
 
         Dependencies.Android.coreKtx,
         Dependencies.Android.appCompat,

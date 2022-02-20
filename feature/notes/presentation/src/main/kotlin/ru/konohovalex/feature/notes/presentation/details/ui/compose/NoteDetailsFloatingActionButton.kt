@@ -10,12 +10,11 @@ import ru.konohovalex.core.ui.R
 import ru.konohovalex.core.ui.compose.ThemedImage
 import ru.konohovalex.core.ui.model.ImageWrapper
 
-// https://compose.academy/blog/building_a_multi-action_floating_action_button_in_jetpack_compose
+// TODO("https://compose.academy/blog/building_a_multi-action_floating_action_button_in_jetpack_compose")
 @Composable
 internal fun NoteDetailsFloatingActionButton() {
     FloatingActionButton(
         onClick = {
-            // tbd show popping-up fabs for image/audio addition
         },
         modifier = Modifier
             .padding(PaddingValues(Theme.sizes.border)),

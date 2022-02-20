@@ -9,8 +9,7 @@ internal class ProfileToProfileDomainModelMapper
 @Inject constructor() : Mapper<Profile, ProfileDomainModel> {
     override fun invoke(input: Profile) = with(input) {
         ProfileDomainModel(
-            id = id,
-            name = name,
+            userName = userName,
         )
     }
 }

@@ -26,6 +26,7 @@ object Dependencies {
         const val material = "com.google.android.material:material:1.4.0"
         const val splashScreen = "androidx.core:core-splashscreen:1.0.0-beta01"
         const val dataStorePreferences = "androidx.datastore:datastore-preferences:1.0.0"
+        const val securityCrypto = "androidx.security:security-crypto:1.0.0"
 
         object Lifecycle {
             private const val version = "2.4.0"
@@ -48,9 +49,7 @@ object Dependencies {
             const val activity = "androidx.activity:activity-compose:1.4.0"
             const val navigation = "androidx.navigation:navigation-compose:2.4.0-rc01"
             const val livedata = "androidx.compose.runtime:runtime-livedata:$version"
-            // tbd
-            // Grab necessary from here:
-            // https://mvnrepository.com/artifact/com.google.accompanist
+            // TODO("grab necessary from https://mvnrepository.com/artifact/com.google.accompanist")
 
             fun getAllRuntimeDependencies() = listOf(
                 ui,

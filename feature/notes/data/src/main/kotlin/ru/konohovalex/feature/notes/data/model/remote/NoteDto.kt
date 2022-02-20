@@ -10,5 +10,5 @@ internal data class NoteDto(
     @SerializedName("dateTimeLastEdited")
     val dateTimeLastEdited: String,
     @SerializedName("noteContent")
-    val noteContent: List<NoteContentDto>,
+    val noteContentDto: List<NoteContentDto>,
 )

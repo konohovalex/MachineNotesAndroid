@@ -17,7 +17,7 @@ internal class NoteDtoToNoteMapper
             id,
             DateTime(dateTimeCreated),
             DateTime(dateTimeLastEdited),
-            noteContent.map(noteContentDtoToNoteContentMapper),
+            noteContentDto.map(noteContentDtoToNoteContentMapper),
         )
     }
 }

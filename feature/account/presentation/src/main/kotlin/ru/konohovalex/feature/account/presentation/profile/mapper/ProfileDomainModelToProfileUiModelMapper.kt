@@ -10,8 +10,7 @@ internal class ProfileDomainModelToProfileUiModelMapper
 @Inject constructor() : Mapper<ProfileDomainModel, ProfileUiModel> {
     override fun invoke(input: ProfileDomainModel) = with(input) {
         ProfileUiModel(
-            id = id,
-            name = name,
+            userName = userName ?: "",
             notesStatistics = createDummyNotesStatistics(),
         )
     }

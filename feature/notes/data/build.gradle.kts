@@ -12,6 +12,8 @@ dependencies {
         project(Modules.Core.data),
         project(Modules.Core.utils),
 
+        project(Modules.Feature.Account.data),
+
         Dependencies.Retrofit.getAllRuntimeDependencies(),
 
         Dependencies.Room.getAllRuntimeDependencies(),

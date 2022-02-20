@@ -21,13 +21,13 @@ internal class ProfileStorageModule {
     fun provideProfileStorage(
         @Named(Qualifiers.ACCOUNT_DATA_COROUTINE_SCOPE)
         accountDataCoroutineScope: CoroutineScope,
+        @Named(Qualifiers.ACCOUNT_DATA_GSON)
+        accountDataGson: Gson,
         @Named(Qualifiers.PROFILE_PREFERENCES_DATA_STORE)
         profilePreferencesDataStore: DataStore<Preferences>,
-        @Named(Qualifiers.PROFILE_GSON)
-        profileGson: Gson,
     ): ProfileStorageContract = ProfileStorageImpl(
         coroutineScope = accountDataCoroutineScope,
         preferencesDataStore = profilePreferencesDataStore,
-        gson = profileGson,
+        gson = accountDataGson,
     )
 }

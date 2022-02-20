@@ -8,7 +8,7 @@ import dagger.hilt.components.SingletonComponent
     includes = [
         PreferencesDataCoroutinesModule::class,
         PreferencesDataMappersModule::class,
-        PreferencesGsonModule::class,
+        PreferencesDataGsonModule::class,
         PreferencesDataStoreModule::class,
         PreferencesStorageModule::class,
         PreferencesRepositoryModule::class,

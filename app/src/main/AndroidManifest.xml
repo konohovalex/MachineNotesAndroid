@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     package="ru.konohovalex.machinenotes">
 
     <uses-permission android:name="android.permission.INTERNET" />
 
-    <!-- tbd remove usesCleartextTraffic -->
+    <!-- TODO("remove usesCleartextTraffic with android:networkSecurityConfig="@xml/network_security_config"") -->
     <application
         android:name=".app.presentation.MachineNotesApp"
         android:allowBackup="false"
@@ -13,7 +14,8 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.MachineNotesSplash"
-        android:usesCleartextTraffic="true">
+        android:usesCleartextTraffic="true"
+        tools:targetApi="m">
 
         <activity
             android:name="ru.konohovalex.machinenotes.app.presentation.main.activity.MainActivity"

@@ -12,6 +12,7 @@ import ru.konohovalex.feature.account.presentation.profile.viewmodel.ProfileView
 fun getAuthNavigationRoute() = AccountRoute.Auth.buildNavigationRoute()
 
 fun NavGraphBuilder.authScreen(
+    isFirstLaunch: Boolean,
     authorizationSuccessfulAction: () -> Unit,
     authorizationDeclinedAction: () -> Unit,
 ) {
@@ -19,6 +20,7 @@ fun NavGraphBuilder.authScreen(
         val viewModel = hiltViewModel<AuthViewModel>()
 
         AuthScreen(
+            isFirstLaunch = isFirstLaunch,
             viewStateProvider = viewModel,
             viewEventHandler = viewModel,
             authorizationSuccessfulAction = authorizationSuccessfulAction,

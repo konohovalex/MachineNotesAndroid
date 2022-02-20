@@ -19,10 +19,10 @@ object Modules {
             private const val domainPostfix = ":domain"
             private const val presentationPostfix = ":presentation"
 
+            private const val account = ":account"
             private const val imageRecognition = ":imagerecognition"
             private const val notes = ":notes"
             private const val preferences = ":preferences"
-            private const val account = ":account"
             private const val speechRecognition = ":speechrecognition"
         }
 
@@ -30,10 +30,10 @@ object Modules {
         val domain = "$featurePrefix$featureName$domainPostfix"
         val presentation = "$featurePrefix$featureName$presentationPostfix"
 
+        object Account : Feature(account)
         object ImageRecognition : Feature(imageRecognition)
         object Notes : Feature(notes)
         object Preferences : Feature(preferences)
-        object Account : Feature(account)
         object SpeechRecognition : Feature(speechRecognition)
     }
 }

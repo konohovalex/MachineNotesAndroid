@@ -18,7 +18,7 @@ internal fun NoteList(
     onNoteClick: (noteId: String) -> Unit,
     onDeleteNote: (noteId: String) -> Unit,
 ) {
-    // tbd error state for not first page
+    // TODO("error state for not first page")
 
     /** See [androidx.compose.material.FloatingActionButton.FabSize] */
     val fabSize = 56.dp
