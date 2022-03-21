@@ -10,10 +10,8 @@ class AuthInterceptor
 @Inject constructor(private val authDataStorageContract: AuthDataStorageContract) : Interceptor {
     override fun intercept(chain: Interceptor.Chain): Response {
         return chain.proceed(
-            authDataStorageContract.getAuthToken()?.let {
-                chain.request()
-                    .addAccessToken(it.accessToken)
-            } ?: chain.request()
+            chain.request()
+                .addAccessToken(authDataStorageContract.getAuthToken()?.accessToken.toString())
         )
     }
 }
